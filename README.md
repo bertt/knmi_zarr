@@ -1,8 +1,8 @@
-# knmi_zar
+# knmi_zarr
 
 KNMI 10-minute weather observations → **Zarr** → interactive **MapLibre** map.
 
-🌍 **Live demo: https://bertt.github.io/knmi_zar/**
+🌍 **Live demo: https://bertt.github.io/knmi_zarr/**
 
 The demo reads the Zarr store directly in the browser (via [zarrita.js](https://github.com/manzt/zarrita.js)) and shows all KNMI automatic weather stations (including the Caribbean Netherlands) on a map: temperature, wind (with arrows), humidity, pressure, visibility, cloud cover, radiation and more.
 
