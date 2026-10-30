@@ -1,0 +1,45 @@
+{
+  "shape": [
+    56,
+    1
+  ],
+  "data_type": "float64",
+  "chunk_grid": {
+    "name": "regular",
+    "configuration": {
+      "chunk_shape": [
+        56,
+        1
+      ]
+    }
+  },
+  "chunk_key_encoding": {
+    "name": "default",
+    "configuration": {
+      "separator": "/"
+    }
+  },
+  "fill_value": "NaN",
+  "codecs": [
+    {
+      "name": "bytes",
+      "configuration": {
+        "endian": "little"
+      }
+    }
+  ],
+  "attributes": {
+    "name": "Sax3H",
+    "long_name": "Wind Speed Maximum last 3 Hours",
+    "units": "m/s",
+    "standard_name": "wind_speed",
+    "_FillValue": "AAAAAAAA+H8="
+  },
+  "dimension_names": [
+    "station",
+    "time"
+  ],
+  "zarr_format": 3,
+  "node_type": "array",
+  "storage_transformers": []
+}

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KNMI 10-minuten waarnemingen · Zarr demo</title>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<style>
+  :root { --bg:#0e1420; --panel:rgba(16,23,38,.92); --fg:#e8edf5; --mut:#8fa0b8; --acc:#4cc9f0; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; font:14px/1.4 system-ui,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--fg); }
+  #map { position:absolute; inset:0; }
+  .panel { position:absolute; background:var(--panel); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.08); border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.4); }
+  #side { top:14px; left:14px; width:330px; max-height:calc(100% - 28px); display:flex; flex-direction:column; padding:16px; }
+  h1 { margin:0; font-size:18px; letter-spacing:.2px; }
+  .sub { color:var(--mut); font-size:12px; margin:2px 0 12px; }
+  #chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+  .chip { cursor:pointer; padding:5px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:transparent; color:var(--fg); font:inherit; font-size:12.5px; }
+  .chip:hover { border-color:var(--acc); }
+  .chip.on { background:var(--acc); color:#04202b; border-color:var(--acc); font-weight:600; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+  .stat { background:rgba(255,255,255,.05); border-radius:10px; padding:8px; text-align:center; }
+  .stat b { display:block; font-size:16px; }
+  .stat span { font-size:11px; color:var(--mut); }
+  .row { display:flex; align-items:center; gap:8px; color:var(--mut); font-size:12px; margin-bottom:10px; }
+  .row input { accent-color:var(--acc); }
+  #list { overflow:auto; flex:1; margin:0 -6px; padding:0 6px; }
+  .item { display:flex; align-items:center; gap:8px; padding:5px 6px; border-radius:8px; cursor:pointer; }
+  .item:hover { background:rgba(255,255,255,.07); }
+  .dot { width:10px; height:10px; border-radius:50%; flex:none; }
+  .item .n { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .item .v { font-variant-numeric:tabular-nums; font-weight:600; }
+  #legend { right:14px; bottom:34px; padding:10px 14px; width:240px; }
+  #legend .bar { height:10px; border-radius:5px; margin:6px 0 3px; }
+  #legend .ticks { display:flex; justify-content:space-between; font-size:11px; color:var(--mut); }
+  #legend .t { font-size:12px; font-weight:600; }
+  #nav { right:14px; top:14px; padding:6px; display:flex; gap:6px; }
+  #nav button { padding:6px 10px; }
+  .maplibregl-popup-content { background:#141c2d; color:var(--fg); border-radius:12px; padding:12px 14px; min-width:200px; }
+  .maplibregl-popup-tip { border-top-color:#141c2d !important; border-bottom-color:#141c2d !important; }
+  .maplibregl-popup-close-button { color:var(--fg); }
+  .pop h3 { margin:0 22px 2px 0; font-size:15px; }
+  .pop small { color:var(--mut); }
+  .pop table { width:100%; margin-top:8px; border-collapse:collapse; }
+  .pop td { padding:2px 0; } .pop td:last-child { text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
+  #status { position:absolute; inset:0; display:grid; place-items:center; background:var(--bg); z-index:10; color:var(--mut); }
+  @media (max-width:700px){ #side{ width:auto; right:14px; max-height:38%; } #legend{ left:14px; right:auto; bottom:24px; } #nav{display:none} }
+</style>
+</head>
+<body>
+<div id="status">Zarr laden…</div>
+<div id="map"></div>
+
+<div id="side" class="panel">
+  <h1>⚡ KNMI weerstations</h1>
+  <div class="sub" id="time">10-minuten waarnemingen · gelezen uit Zarr</div>
+  <div id="chips"></div>
+  <div class="stats" id="stats"></div>
+  <label class="row"><input type="checkbox" id="wind" checked> Windpijlen tonen (richting waar de wind naartoe waait)</label>
+  <div id="list"></div>
+</div>
+
+<div id="nav" class="panel">
+  <button class="chip" id="goNL">Nederland</button>
+  <button class="chip" id="goBES">Caribisch NL</button>
+</div>
+<div id="legend" class="panel"></div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script type="module">
+import * as zarr from "https://esm.sh/zarrita@0.5.1";
+
+const VARS = {
+  ta:  { label:"Temperatuur",       unit:"°C",   ramp:"turbo",   dom:[-5,30],  dec:1 },
+  td:  { label:"Dauwpunt",          unit:"°C",   ramp:"turbo",   dom:[-5,25],  dec:1 },
+  ff:  { label:"Windsnelheid",      unit:"m/s",  ramp:"wind",    dom:[0,15],   dec:1 },
+  gff: { label:"Windstoot",         unit:"m/s",  ramp:"wind",    dom:[0,25],   dec:1 },
+  rh:  { label:"Luchtvochtigheid",  unit:"%",    ramp:"humid",   dom:[40,100], dec:0 },
+  pp:  { label:"Luchtdruk (zeeniveau)", unit:"hPa", ramp:"press", dom:[990,1040], dec:1 },
+  vv:  { label:"Zicht",             unit:"km",   ramp:"vis",     dom:[0,20],   dec:1, scale:0.001 },
+  n:   { label:"Bewolking",         unit:"/8",   ramp:"cloud",   dom:[0,8],    dec:0 },
+  qg:  { label:"Globale straling",  unit:"W/m²", ramp:"sun",     dom:[0,800],  dec:0 },
+  tg:  { label:"Grondtemperatuur",  unit:"°C",   ramp:"turbo",   dom:[-5,30],  dec:1 },
+  dd:  { label:"Windrichting",      unit:"°",    ramp:"hue",     dom:[0,360],  dec:0 },
+};
+const RAMPS = {
+  turbo: ["#30123b","#4662d7","#36aaf9","#1ae4b6","#72fe5e","#c7ef34","#faba39","#f66b19","#ca2a04","#7a0403"],
+  wind:  ["#0d1b4c","#1f5fbf","#2ec4b6","#9ae66e","#ffd166","#ef476f","#8e1b6b"],
+  humid: ["#a0522d","#e0c27a","#b8e0b0","#4cc9f0","#1d4ed8"],
+  press: ["#6a0dad","#2563eb","#22d3ee","#a3e635","#facc15","#f97316","#dc2626"],
+  vis:   ["#5b2a86","#8f4a9e","#4a6fe3","#4cc9f0","#e0f7ff"],
+  cloud: ["#ffe27a","#d7dde6","#8e9bb0","#4a5568"],
+  sun:   ["#1b1f3a","#6b3fa0","#e0556b","#ffb703","#fff3b0"],
+  hue:   ["#4cc9f0","#7bd88f","#ffd166","#ef476f","#4cc9f0"],
+};
+const hex = h => [1,3,5].map(i => parseInt(h.slice(i,i+2),16));
+function color(ramp, t) {
+  const c = RAMPS[ramp]; t = Math.max(0, Math.min(1, t));
+  const x = t*(c.length-1), i = Math.min(c.length-2, Math.floor(x)), f = x-i;
+  const a = hex(c[i]), b = hex(c[i+1]);
+  return "#" + a.map((v,k)=>Math.round(v+(b[k]-v)*f).toString(16).padStart(2,"0")).join("");
+}
+const fmt = (v, d) => v==null ? "–" : v.toFixed(d);
+
+// ---------- Zarr ----------
+const store = new zarr.FetchStore(new URL("obs.zarr", location.href).href);
+const root = zarr.root(store);
+async function readVar(name) {
+  const arr = await zarr.open(root.resolve(name), { kind: "array" });
+  const { data } = await zarr.get(arr);
+  return Array.from(data, v => (Number.isFinite(v) && Math.abs(v) < 1e30) ? v : null);
+}
+const meta = await (await fetch("stations.json")).json();
+const data = {};
+await Promise.all(Object.keys(VARS).map(async k => data[k] = await readVar(k)));
+
+document.getElementById("time").textContent =
+  new Date(meta.time).toLocaleString("nl-NL", { dateStyle:"full", timeStyle:"short" }) + " · uit Zarr";
+
+const val = (k, i) => {
+  const v = data[k][i]; return v==null ? null : v * (VARS[k].scale ?? 1);
+};
+
+// ---------- Map ----------
+const map = new maplibregl.Map({
+  container: "map",
+  style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+  bounds: [[2.4,50.6],[7.6,54.2]], fitBoundsOptions:{ padding:{ left:360, top:30, right:30, bottom:30 } },
+  attributionControl: { compact:true },
+});
+map.addControl(new maplibregl.NavigationControl({ showCompass:false }), "bottom-left");
+document.getElementById("goNL").onclick = () => map.fitBounds([[2.4,50.6],[7.6,54.2]], { padding:{left:360,top:30,right:30,bottom:30} });
+document.getElementById("goBES").onclick = () => map.fitBounds([[-69.4,11.9],[-62.8,17.8]], { padding:{left:360,top:30,right:30,bottom:30} });
+
+function arrowIcon() {
+  const s = 64, c = document.createElement("canvas"); c.width = c.height = s;
+  const g = c.getContext("2d");
+  g.fillStyle = "#fff"; g.strokeStyle = "rgba(0,0,0,.7)"; g.lineWidth = 3; g.lineJoin = "round";
+  g.beginPath(); g.moveTo(32,4); g.lineTo(46,30); g.lineTo(35,26); g.lineTo(35,60); g.lineTo(29,60); g.lineTo(29,26); g.lineTo(18,30); g.closePath();
+  g.stroke(); g.fill();
+  return g.getImageData(0,0,s,s);
+}
+
+let cur = "ta", popup;
+const feats = () => ({
+  type:"FeatureCollection",
+  features: meta.stations.map((s,i) => {
+    const v = val(cur,i), V = VARS[cur];
+    const dd = data.dd[i], ff = data.ff[i];
+    return { type:"Feature", id:i,
+      geometry:{ type:"Point", coordinates:[s.lon,s.lat] },
+      properties:{ i, name:s.name, v, label: v==null ? "" : fmt(v, V.dec),
+        color: v==null ? "#566" : color(V.ramp, (v-V.dom[0])/(V.dom[1]-V.dom[0])),
+        dd: dd==null ? 0 : dd + 180, hasWind: dd!=null && ff!=null && ff>0.3 ? 1 : 0,
+        size: ff==null ? .35 : .3 + Math.min(ff,15)/15*.35 } };
+  })
+});
+
+map.on("load", () => {
+  map.addImage("arrow", arrowIcon(), { sdf:false });
+  map.addSource("st", { type:"geojson", data:feats() });
+  map.addLayer({ id:"glow", type:"circle", source:"st", paint:{
+    "circle-radius":["interpolate",["linear"],["zoom"],4,10,9,26], "circle-color":["get","color"], "circle-opacity":.22, "circle-blur":.8 }});
+  map.addLayer({ id:"wind", type:"symbol", source:"st", filter:["==",["get","hasWind"],1], layout:{
+    "icon-image":"arrow", "icon-rotate":["get","dd"], "icon-rotation-alignment":"map",
+    "icon-size":["interpolate",["linear"],["zoom"],4,["*",["get","size"],.6],9,["*",["get","size"],1.4]],
+    "icon-allow-overlap":true, "icon-offset":[0,-30] }, paint:{ "icon-opacity":.85 }});
+  map.addLayer({ id:"pts", type:"circle", source:"st", paint:{
+    "circle-radius":["interpolate",["linear"],["zoom"],4,5,9,11], "circle-color":["get","color"],
+    "circle-stroke-color":"#fff", "circle-stroke-width":1.5 }});
+  map.addLayer({ id:"lbl", type:"symbol", source:"st", layout:{
+    "text-field":["get","label"], "text-size":12, "text-font":["Montserrat Medium","Open Sans Semibold","Noto Sans Regular"],
+    "text-offset":[0,1.4], "text-allow-overlap":false }, paint:{
+    "text-color":"#fff", "text-halo-color":"rgba(0,0,0,.85)", "text-halo-width":1.5 }});
+  map.on("click","pts", e => show(e.features[0].properties.i, e.lngLat));
+  map.on("mouseenter","pts", () => map.getCanvas().style.cursor = "pointer");
+  map.on("mouseleave","pts", () => map.getCanvas().style.cursor = "");
+  document.getElementById("status").remove();
+  render();
+});
+
+function show(i, at) {
+  const s = meta.stations[i];
+  const rows = Object.entries(VARS).map(([k,V]) => {
+    const v = val(k,i); return `<tr><td>${V.label}</td><td>${fmt(v,V.dec)} ${v==null?"":V.unit}</td></tr>`;
+  }).join("");
+  popup?.remove();
+  popup = new maplibregl.Popup({ offset:14, maxWidth:"280px" }).setLngLat(at ?? [s.lon,s.lat])
+    .setHTML(`<div class="pop"><h3>${s.name}</h3><small>Station ${s.id} · ${s.height.toFixed(0)} m hoogte</small><table>${rows}</table></div>`).addTo(map);
+}
+
+// ---------- UI ----------
+const chips = document.getElementById("chips");
+for (const [k,V] of Object.entries(VARS)) {
+  const b = document.createElement("button"); b.className = "chip"; b.textContent = V.label; b.dataset.k = k;
+  b.onclick = () => { cur = k; render(); }; chips.append(b);
+}
+document.getElementById("wind").onchange = e =>
+  map.setLayoutProperty("wind","visibility", e.target.checked ? "visible" : "none");
+
+function render() {
+  const V = VARS[cur];
+  chips.querySelectorAll(".chip").forEach(b => b.classList.toggle("on", b.dataset.k === cur));
+  map.getSource("st").setData(feats());
+
+  const items = meta.stations.map((s,i) => ({ s, i, v: val(cur,i) })).filter(x => x.v != null);
+  items.sort((a,b) => b.v - a.v);
+  const vs = items.map(x => x.v);
+  const mean = vs.reduce((a,b)=>a+b,0)/vs.length;
+  const st = [["Max", Math.max(...vs)], ["Gemiddeld", mean], ["Min", Math.min(...vs)]];
+  document.getElementById("stats").innerHTML = st.map(([l,v]) =>
+    `<div class="stat"><b>${fmt(v,V.dec)}<small> ${V.unit}</small></b><span>${l}</span></div>`).join("");
+
+  document.getElementById("list").innerHTML = items.map(({s,i,v}) =>
+    `<div class="item" data-i="${i}"><span class="dot" style="background:${color(V.ramp,(v-V.dom[0])/(V.dom[1]-V.dom[0]))}"></span>
+     <span class="n">${s.name}</span><span class="v">${fmt(v,V.dec)} ${V.unit}</span></div>`).join("");
+  document.querySelectorAll(".item").forEach(el => el.onclick = () => {
+    const i = +el.dataset.i, s = meta.stations[i];
+    map.flyTo({ center:[s.lon,s.lat], zoom: Math.max(map.getZoom(), 8), offset:[150,0] }); show(i);
+  });
+
+  const grad = RAMPS[V.ramp].join(",");
+  document.getElementById("legend").innerHTML =
+    `<div class="t">${V.label} (${V.unit})</div><div class="bar" style="background:linear-gradient(90deg,${grad})"></div>
+     <div class="ticks"><span>${V.dom[0]}</span><span>${(V.dom[0]+V.dom[1])/2}</span><span>${V.dom[1]}</span></div>`;
+}
+</script>
+</body>
+</html>
