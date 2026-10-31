@@ -112,9 +112,9 @@ const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t
 const sunWord = q => q < 10 ? "dark / no sun" : q < 100 ? "overcast" : q < 250 ? "cloudy" : q < 500 ? "partly sunny" : q < 800 ? "sunny" : "very sunny";
 const sg = v => `${v < 0 ? "−" : "+"}${Math.abs(v)}°`;
 const INPUT_NAMES = { rainIntensity: "rain now (mm/h)", rain1h: "rain last hour (mm)", rain6h: "rain last 6 h (mm)", rain24h: "rain last 24 h (mm)",
-  rideTemp: "temperature on the bike (°C)", ta: "air temperature (°C)", qg: "sun (W/m²)", vv: "visibility (m)", night: "dark", iceRisk: "ice risk", saltRisk: "salt risk", hail: "hail", ff: "wind (m/s)", gust: "gusts (m/s)", rh: "humidity (%)" };
+  rideTemp: "temperature on the bike (°C)", ta: "air temperature (°C)", qg: "sun (W/m²)", vv: "visibility (m)", night: "dark", darkSoon: "dark within 2 hours", iceRisk: "ice risk", saltRisk: "salt risk", hail: "hail", ff: "wind (m/s)", gust: "gusts (m/s)", rh: "humidity (%)" };
 const OP_TEXT = { gt: ">", gte: "≥", lt: "<", lte: "≤", eq: "=" };
-const condText = c => ["night", "iceRisk", "saltRisk"].includes(c.input) && c.op === "gte" && c.value === 1
+const condText = c => ["night", "darkSoon", "iceRisk", "saltRisk"].includes(c.input) && c.op === "gte" && c.value === 1
   ? INPUT_NAMES[c.input] : `${INPUT_NAMES[c.input] ?? c.input} ${OP_TEXT[c.op] ?? c.op} ${c.value}`;
 const compass = d => ["N","NE","E","SE","S","SW","W","NW"][Math.round(d/45) % 8];
 const maxOf = (...a) => { const v = a.filter(x => x != null); return v.length ? Math.max(...v) : null; };
@@ -180,6 +180,7 @@ function derive(o, s, t, R) {
     saltRisk: o.ta != null && o.ta <= r.saltTempC && (wetNow || (o.R6H ?? 0) > 0.5) ? 1 : 0,
     hail: { 87: 1, 27: 2, 89: 2, 88: 3, 90: 3, 96: 3, 99: 4 }[o.ww] ?? 0,
     night: sunElevation(t, s.lat, s.lon) < -1 ? 1 : 0,
+    darkSoon: sunElevation(new Date(t.getTime() + (r.darkSoonHours ?? 2) * 36e5), s.lat, s.lon) < -1 ? 1 : 0,
     _parts: parts,
   };
 }
