@@ -262,7 +262,7 @@ async function main() {
       : "";
     const pills = [
       o.ta != null && `🌡️ <b>${fmt(o.ta, 1)}°</b> <span>feels ${fmt(feels, 1)}° on the bike</span>`,
-      o.ff != null && `💨 <b>${bft(o.ff)}</b> Bft${o.dd != null ? ` from <b>${compass(o.dd)}</b> (${fmt(o.dd)}°)` : ""}`,
+      o.ff != null && `💨 <b>${bft(o.ff)}</b> Bft${o.dd != null ? ` from <b>${compass(o.dd)}</b>` : ""}`,
       inp.gust != null && `🌬️ gusts <b>${bft(inp.gust)}</b> Bft`,
       inp.rainIntensity != null && `🌧️ <b>${fmt(inp.rainIntensity, 1)}</b> mm/h`,
       o.R1H != null && `☔ <b>${fmt(o.R1H, 1)}</b> mm last hour`,
