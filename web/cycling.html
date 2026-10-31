@@ -66,6 +66,7 @@
   td:last-child { text-align:right; font-weight:650; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .pos { color:#86efac; } .neg { color:#fca5a5; } .zero { color:var(--mut); }
   .sharelink { display:none; margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,.15); text-align:center; font-size:15px; font-weight:650; color:var(--acc); }
+  .sharelink .when { display:block; margin-top:4px; font-size:13px; font-weight:500; color:var(--fg); }
   .sharelink small { display:block; margin-top:2px; font-size:11px; font-weight:400; color:var(--mut); }
   .foot { margin-top:14px; font-size:11px; line-height:1.4; color:var(--mut); text-align:center; }
   button { font:inherit; font-size:13px; color:#fff; background:rgba(255,255,255,.18); border:0; border-radius:999px; padding:4px 12px; cursor:pointer; margin-top:8px; }
@@ -336,7 +337,7 @@ async function main() {
           ${table(R.cleaning.title + " — points", clean)}</table>
       </details>
 
-      <div class="sharelink">🚴 ${SHARE_URL}<small>Data: KNMI, CC BY 4.0 · ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })}</small></div>
+      <div class="sharelink">🚴 ${SHARE_URL}<span class="when">🕒 Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (local time)</span><small>Data: KNMI, CC BY 4.0</small></div>
       <div class="noshare" style="text-align:center"><button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
       <div class="foot noshare">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time). Indicative advice based on the rules in
         <a href="${esc(RULES_URL)}">${esc(RULES_URL)}</a> (add <code>?rules=URL</code> to try your own).<br>
