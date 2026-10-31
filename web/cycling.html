@@ -114,7 +114,7 @@ const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t
 const sunWord = q => q < 10 ? "dark / no sun" : q < 100 ? "overcast" : q < 250 ? "cloudy" : q < 500 ? "partly sunny" : q < 800 ? "sunny" : "very sunny";
 const sg = v => `${v < 0 ? "−" : "+"}${Math.abs(v)}°`;
 const INPUT_NAMES = { rainIntensity: "rain now (mm/h)", rain1h: "rain last hour (mm)", rain6h: "rain last 6 h (mm)", rain24h: "rain last 24 h (mm)",
-  rideTemp: "temperature on the bike (°C)", ta: "air temperature (°C)", qg: "sun (W/m²)", vv: "visibility (m)", night: "dark", darkness: "darkness (%)", darkSoon: "dark within 2 hours", iceRisk: "ice risk", saltRisk: "salt risk", hail: "hail", ff: "wind (m/s)", gust: "gusts (m/s)", rh: "humidity (%)" };
+  rideTemp: "temperature on the bike (°C)", ta: "air temperature (°C)", qg: "sun (W/m²)", vv: "visibility (m)", night: "dark", darkness: "darkness (%)", moonlight: "bright moon and clear sky", moonIllumination: "moon illuminated (%)", darkSoon: "dark within 2 hours", iceRisk: "ice risk", saltRisk: "salt risk", hail: "hail", ff: "wind (m/s)", gust: "gusts (m/s)", rh: "humidity (%)" };
 const OP_TEXT = { gt: ">", gte: "≥", lt: "<", lte: "≤", eq: "=" };
 const condText = c => ["night", "darkSoon", "iceRisk", "saltRisk"].includes(c.input) && c.op === "gte" && c.value === 1
   ? INPUT_NAMES[c.input] : `${INPUT_NAMES[c.input] ?? c.input} ${OP_TEXT[c.op] ?? c.op} ${c.value}`;
@@ -136,6 +136,19 @@ function sunElevation(date, lat, lon) {
   const h = date.getUTCHours() + date.getUTCMinutes()/60 + lon/15;
   const ha = (h-12) * 15 * r;
   return Math.asin(Math.sin(lat*r)*Math.sin(decl) + Math.cos(lat*r)*Math.cos(decl)*Math.cos(ha)) / r;
+}
+
+function moonInfo(date, lat, lon) {
+  const r = Math.PI/180, d = (date - Date.UTC(2000, 0, 1, 12)) / 864e5;
+  const sunLon = (280.460 + 0.9856474*d + 1.915*Math.sin((357.528 + 0.9856003*d)*r) + 0.02*Math.sin(2*(357.528 + 0.9856003*d)*r)) * r;
+  const mLon = (218.316 + 13.176396*d + 6.289*Math.sin((134.963 + 13.064993*d)*r)) * r;
+  const mLat = 5.128 * Math.sin((93.272 + 13.22935*d)*r) * r;
+  const eps = (23.439 - 3.6e-7*d) * r;
+  const ra = Math.atan2(Math.sin(mLon)*Math.cos(eps) - Math.tan(mLat)*Math.sin(eps), Math.cos(mLon));
+  const dec = Math.asin(Math.sin(mLat)*Math.cos(eps) + Math.cos(mLat)*Math.sin(eps)*Math.sin(mLon));
+  const ha = (280.46061837 + 360.98564736629*d + lon) * r - ra;
+  const alt = Math.asin(Math.sin(lat*r)*Math.sin(dec) + Math.cos(lat*r)*Math.cos(dec)*Math.cos(ha)) / r;
+  return { altitude: alt, illumination: Math.round(50 * (1 - Math.cos(mLon - sunLon))) };
 }
 
 // ---------- Rules engine (rules live in cycling-rules.json) ----------
@@ -175,6 +188,10 @@ function derive(o, s, t, R) {
     if (chill > 0) { rideTemp -= chill; parts.push(["wind", -chill]); }
   }
   const wetNow = (o.R1H ?? 0) > 0.1 || raining;
+  const darkness = Math.round(100 * Math.min(1, Math.max(0, ((r.twilightStartDeg ?? 4) - sunElevation(t, s.lat, s.lon)) / ((r.twilightStartDeg ?? 4) - (r.fullDarkDeg ?? -12)))));
+  const moon = moonInfo(t, s.lat, s.lon);
+  const moonlight = darkness >= 50 && o.n != null && o.n <= (r.moonMaxCloudOctas ?? 2) &&
+    moon.illumination >= (r.moonMinIlluminationPct ?? 50) && moon.altitude >= (r.moonMinAltitudeDeg ?? 5) ? 1 : 0;
   return {
     ta: o.ta, td: o.td, rh: o.rh, ff: o.ff, gust: maxOf(o.gff, o.fx), qg: o.qg, vv: o.vv, n: o.n, ss: o.ss,
     rainIntensity, rain1h: o.R1H, rain6h: o.R6H, rain24h: o.R24H, rideTemp,
@@ -182,7 +199,8 @@ function derive(o, s, t, R) {
     saltRisk: o.ta != null && o.ta <= r.saltTempC && (wetNow || (o.R6H ?? 0) > 0.5) ? 1 : 0,
     hail: { 87: 1, 27: 2, 89: 2, 88: 3, 90: 3, 96: 3, 99: 4 }[o.ww] ?? 0,
     night: sunElevation(t, s.lat, s.lon) < -1 ? 1 : 0,
-    darkness: Math.round(100 * Math.min(1, Math.max(0, ((r.twilightStartDeg ?? 4) - sunElevation(t, s.lat, s.lon)) / ((r.twilightStartDeg ?? 4) - (r.fullDarkDeg ?? -12))))),
+    darkness,
+    moonlight, moonIllumination: moon.illumination,
     darkSoon: sunElevation(new Date(t.getTime() + (r.darkSoonHours ?? 2) * 36e5), s.lat, s.lon) < -1 ? 1 : 0,
     _parts: parts,
   };

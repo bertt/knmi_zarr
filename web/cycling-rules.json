@@ -22,7 +22,10 @@
     "saltTempC": 3,
     "darkSoonHours": 2,
     "twilightStartDeg": 4,
-    "fullDarkDeg": -12
+    "fullDarkDeg": -12,
+    "moonMaxCloudOctas": 2,
+    "moonMinIlluminationPct": 50,
+    "moonMinAltitudeDeg": 5
   },
 
   "scores": {
@@ -130,6 +133,11 @@
             { "upTo": 50, "points": -12, "note": "Twilight: harder to see" },
             { "upTo": 75, "points": -20, "note": "Getting dark: lights needed" },
             { "upTo": null, "points": -30, "note": "Dark: less pleasant and harder to see, lights needed" }
+          ] },
+        { "id": "moon", "label": "Bright moon, clear sky", "input": "moonlight", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": 10, "note": "Moonlit and clear: better to see and nicer to ride" }
           ] }
       ],
       "verdicts": [
@@ -285,6 +293,7 @@
       { "when": { "input": "rideTemp", "op": "gte", "value": 25 }, "items": ["Extra bottle"] },
       { "when": { "input": "night", "op": "gte", "value": 1 }, "items": ["Front and rear lights", "Reflective vest"], "warning": "It is dark: use front and rear lights and wear a reflective vest." },
       { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }], "items": ["Front and rear lights"], "warning": "Twilight: it is getting dark, use your lights." },
+      { "when": { "input": "moonlight", "op": "gte", "value": 1 }, "warning": "Clear sky and a bright moon: nice moonlit ride, but still use your lights." },
       { "when": [{ "input": "darkSoon", "op": "gte", "value": 1 }, { "input": "darkness", "op": "lte", "value": 0 }], "items": ["Front and rear lights"], "warning": "It gets dark within 2 hours: take lights in case you are still out." },
       { "when": { "input": "vv", "op": "lte", "value": 2000 }, "items": ["Front and rear lights"], "warning": "Fog or mist: less pleasant to ride and you are harder to see. Use lights and ride carefully." },
       { "when": { "input": "iceRisk", "op": "gte", "value": 1 }, "warning": "Ice risk: roads can be slippery. Take care or use the trainer." },
