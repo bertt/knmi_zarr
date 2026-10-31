@@ -104,6 +104,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", "
 const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
 const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t => v >= t).length;
 const sunWord = q => q < 10 ? "dark / no sun" : q < 100 ? "overcast" : q < 250 ? "cloudy" : q < 500 ? "partly sunny" : q < 800 ? "sunny" : "very sunny";
+const sg = v => `${v < 0 ? "−" : "+"}${Math.abs(v)}°`;
 const compass = d => ["N","NE","E","SE","S","SW","W","NW"][Math.round(d/45) % 8];
 const maxOf = (...a) => { const v = a.filter(x => x != null); return v.length ? Math.max(...v) : null; };
 
@@ -286,6 +287,18 @@ async function main() {
       </div>
 
       <details><summary>How were these scores calculated?</summary>
+        <div class="why" style="margin:8px 0">
+          <b>Temperature on the bike</b> (used for clothing, the jacket advice and the scores) = air temperature
+          ${sg(R.ride.bikeOffsetC)} for riding speed,
+          ${sg(R.ride.rainOffsetC)} if it rains (more than ${R.ride.rainThresholdMmH} mm/h),
+          ${sg(R.ride.dampOffsetC)} for damp air (air temperature minus dew point below ${R.ride.dampSpreadBelowC}° and air at most ${R.ride.dampMaxTempC}°),
+          and −${R.ride.windChillPerMs}° per m/s of wind above ${R.ride.windChillAboveMs} m/s.<br>
+          <b>Flags:</b> ice risk when air is at most ${R.ride.iceTempC}° and the roads are wet or humidity is at least ${R.ride.iceHumidityPct}%;
+          road salt likely when air is at most ${R.ride.saltTempC}° and it is wet or rained more than 0.5 mm in 6 hours.<br>
+          <b>Clothing</b> is picked from the temperature on the bike: ${R.clothing.bands.map((b, i, a) => `${esc(b.label)} (${b.upTo == null ? `above ${a[i-1].upTo}°` : `up to ${b.upTo}°`})`).join(", ")}.
+          Extras (rain gear, sunglasses, lights, …) are added by their own conditions.<br>
+          <b>Rain jacket:</b> ${R.rainJacket.levels.map(l => `${esc(l.label)} — ${esc(l.text)}`).join("; ")}.
+        </div>
         <table>${table(R.scores.comfort.title + ` — base ${R.scores.comfort.base}`, comfort)}
           ${table(R.scores.training.title + ` — base ${R.scores.training.base}`, training)}
           ${table(R.cleaning.title + " — points", clean)}</table>
