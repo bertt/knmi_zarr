@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="nl">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KNMI 10-minuten waarnemingen · Zarr demo</title>
+<title>KNMI 10-minute observations · Zarr demo</title>
 <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
 <style>
   :root { --bg:#0e1420; --panel:rgba(16,23,38,.92); --fg:#e8edf5; --mut:#8fa0b8; --acc:#4cc9f0; }
@@ -42,6 +42,7 @@
   .pop h3 { margin:0 22px 2px 0; font-size:15px; }
   .pop small { color:var(--mut); }
   .pop table { width:100%; margin-top:8px; border-collapse:collapse; }
+  .pop { max-height:50vh; overflow-y:auto; }
   .pop td { padding:2px 0; } .pop td:last-child { text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
   #status { position:absolute; inset:0; display:grid; place-items:center; background:var(--bg); z-index:10; color:var(--mut); }
   #toggle { display:none; }
@@ -69,22 +70,22 @@
 </style>
 </head>
 <body>
-<div id="status">Zarr laden…</div>
+<div id="status">Loading Zarr…</div>
 <div id="map"></div>
 
 <div id="side" class="panel">
-  <h1>⚡ KNMI weerstations</h1>
-  <div class="sub" id="time">10-minuten waarnemingen · gelezen uit Zarr</div>
+  <h1>⚡ KNMI weather stations</h1>
+  <div class="sub" id="time">10-minute observations · read from Zarr</div>
   <div id="chips"></div>
   <div class="stats" id="stats"></div>
-  <label class="row"><input type="checkbox" id="wind" checked> Windpijlen tonen (richting waar de wind naartoe waait)</label>
+  <label class="row"><input type="checkbox" id="wind" checked> Show wind arrows (pointing where the wind blows to)</label>
   <div id="list"></div>
-  <button class="chip" id="toggle">Toon stationslijst</button>
+  <button class="chip" id="toggle">Show station list</button>
 </div>
 
 <div id="nav" class="panel">
-  <button class="chip" id="goNL">Nederland</button>
-  <button class="chip" id="goBES">Caribisch NL</button>
+  <button class="chip" id="goNL">Netherlands</button>
+  <button class="chip" id="goBES">Caribbean NL</button>
 </div>
 <div id="legend" class="panel"></div>
 
@@ -93,17 +94,27 @@
 import * as zarr from "https://esm.sh/zarrita@0.5.1";
 
 const VARS = {
-  ta:  { label:"Temperatuur",       unit:"°C",   ramp:"turbo",   dom:[-5,30],  dec:1 },
-  td:  { label:"Dauwpunt",          unit:"°C",   ramp:"turbo",   dom:[-5,25],  dec:1 },
-  ff:  { label:"Windsnelheid",      unit:"m/s",  ramp:"wind",    dom:[0,15],   dec:1 },
-  gff: { label:"Windstoot",         unit:"m/s",  ramp:"wind",    dom:[0,25],   dec:1 },
-  rh:  { label:"Luchtvochtigheid",  unit:"%",    ramp:"humid",   dom:[40,100], dec:0 },
-  pp:  { label:"Luchtdruk (zeeniveau)", unit:"hPa", ramp:"press", dom:[990,1040], dec:1 },
-  vv:  { label:"Zicht",             unit:"km",   ramp:"vis",     dom:[0,20],   dec:1, scale:0.001 },
-  n:   { label:"Bewolking",         unit:"/8",   ramp:"cloud",   dom:[0,8],    dec:0 },
-  qg:  { label:"Globale straling",  unit:"W/m²", ramp:"sun",     dom:[0,800],  dec:0 },
-  tg:  { label:"Grondtemperatuur",  unit:"°C",   ramp:"turbo",   dom:[-5,30],  dec:1 },
-  dd:  { label:"Windrichting",      unit:"°",    ramp:"hue",     dom:[0,360],  dec:0 },
+  ta:  { label:"Temperature",       unit:"°C",   ramp:"turbo",   dom:[-5,30],  dec:1 },
+  td:  { label:"Dew point",          unit:"°C",   ramp:"turbo",   dom:[-5,25],  dec:1 },
+  ff:  { label:"Wind speed",      unit:"m/s",  ramp:"wind",    dom:[0,15],   dec:1 },
+  gff: { label:"Wind gust",         unit:"m/s",  ramp:"wind",    dom:[0,25],   dec:1 },
+  rh:  { label:"Humidity",  unit:"%",    ramp:"humid",   dom:[40,100], dec:0 },
+  pp:  { label:"Pressure (sea level)", unit:"hPa", ramp:"press", dom:[990,1040], dec:1 },
+  vv:  { label:"Visibility",             unit:"km",   ramp:"vis",     dom:[0,20],   dec:1, scale:0.001 },
+  n:   { label:"Cloud cover",         unit:"/8",   ramp:"cloud",   dom:[0,8],    dec:0 },
+  qg:  { label:"Global radiation",  unit:"W/m²", ramp:"sun",     dom:[0,800],  dec:0 },
+  tg:  { label:"Ground temperature",  unit:"°C",   ramp:"turbo",   dom:[-5,30],  dec:1 },
+  dd:  { label:"Wind direction",      unit:"°",    ramp:"hue",     dom:[0,360],  dec:0 },
+  tn:  { label:"Min. temperature (10 min)", unit:"°C", ramp:"turbo", dom:[-5,30], dec:1 },
+  tx:  { label:"Max. temperature (10 min)", unit:"°C", ramp:"turbo", dom:[-5,30], dec:1 },
+  tb:  { label:"Wet-bulb temperature", unit:"°C", ramp:"turbo",   dom:[-5,25],  dec:1 },
+  fx:  { label:"Max. wind gust (10 min)", unit:"m/s", ramp:"wind", dom:[0,25],   dec:1 },
+  rg:  { label:"Precipitation intensity", unit:"mm/h", ramp:"rain",    dom:[0,10],   dec:1 },
+  R1H: { label:"Precipitation 1 h",    unit:"mm",   ramp:"rain",    dom:[0,10],   dec:1 },
+  R24H:{ label:"Precipitation 24 h",   unit:"mm",   ramp:"rain",    dom:[0,30],   dec:1 },
+  ss:  { label:"Sunshine (10 min)", unit:"min", ramp:"sun",   dom:[0,10],   dec:0 },
+  hc:  { label:"Cloud base",       unit:"ft",   ramp:"cloud",   dom:[0,10000], dec:0 },
+  ps:  { label:"Pressure (station)", unit:"hPa", ramp:"press",  dom:[990,1040], dec:1 },
 };
 const RAMPS = {
   turbo: ["#30123b","#4662d7","#36aaf9","#1ae4b6","#72fe5e","#c7ef34","#faba39","#f66b19","#ca2a04","#7a0403"],
@@ -111,6 +122,7 @@ const RAMPS = {
   humid: ["#a0522d","#e0c27a","#b8e0b0","#4cc9f0","#1d4ed8"],
   press: ["#6a0dad","#2563eb","#22d3ee","#a3e635","#facc15","#f97316","#dc2626"],
   vis:   ["#5b2a86","#8f4a9e","#4a6fe3","#4cc9f0","#e0f7ff"],
+  rain:  ["#2b2d42","#3a6ea5","#4cc9f0","#7bd88f","#ffd166","#ef476f","#8e1b6b"],
   cloud: ["#ffe27a","#d7dde6","#8e9bb0","#4a5568"],
   sun:   ["#1b1f3a","#6b3fa0","#e0556b","#ffb703","#fff3b0"],
   hue:   ["#4cc9f0","#7bd88f","#ffd166","#ef476f","#4cc9f0"],
@@ -140,12 +152,12 @@ try {
   meta = await r.json();
   await Promise.all(Object.keys(VARS).map(async k => data[k] = await readVar(k)));
 } catch (err) {
-  statusEl.textContent = "Laden mislukt: " + err.message;
+  statusEl.textContent = "Loading failed: " + err.message;
   throw err;
 }
 
 document.getElementById("time").textContent =
-  new Date(meta.time).toLocaleString("nl-NL", { dateStyle:"full", timeStyle:"short" }) + " · uit Zarr";
+  new Date(meta.time).toLocaleString("en-GB", { dateStyle:"full", timeStyle:"short" }) + " · from Zarr";
 
 const val = (k, i) => {
   const v = data[k][i]; return v==null ? null : v * (VARS[k].scale ?? 1);
@@ -169,9 +181,9 @@ document.getElementById("goNL").onclick = () => map.fitBounds(NL, { padding:pad(
 document.getElementById("goBES").onclick = () => map.fitBounds(BES, { padding:pad() });
 document.getElementById("toggle").onclick = e => {
   const open = sideEl.classList.toggle("open");
-  e.target.textContent = open ? "Verberg stationslijst" : "Toon stationslijst";
+  e.target.textContent = open ? "Hide station list" : "Show station list";
 };
-map.on("error", e => { if (statusEl.isConnected) statusEl.textContent = "Kaart laden mislukt: " + (e.error?.message ?? "onbekende fout"); });
+map.on("error", e => { if (statusEl.isConnected) statusEl.textContent = "Loading map failed: " + (e.error?.message ?? "unknown error"); });
 
 function arrowIcon() {
   const s = 64, c = document.createElement("canvas"); c.width = c.height = s;
@@ -227,7 +239,7 @@ function show(i, at) {
   }).join("");
   popup?.remove();
   popup = new maplibregl.Popup({ offset:14, maxWidth:"280px" }).setLngLat(at ?? [s.lon,s.lat])
-    .setHTML(`<div class="pop"><h3>${s.name}</h3><small>Station ${s.id} · ${s.height.toFixed(0)} m hoogte</small><table>${rows}</table></div>`).addTo(map);
+    .setHTML(`<div class="pop"><h3>${s.name}</h3><small>Station ${s.id} · ${s.height.toFixed(0)} m elevation</small><table>${rows}</table></div>`).addTo(map);
 }
 
 // ---------- UI ----------
@@ -248,7 +260,7 @@ function render() {
   items.sort((a,b) => b.v - a.v);
   const vs = items.map(x => x.v);
   const mean = vs.reduce((a,b)=>a+b,0)/vs.length;
-  const st = [["Max", Math.max(...vs)], ["Gemiddeld", mean], ["Min", Math.min(...vs)]];
+  const st = [["Max", Math.max(...vs)], ["Mean", mean], ["Min", Math.min(...vs)]];
   document.getElementById("stats").innerHTML = st.map(([l,v]) =>
     `<div class="stat"><b>${fmt(v,V.dec)}<small> ${V.unit}</small></b><span>${l}</span></div>`).join("");
 
@@ -257,7 +269,7 @@ function render() {
      <span class="n">${s.name}</span><span class="v">${fmt(v,V.dec)} ${V.unit}</span></div>`).join("");
   document.querySelectorAll(".item").forEach(el => el.onclick = () => {
     const i = +el.dataset.i, s = meta.stations[i];
-    if (isMobile()) { sideEl.classList.remove("open"); document.getElementById("toggle").textContent = "Toon stationslijst"; }
+    if (isMobile()) { sideEl.classList.remove("open"); document.getElementById("toggle").textContent = "Show station list"; }
     map.flyTo({ center:[s.lon,s.lat], zoom: Math.max(map.getZoom(), 8), offset: isMobile() ? [0,-sideEl.offsetHeight/2] : [150,0] }); show(i);
   });
 
