@@ -102,6 +102,7 @@ const readVar = async name => {
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
+const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t => v >= t).length;
 const compass = d => ["N","NE","E","SE","S","SW","W","NW"][Math.round(d/45) % 8];
 const maxOf = (...a) => { const v = a.filter(x => x != null); return v.length ? Math.max(...v) : null; };
 
@@ -232,8 +233,8 @@ async function main() {
       : "";
     const pills = [
       o.ta != null && `🌡️ <b>${fmt(o.ta, 1)}°</b> <span>feels ${fmt(feels, 1)}° on the bike</span>`,
-      o.ff != null && `💨 <b>${fmt(o.ff * 3.6)}</b> km/h${o.dd != null ? ` from <b>${compass(o.dd)}</b> (${fmt(o.dd)}°)` : ""}`,
-      inp.gust != null && `🌬️ gusts <b>${fmt(inp.gust * 3.6)}</b> km/h`,
+      o.ff != null && `💨 <b>${bft(o.ff)}</b> Bft${o.dd != null ? ` from <b>${compass(o.dd)}</b> (${fmt(o.dd)}°)` : ""}`,
+      inp.gust != null && `🌬️ gusts <b>${bft(inp.gust)}</b> Bft`,
       inp.rainIntensity != null && `🌧️ <b>${fmt(inp.rainIntensity, 1)}</b> mm/h`,
       o.R1H != null && `☔ <b>${fmt(o.R1H, 1)}</b> mm last hour`,
       o.qg != null && `☀️ <b>${fmt(o.qg)}</b> W/m²`,
