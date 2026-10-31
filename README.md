@@ -56,7 +56,7 @@ python -m http.server 8765   # open http://localhost:8765
 
 ## Deployment
 
-GitHub Pages serves the `web/` folder through the workflow in `.github/workflows/pages.yml` on every push to `main`.
+GitHub Pages serves the `web/` folder through the workflow in `.github/workflows/pages.yml` on every push to `main`, manually, and hourly (`cron`). Each run downloads the latest KNMI file, converts it to `web/obs.zarr` and `web/stations.json`, and deploys. Add your API key as repository secret `KNMI_API_KEY` (Settings → Secrets and variables → Actions).
 
 ## Data & license
 
