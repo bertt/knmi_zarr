@@ -221,6 +221,7 @@ async function main() {
     const base = new Set(band?.items ?? []);
     const extraOnly = [...extras].filter(i => !base.has(i));
 
+    const rj = R.rainJacket?.levels.find(l => !l.when || test(l.when, inp));
     const clean = evalRules(R.cleaning.rules, inp, 0);
     const level = [...R.cleaning.levels].sort((a, b) => b.min - a.min).find(l => clean.total >= l.min) ?? R.cleaning.levels[0];
     const levelNo = R.cleaning.levels.findIndex(l => l === level) + 1;
@@ -272,6 +273,9 @@ async function main() {
           <div class="why">${esc(why)}</div>` : `<div class="why">No temperature data for this station.</div>`}
         ${warnings.map(w => `<div class="warn">⚠️ ${esc(w)}</div>`).join("")}
       </div>
+
+      ${rj ? `<div class="sec"><h2>${esc(R.rainJacket.title)}</h2>
+        <div class="clean"><div class="em">${rj.icon}</div><div><div class="l">${esc(rj.label)}</div><div class="t">${esc(rj.text)}</div></div></div></div>` : ""}
 
       <div class="sec"><h2>🧽 ${esc(R.cleaning.title)}</h2>
         <div class="clean"><div class="em">${level.icon}</div><div>
