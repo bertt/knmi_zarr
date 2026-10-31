@@ -189,6 +189,11 @@ const iconFor = item => ITEM_ICONS.find(([re]) => re.test(item))?.[1] ?? "•";
 const valueText = (r, v) => v == null ? "–" : r.display === "flag" ? (v ? "yes" : "no") : `${fmt(v, r.dec ?? 1)}${r.unit ? " " + r.unit : ""}`;
 const signed = p => p > 0 ? `<span class="pos">+${p}</span>` : p < 0 ? `<span class="neg">${p}</span>` : `<span class="zero">0</span>`;
 
+const SENSORS = [
+  { label: "temperature", vars: ["ta"] }, { label: "wind", vars: ["ff"] }, { label: "rain", vars: ["rg", "pg", "R1H"] },
+  { label: "visibility", vars: ["vv"] },
+];
+
 async function main() {
   const [meta, R] = await Promise.all([
     fetch(`${BASE}/stations.json`).then(r => r.json()),
@@ -218,7 +223,18 @@ async function main() {
   const sorted = meta.stations.map((s, i) => ({ s, i })).sort((x, y) => x.s.name.localeCompare(y.s.name));
   const t = new Date(meta.time);
 
+  const missingAt = i => SENSORS.filter(x => x.vars.every(k => data[k]?.[i] == null)).map(x => x.label);
+  const betterStation = (i, missing) => meta.stations
+    .map((st, j) => ({ j, d: km(meta.stations[i].lat, meta.stations[i].lon, st.lat, st.lon) }))
+    .filter(x => x.j !== i && x.d <= 60 && missing.every(l => !missingAt(x.j).includes(l)))
+    .sort((a, b) => a.d - b.d)[0];
+
   const render = (idx, notice, distance) => {
+    const missing = missingAt(idx), better = missing.length ? betterStation(idx, missing) : null;
+    const sensorNote = missing.length
+      ? `No ${missing.join(", ")} data from this station right now, so the scores and advice are incomplete.` +
+        (better ? ` <a href="?station=${encodeURIComponent(meta.stations[better.j].name)}" class="goto" data-i="${better.j}">Try ${esc(meta.stations[better.j].name)}</a> (${fmt(better.d)} km away) instead.` : "")
+      : "";
     const s = meta.stations[idx], o = obs(idx), inp = derive(o, s, t, R);
     const comfort = evalRules(R.scores.comfort.rules, inp, R.scores.comfort.base);
     const training = evalRules(R.scores.training.rules, inp, R.scores.training.base);
@@ -266,6 +282,7 @@ async function main() {
         <select id="pick" aria-label="Choose a station">${sorted.map(({ s: st, i }) =>
           `<option value="${i}"${i === idx ? " selected" : ""}>${esc(st.name)}${user ? ` · ${fmt(km(user.latitude, user.longitude, st.lat, st.lon))} km` : ""}</option>`).join("")}</select>
         ${notice ? `<div class="notice">ℹ️ ${notice}</div>` : ""}
+        ${sensorNote ? `<div class="warn">⚠️ ${sensorNote}</div>` : ""}
       </div>
 
       <div class="scores">
@@ -326,12 +343,13 @@ async function main() {
     document.getElementById("retry")?.addEventListener("click", () => {
       const u = new URL(location.href); u.searchParams.delete("station"); location.href = u;
     });
-    document.getElementById("pick").addEventListener("change", e => {
-      const i = +e.target.value;
+    const show = i => {
       const u = new URL(location.href); u.searchParams.set("station", meta.stations[i].name);
       history.replaceState(null, "", u);
       render(i, "", user ? km(user.latitude, user.longitude, meta.stations[i].lat, meta.stations[i].lon) : null);
-    });
+    };
+    document.getElementById("pick").addEventListener("change", e => show(+e.target.value));
+    document.querySelector(".goto")?.addEventListener("click", e => { e.preventDefault(); show(+e.target.dataset.i); });
   };
   render(idx, notice, distance);
 }
