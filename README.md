@@ -75,7 +75,24 @@ How it works:
 
 The page links to KNMI (source), the CC BY 4.0 license, the Zarr store URL it reads (`https://bertt.github.io/knmi_zarr/obs.zarr`) and this repository, and states that the data is converted and not an official KNMI product.
 
-### 5. Read the latest observations from the online Zarr (Python)
+A station picker lets you switch to any of the 56 stations (distance is shown when the location is known).
+
+### 5. Cycling weather (`web/cycling.html`)
+
+🚴 **Live: <https://bertt.github.io/knmi_zarr/cycling.html>**
+
+A third page that turns the same Zarr data (<https://bertt.github.io/knmi_zarr/obs.zarr>, read in the browser with zarrita.js) into cycling advice for the nearest (or a chosen) station:
+
+- **Ride comfort** score (0-100): sun and dry is good, rain, cold, strong wind and poor visibility are bad.
+- **Training** score (0-100): like comfort, but wind and cold count as a plus.
+- **What to wear**: based on the temperature *on the bike* (air temperature about 2 °C lower, extra for rain, damp air via the dew point and wind chill), e.g. short/short above 15 °C, gloves and skullcap below 10 °C, windjacket below 12 °C, windjacket + base layer below 0 °C. Extras for rain, darkness, sun and ice.
+- **Bike cleaning**: estimate from rain now, the last 1/6/24 hours and salt risk.
+
+All rules and thresholds live in [`web/cycling-rules.json`](web/cycling-rules.json), so they can be tuned without touching the code. Rules are `bands` (`upTo` value, `points`, `note`; `upTo: null` = everything above), clothing bands/extras, and cleaning rules/levels. Try your own rules with `cycling.html?rules=<url-to-json>`. The page has a "How were these scores calculated?" section showing every rule's contribution. The advice is indicative only.
+
+Source data: [KNMI 10-minute in-situ meteorological observations](https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0), © KNMI, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Converted to Zarr here; not an official KNMI product. The page footer repeats this attribution and links to the Zarr store (<https://bertt.github.io/knmi_zarr/obs.zarr>).
+
+### 6. Read the latest observations from the online Zarr (Python)
 
 `latest.py` shows that the published Zarr store can be used directly in a process, without a KNMI API key or a server. It reads `stations.json` to find a station by name (default `De Bilt`, the KNMI station in Utrecht), opens `https://bertt.github.io/knmi_zarr/obs.zarr` with xarray and prints the latest measurements of that station with their units.
 

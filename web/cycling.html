@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cycling weather · KNMI Zarr demo</title>
+<style>
+  :root { --fg:#e8edf5; --mut:#8fa0b8; --acc:#4cc9f0; --bg1:#0e1420; --bg2:#0f3d3a; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:start center; padding:14px; color:var(--fg);
+    font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(circle at 85% 0%,var(--bg2),transparent 60%),var(--bg1) fixed; }
+  a { color:var(--acc); }
+  .card, .banner { text-shadow:none; }
+  .wrap { width:min(620px,100%); }
+  .banner { margin-bottom:10px; padding:7px 12px; border-radius:14px; background:rgba(16,23,38,.92); border:1px solid rgba(255,255,255,.08); text-align:center; font-size:12px; line-height:1.4; color:var(--mut); }
+  .banner b { color:var(--acc); font-size:14px; letter-spacing:.02em; }
+  .banner a { word-break:break-all; }
+  .card { padding:18px 18px 14px; border-radius:26px; background:rgba(16,23,38,.92); border:1px solid rgba(255,255,255,.08);
+    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:0 8px 30px rgba(0,0,0,.4); }
+  .head { text-align:center; }
+  .title { font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--mut); }
+  .place { font-size:22px; font-weight:700; margin-top:2px; }
+  .sub { color:var(--mut); font-size:12.5px; }
+  select { margin-top:8px; max-width:100%; font:inherit; font-size:13px; color:#fff; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:4px 12px; }
+  select option { color:#000; }
+  .notice { margin:10px 0 0; padding:7px 11px; border-radius:12px; background:rgba(0,0,0,.25); font-size:12.5px; }
+
+  .scores { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+  .score { padding:14px 10px 12px; border-radius:20px; background:rgba(255,255,255,.05); text-align:center; }
+  .score h3 { margin:0 0 8px; font-size:11.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--mut); }
+  .ring { --p:0%; --c:#2ecc71; width:112px; height:112px; margin:0 auto; border-radius:50%;
+    background:conic-gradient(var(--c) var(--p), rgba(255,255,255,.18) 0); display:grid; place-items:center; transition:background .5s; }
+  .ring > div { width:88px; height:88px; border-radius:50%; background:rgba(18,26,48,.62); display:grid; place-items:center; align-content:center; }
+  .ring .em { font-size:30px; line-height:1; }
+  .ring .n { font-size:21px; font-weight:700; line-height:1.1; }
+  .verdict { margin-top:9px; font-size:15px; font-weight:650; }
+
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; justify-content:center; }
+  .pill { padding:4px 10px; border-radius:999px; background:rgba(0,0,0,.24); font-size:12.5px; white-space:nowrap; }
+  .pill b { font-weight:650; }
+
+  .sec { margin-top:14px; padding:13px 14px; border-radius:20px; background:rgba(255,255,255,.05); }
+  .sec h2 { margin:0 0 8px; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--mut); }
+  .outfit { font-size:17px; font-weight:650; }
+  .outfit small { font-weight:400; color:var(--mut); font-size:13px; }
+  .items { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .item { padding:5px 11px; border-radius:999px; background:rgba(76,201,240,.16); border:1px solid rgba(76,201,240,.35); font-size:13.5px; }
+  .item.extra { background:rgba(255,255,255,.1); border:1px dashed rgba(255,255,255,.35); }
+  .why { margin-top:9px; font-size:12px; color:var(--mut); }
+  .warn { margin-top:9px; padding:7px 11px; border-radius:12px; background:rgba(239,68,68,.35); font-size:13px; }
+  .clean { display:flex; gap:12px; align-items:center; }
+  .clean .em { font-size:38px; line-height:1; }
+  .clean .l { font-size:16px; font-weight:650; }
+  .clean .t { font-size:13px; color:var(--mut); }
+  .dots { display:flex; gap:4px; margin-top:6px; }
+  .dots i { width:22px; height:6px; border-radius:3px; background:rgba(255,255,255,.2); }
+  .dots i.on { background:var(--acc); }
+
+  details { margin-top:14px; }
+  summary { cursor:pointer; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut); }
+  table { width:100%; border-collapse:collapse; margin-top:8px; font-size:12.5px; }
+  th { text-align:left; padding:8px 0 3px; font-size:12px; color:#fff; }
+  td { padding:2px 0; vertical-align:top; }
+  td:nth-child(2) { color:var(--mut); padding:2px 8px; }
+  td:last-child { text-align:right; font-weight:650; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .pos { color:#86efac; } .neg { color:#fca5a5; } .zero { color:var(--mut); }
+  .foot { margin-top:14px; font-size:11px; line-height:1.4; color:var(--mut); text-align:center; }
+  button { font:inherit; font-size:13px; color:#fff; background:rgba(255,255,255,.18); border:0; border-radius:999px; padding:4px 12px; cursor:pointer; margin-top:8px; }
+  button:hover { background:rgba(255,255,255,.28); }
+  @media (max-width:480px) { .ring { width:96px; height:96px; } .ring > div { width:74px; height:74px; } .ring .n { font-size:18px; } .verdict { font-size:13.5px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner"><b>Zarr demo</b> · live KNMI observations read straight from a <a href="https://zarr.dev/">Zarr</a> store in your browser<br>
+    Zarr source: <a id="zsrc" href="#"></a><br>
+    <a href="./">🗺️ All stations on a map</a> · <a href="nearby.html">🌦️ Weather near you</a></div>
+  <div class="card" id="card"><div class="head"><div class="sub">Loading…</div></div></div>
+</div>
+
+<script type="module">
+import * as zarr from "https://esm.sh/zarrita@0.5.1";
+
+const BASE = "https://bertt.github.io/knmi_zarr";   // always read the Zarr published on GitHub Pages
+const ZARR_URL = `${BASE}/obs.zarr`;
+const RULES_URL = new URLSearchParams(location.search).get("rules") || "cycling-rules.json";
+const FALLBACK = "De Bilt";
+const MAX_KM = 150;
+const VARS = ["ta","td","rh","ff","gff","fx","qg","vv","n","ss","rg","pg","R1H","R6H","R24H"];
+
+const card = document.getElementById("card");
+const zsrc = document.getElementById("zsrc");
+zsrc.href = ZARR_URL; zsrc.textContent = ZARR_URL;
+const store = new zarr.FetchStore(ZARR_URL);
+const root = zarr.root(store);
+const readVar = async name => {
+  const arr = await zarr.open(root.resolve(name), { kind: "array" });
+  const { data } = await zarr.get(arr);
+  return Array.from(data, v => (Number.isFinite(v) && Math.abs(v) < 1e30) ? v : null);
+};
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
+const compass = d => ["N","NE","E","SE","S","SW","W","NW"][Math.round(d/45) % 8];
+const maxOf = (...a) => { const v = a.filter(x => x != null); return v.length ? Math.max(...v) : null; };
+
+function km(lat1, lon1, lat2, lon2) {
+  const r = Math.PI/180, a = Math.sin((lat2-lat1)*r/2)**2 +
+    Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin((lon2-lon1)*r/2)**2;
+  return 12742 * Math.asin(Math.sqrt(a));
+}
+const getPosition = () => new Promise((res, rej) => navigator.geolocation
+  ? navigator.geolocation.getCurrentPosition(res, rej, { timeout:10000, maximumAge:600000 })
+  : rej(new Error("Geolocation is not supported by this browser")));
+
+function sunElevation(date, lat, lon) {
+  const r = Math.PI/180, n = Math.floor((date - Date.UTC(date.getUTCFullYear(),0,0)) / 864e5);
+  const decl = 23.44 * Math.sin(2*Math.PI*(284+n)/365) * r;
+  const h = date.getUTCHours() + date.getUTCMinutes()/60 + lon/15;
+  const ha = (h-12) * 15 * r;
+  return Math.asin(Math.sin(lat*r)*Math.sin(decl) + Math.cos(lat*r)*Math.cos(decl)*Math.cos(ha)) / r;
+}
+
+// ---------- Rules engine (rules live in cycling-rules.json) ----------
+const pick = (bands, v) => bands.find(b => b.upTo == null || v <= b.upTo);
+
+function evalRules(list, inp, base) {
+  let total = base;
+  const rows = list.map(r => {
+    const v = inp[r.input];
+    if (v == null) return { r, v: null, points: 0, note: "no data" };
+    const b = pick(r.bands, v), points = b?.points ?? 0;
+    total += points;
+    return { r, v, points, note: b?.note ?? "" };
+  });
+  return { total, rows };
+}
+const verdictFor = (list, score) => [...list].sort((a, b) => b.min - a.min).find(x => score >= x.min) ?? list[list.length - 1];
+const test = (c, inp) => (Array.isArray(c) ? c : [c]).every(x => {
+  const v = inp[x.input];
+  if (v == null) return false;
+  return { gt: v > x.value, gte: v >= x.value, lt: v < x.value, lte: v <= x.value, eq: v === x.value }[x.op];
+});
+
+function derive(o, s, t, R) {
+  const r = R.ride;
+  const rainIntensity = maxOf(o.rg, o.pg);
+  const raining = rainIntensity != null && rainIntensity > r.rainThresholdMmH;
+  const spread = o.ta != null && o.td != null ? o.ta - o.td : null;
+  const damp = spread != null && spread < r.dampSpreadBelowC && o.ta <= r.dampMaxTempC;
+  const chill = o.ff != null ? Math.max(0, o.ff - r.windChillAboveMs) * r.windChillPerMs : 0;
+  const parts = [];
+  let rideTemp = null;
+  if (o.ta != null) {
+    rideTemp = o.ta + r.bikeOffsetC; parts.push(["riding speed", r.bikeOffsetC]);
+    if (raining) { rideTemp += r.rainOffsetC; parts.push(["rain", r.rainOffsetC]); }
+    if (damp)    { rideTemp += r.dampOffsetC; parts.push(["damp air (dew point close to temperature)", r.dampOffsetC]); }
+    if (chill > 0) { rideTemp -= chill; parts.push(["wind", -chill]); }
+  }
+  const wetNow = (o.R1H ?? 0) > 0.1 || raining;
+  return {
+    ta: o.ta, td: o.td, rh: o.rh, ff: o.ff, gust: maxOf(o.gff, o.fx), qg: o.qg, vv: o.vv, n: o.n, ss: o.ss,
+    rainIntensity, rain1h: o.R1H, rain6h: o.R6H, rain24h: o.R24H, rideTemp,
+    iceRisk: o.ta != null && o.ta <= r.iceTempC && (wetNow || (o.rh != null && o.rh >= r.iceHumidityPct)) ? 1 : 0,
+    saltRisk: o.ta != null && o.ta <= r.saltTempC && (wetNow || (o.R6H ?? 0) > 0.5) ? 1 : 0,
+    night: sunElevation(t, s.lat, s.lon) < -1 ? 1 : 0,
+    _parts: parts,
+  };
+}
+
+const ITEM_ICONS = [
+  [/rain jacket|waterproof jacket/i, "☔"], [/jacket|jersey/i, "👕"], [/base layer/i, "🧥"], [/bib|tights|shorts/i, "🩳"],
+  [/warmers/i, "🦵"], [/gloves/i, "🧤"], [/skullcap|cap/i, "🧢"], [/overshoes|shoe/i, "👟"],
+  [/mudguard/i, "🛡️"], [/lights/i, "🔦"], [/reflective/i, "🦺"], [/sunglasses/i, "🕶️"], [/sunscreen/i, "🧴"], [/bottle/i, "🥤"],
+];
+const iconFor = item => ITEM_ICONS.find(([re]) => re.test(item))?.[1] ?? "•";
+const valueText = (r, v) => v == null ? "–" : r.display === "flag" ? (v ? "yes" : "no") : `${fmt(v, r.dec ?? 1)}${r.unit ? " " + r.unit : ""}`;
+const signed = p => p > 0 ? `<span class="pos">+${p}</span>` : p < 0 ? `<span class="neg">${p}</span>` : `<span class="zero">0</span>`;
+
+async function main() {
+  const [meta, R] = await Promise.all([
+    fetch(`${BASE}/stations.json`).then(r => r.json()),
+    fetch(RULES_URL).then(r => { if (!r.ok) throw new Error(`${RULES_URL}: HTTP ${r.status}`); return r.json(); }),
+  ]);
+  const keys = VARS.filter(k => k in meta.variables);
+  const data = {};
+  await Promise.all(keys.map(async k => data[k] = await readVar(k)));
+  const obs = i => Object.fromEntries(VARS.map(k => [k, data[k]?.[i] ?? null]));
+
+  let idx = meta.stations.findIndex(s => s.name === FALLBACK), notice = "", distance = null, user = null;
+  try {
+    const { coords } = await getPosition();
+    user = coords;
+    const ranked = meta.stations
+      .map((s, i) => ({ i, d: km(coords.latitude, coords.longitude, s.lat, s.lon) }))
+      .filter(x => data.ta?.[x.i] != null)
+      .sort((a, b) => a.d - b.d);
+    if (ranked[0] && ranked[0].d <= MAX_KM) { idx = ranked[0].i; distance = ranked[0].d; }
+    else notice = `You appear to be outside the KNMI network (nearest station: ${fmt(ranked[0]?.d)} km away), so ${FALLBACK} is shown instead.`;
+  } catch (err) {
+    notice = `Your location is not available (${esc(err.message)}), so ${FALLBACK} is shown instead.`;
+  }
+  const sorted = meta.stations.map((s, i) => ({ s, i })).sort((x, y) => x.s.name.localeCompare(y.s.name));
+  const t = new Date(meta.time);
+
+  const render = (idx, notice, distance) => {
+    const s = meta.stations[idx], o = obs(idx), inp = derive(o, s, t, R);
+    const comfort = evalRules(R.scores.comfort.rules, inp, R.scores.comfort.base);
+    const training = evalRules(R.scores.training.rules, inp, R.scores.training.base);
+    const cScore = Math.round(Math.max(0, Math.min(100, comfort.total)));
+    const tScore = Math.round(Math.max(0, Math.min(100, training.total)));
+    const cV = verdictFor(R.scores.comfort.verdicts, cScore), tV = verdictFor(R.scores.training.verdicts, tScore);
+    const [bg1, bg2] = cV.bg ?? ["#0e1420", "#0f3d3a"];
+    document.documentElement.style.setProperty("--bg1", bg1);
+    document.documentElement.style.setProperty("--bg2", bg2);
+
+    const band = inp.rideTemp == null ? null : pick(R.clothing.bands, inp.rideTemp);
+    const extras = new Set(), warnings = [];
+    for (const e of R.clothing.extras) if (test(e.when, inp)) { (e.items ?? []).forEach(i => extras.add(i)); if (e.warning) warnings.push(e.warning); }
+    const base = new Set(band?.items ?? []);
+    const extraOnly = [...extras].filter(i => !base.has(i));
+
+    const clean = evalRules(R.cleaning.rules, inp, 0);
+    const level = [...R.cleaning.levels].sort((a, b) => b.min - a.min).find(l => clean.total >= l.min) ?? R.cleaning.levels[0];
+    const levelNo = R.cleaning.levels.findIndex(l => l === level) + 1;
+
+    const feels = inp.rideTemp == null ? null : inp.rideTemp;
+    const why = inp._parts.length
+      ? `Air ${fmt(o.ta, 1)}° → ${fmt(feels, 1)}° on the bike (${inp._parts.map(([l, v]) => `${l} ${v > 0 ? "+" : ""}${fmt(v, 1)}`).join(", ")})`
+      : "";
+    const pills = [
+      o.ta != null && `🌡️ <b>${fmt(o.ta, 1)}°</b> <span>feels ${fmt(feels, 1)}° on the bike</span>`,
+      o.ff != null && `💨 <b>${fmt(o.ff * 3.6)}</b> km/h${o.dd != null ? "" : ""}`,
+      inp.gust != null && `🌬️ gusts <b>${fmt(inp.gust * 3.6)}</b> km/h`,
+      inp.rainIntensity != null && `🌧️ <b>${fmt(inp.rainIntensity, 1)}</b> mm/h`,
+      o.R1H != null && `☔ <b>${fmt(o.R1H, 1)}</b> mm last hour`,
+      o.qg != null && `☀️ <b>${fmt(o.qg)}</b> W/m²`,
+      o.td != null && `💧 dew point <b>${fmt(o.td, 1)}°</b>`,
+      o.vv != null && `👁️ <b>${fmt(o.vv / 1000, 1)}</b> km`,
+    ].filter(Boolean).map(p => `<span class="pill">${p}</span>`).join("");
+
+    const table = (title, res) => `<tr><th colspan="3">${esc(title)}</th></tr>` + res.rows.map(({ r, v, points, note }) =>
+      `<tr><td>${esc(r.label)}</td><td>${esc(valueText(r, v))}${note ? ` · ${esc(note)}` : ""}</td><td>${signed(points)}</td></tr>`).join("");
+
+    card.innerHTML = `
+      <div class="head">
+        <div class="title">🚴 Cycling weather</div>
+        <div class="place">${esc(s.name)}</div>
+        <div class="sub">${distance == null ? "KNMI weather station" : `KNMI weather station · ${fmt(distance, distance < 10 ? 1 : 0)} km from you`}</div>
+        <select id="pick" aria-label="Choose a station">${sorted.map(({ s: st, i }) =>
+          `<option value="${i}"${i === idx ? " selected" : ""}>${esc(st.name)}${user ? ` · ${fmt(km(user.latitude, user.longitude, st.lat, st.lon))} km` : ""}</option>`).join("")}</select>
+        ${notice ? `<div class="notice">ℹ️ ${notice}</div>` : ""}
+      </div>
+
+      <div class="scores">
+        <div class="score"><h3>Ride comfort</h3>
+          <div class="ring" style="--p:${cScore}%;--c:${cV.color}"><div><span class="em">${cV.icon}</span><span class="n">${cScore}</span></div></div>
+          <div class="verdict">${esc(cV.label)}</div></div>
+        <div class="score"><h3>Training</h3>
+          <div class="ring" style="--p:${tScore}%;--c:${tV.color}"><div><span class="em">${tV.icon}</span><span class="n">${tScore}</span></div></div>
+          <div class="verdict">${esc(tV.label)}</div></div>
+      </div>
+
+      <div class="chips">${pills}</div>
+
+      <div class="sec"><h2>👕 What to wear</h2>
+        ${band ? `<div class="outfit">${esc(band.label)} <small>· feels ${fmt(feels, 0)}° on the bike</small></div>
+          <div class="items">${(band.items).map(i => `<span class="item">${iconFor(i)} ${esc(i)}</span>`).join("")}
+            ${extraOnly.map(i => `<span class="item extra">${iconFor(i)} ${esc(i)}</span>`).join("")}</div>
+          ${band.note ? `<div class="why">${esc(band.note)}</div>` : ""}
+          <div class="why">${esc(why)}</div>` : `<div class="why">No temperature data for this station.</div>`}
+        ${warnings.map(w => `<div class="warn">⚠️ ${esc(w)}</div>`).join("")}
+      </div>
+
+      <div class="sec"><h2>🧽 ${esc(R.cleaning.title)}</h2>
+        <div class="clean"><div class="em">${level.icon}</div><div>
+          <div class="l">${esc(level.label)}</div><div class="t">${esc(level.text)}</div>
+          <div class="dots">${R.cleaning.levels.map((_, i) => `<i class="${i < levelNo ? "on" : ""}"></i>`).join("")}</div></div></div>
+      </div>
+
+      <details><summary>How were these scores calculated?</summary>
+        <table>${table(R.scores.comfort.title + ` — base ${R.scores.comfort.base}`, comfort)}
+          ${table(R.scores.training.title + ` — base ${R.scores.training.base}`, training)}
+          ${table(R.cleaning.title + " — points", clean)}</table>
+      </details>
+
+      ${user == null ? `<div style="text-align:center"><button id="retry">Use my location</button></div>` : ""}
+      <div class="foot">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time). Indicative advice based on the rules in
+        <a href="${esc(RULES_URL)}">${esc(RULES_URL)}</a> (add <code>?rules=URL</code> to try your own).<br>
+        Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
+        <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/">Zarr</a>; not an official KNMI product.<br>
+        Your location stays in your browser. <a href="https://github.com/bertt/knmi_zarr">Source code</a></div>`;
+
+    document.getElementById("retry")?.addEventListener("click", () => location.reload());
+    document.getElementById("pick").addEventListener("change", e => {
+      const i = +e.target.value;
+      render(i, "", user ? km(user.latitude, user.longitude, meta.stations[i].lat, meta.stations[i].lon) : null);
+    });
+  };
+  render(idx, notice, distance);
+}
+
+main().catch(err => { card.innerHTML = `<div class="head"><div class="sub">Loading failed: ${esc(err.message)}</div></div>`; });
+</script>
+</body>
+</html>

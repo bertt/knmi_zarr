@@ -1,0 +1,261 @@
+{
+  "_help": [
+    "Rules for web/cycling.html. Edit freely; the page reads this file on every load.",
+    "A 'band' list is evaluated top to bottom: the first band where value <= upTo applies (upTo null = everything above).",
+    "Units: temperature in degC, wind and gusts in m/s, rain in mm (1h/6h/24h) or mm/h (now), radiation in W/m2, visibility in m.",
+    "Inputs you can use: ta, td, rh, rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, night.",
+    "Scores: result = clamp(base + sum of band points, 0, 100). Cleaning: base + sum of points, then the highest level with min <= total."
+  ],
+
+  "ride": {
+    "bikeOffsetC": -2,
+    "rainOffsetC": -1.5,
+    "rainThresholdMmH": 0.05,
+    "dampOffsetC": -1,
+    "dampSpreadBelowC": 2,
+    "dampMaxTempC": 12,
+    "windChillPerMs": 0.2,
+    "windChillAboveMs": 4,
+    "iceTempC": 1,
+    "iceHumidityPct": 90,
+    "saltTempC": 3
+  },
+
+  "scores": {
+    "comfort": {
+      "title": "Nice weather to ride",
+      "base": 100,
+      "rules": [
+        { "id": "rain-now", "label": "Rain right now", "input": "rainIntensity", "unit": "mm/h", "dec": 1,
+          "bands": [
+            { "upTo": 0.05, "points": 0, "note": "Dry" },
+            { "upTo": 0.5, "points": -25, "note": "Drizzle" },
+            { "upTo": 2, "points": -45, "note": "Rain" },
+            { "upTo": null, "points": -65, "note": "Heavy rain" }
+          ] },
+        { "id": "wet-roads", "label": "Rain last hour (wet roads)", "input": "rain1h", "unit": "mm", "dec": 1,
+          "bands": [
+            { "upTo": 0.1, "points": 0 },
+            { "upTo": 1, "points": -8, "note": "Damp roads" },
+            { "upTo": 3, "points": -15, "note": "Wet roads" },
+            { "upTo": null, "points": -22, "note": "Soaked roads" }
+          ] },
+        { "id": "rain-6h", "label": "Rain last 6 hours", "input": "rain6h", "unit": "mm", "dec": 1,
+          "bands": [
+            { "upTo": 0.5, "points": 0 },
+            { "upTo": 3, "points": -4 },
+            { "upTo": null, "points": -8 }
+          ] },
+        { "id": "temp", "label": "Temperature on the bike", "input": "rideTemp", "unit": "°C", "dec": 1,
+          "bands": [
+            { "upTo": -2, "points": -35, "note": "Freezing" },
+            { "upTo": 2, "points": -25, "note": "Very cold" },
+            { "upTo": 6, "points": -15, "note": "Cold" },
+            { "upTo": 10, "points": -8, "note": "Chilly" },
+            { "upTo": 12, "points": -3, "note": "Cool" },
+            { "upTo": 24, "points": 0, "note": "Comfortable" },
+            { "upTo": 28, "points": -5, "note": "Warm" },
+            { "upTo": 32, "points": -15, "note": "Hot" },
+            { "upTo": null, "points": -30, "note": "Very hot" }
+          ] },
+        { "id": "wind", "label": "Wind", "input": "ff", "unit": "m/s", "dec": 1,
+          "bands": [
+            { "upTo": 4, "points": 0, "note": "Calm to light" },
+            { "upTo": 7, "points": -5, "note": "Breezy" },
+            { "upTo": 10, "points": -15, "note": "Windy" },
+            { "upTo": 13, "points": -30, "note": "Very windy" },
+            { "upTo": null, "points": -45, "note": "Storm-like" }
+          ] },
+        { "id": "gust", "label": "Gusts", "input": "gust", "unit": "m/s", "dec": 1,
+          "bands": [
+            { "upTo": 10, "points": 0 },
+            { "upTo": 15, "points": -5 },
+            { "upTo": 20, "points": -12 },
+            { "upTo": null, "points": -20, "note": "Dangerous gusts" }
+          ] },
+        { "id": "sun", "label": "Sun (global radiation)", "input": "qg", "unit": "W/m²", "dec": 0,
+          "bands": [
+            { "upTo": 50, "points": 0 },
+            { "upTo": 200, "points": 3 },
+            { "upTo": 400, "points": 7, "note": "Some sun" },
+            { "upTo": null, "points": 10, "note": "Sunny" }
+          ] },
+        { "id": "visibility", "label": "Visibility", "input": "vv", "unit": "m", "dec": 0,
+          "bands": [
+            { "upTo": 500, "points": -25, "note": "Dense fog" },
+            { "upTo": 1500, "points": -15, "note": "Fog" },
+            { "upTo": 4000, "points": -6, "note": "Hazy" },
+            { "upTo": null, "points": 0 }
+          ] },
+        { "id": "dewpoint", "label": "Dew point (muggy)", "input": "td", "unit": "°C", "dec": 1,
+          "bands": [
+            { "upTo": 16, "points": 0 },
+            { "upTo": 19, "points": -4, "note": "Humid" },
+            { "upTo": null, "points": -8, "note": "Muggy" }
+          ] },
+        { "id": "ice", "label": "Ice risk (cold and damp)", "input": "iceRisk", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -30, "note": "Slippery roads possible" }
+          ] },
+        { "id": "dark", "label": "Dark", "input": "night", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -10, "note": "Lights needed" }
+          ] }
+      ],
+      "verdicts": [
+        { "min": 80, "label": "Great ride weather", "icon": "😎", "color": "#2ecc71", "bg": ["#0e1420", "#0f3d3a"] },
+        { "min": 60, "label": "Good to ride", "icon": "🙂", "color": "#a3e635", "bg": ["#0e1420", "#16382a"] },
+        { "min": 40, "label": "Okay if you must", "icon": "😐", "color": "#facc15", "bg": ["#0e1420", "#3d3216"] },
+        { "min": 20, "label": "Poor weather", "icon": "🙁", "color": "#fb923c", "bg": ["#0e1420", "#3d2216"] },
+        { "min": 0, "label": "Stay inside", "icon": "🌧️", "color": "#ef4444", "bg": ["#0e1420", "#3d1626"] }
+      ]
+    },
+
+    "training": {
+      "title": "Training weather (wind and cold are welcome)",
+      "base": 55,
+      "rules": [
+        { "id": "rain-now", "label": "Rain right now", "input": "rainIntensity", "unit": "mm/h", "dec": 1,
+          "bands": [
+            { "upTo": 0.05, "points": 0, "note": "Dry" },
+            { "upTo": 0.5, "points": -15, "note": "Drizzle" },
+            { "upTo": 2, "points": -30, "note": "Rain" },
+            { "upTo": null, "points": -50, "note": "Heavy rain" }
+          ] },
+        { "id": "wet-roads", "label": "Rain last hour (wet roads)", "input": "rain1h", "unit": "mm", "dec": 1,
+          "bands": [
+            { "upTo": 0.1, "points": 0 },
+            { "upTo": 1, "points": -5 },
+            { "upTo": 3, "points": -10 },
+            { "upTo": null, "points": -15 }
+          ] },
+        { "id": "wind", "label": "Wind (resistance is training)", "input": "ff", "unit": "m/s", "dec": 1,
+          "bands": [
+            { "upTo": 2, "points": -5, "note": "No resistance" },
+            { "upTo": 5, "points": 5, "note": "Light resistance" },
+            { "upTo": 8, "points": 15, "note": "Good headwind work" },
+            { "upTo": 11, "points": 25, "note": "Hard, great for training" },
+            { "upTo": 14, "points": 15, "note": "Very hard" },
+            { "upTo": null, "points": 0, "note": "Too much" }
+          ] },
+        { "id": "gust", "label": "Gusts", "input": "gust", "unit": "m/s", "dec": 1,
+          "bands": [
+            { "upTo": 15, "points": 0 },
+            { "upTo": 20, "points": -5 },
+            { "upTo": null, "points": -15, "note": "Dangerous gusts" }
+          ] },
+        { "id": "temp", "label": "Temperature on the bike (cold is good)", "input": "rideTemp", "unit": "°C", "dec": 1,
+          "bands": [
+            { "upTo": -2, "points": -15, "note": "Too cold" },
+            { "upTo": 2, "points": 5 },
+            { "upTo": 6, "points": 15, "note": "Cold, good for training" },
+            { "upTo": 10, "points": 10 },
+            { "upTo": 14, "points": 5 },
+            { "upTo": 22, "points": 0 },
+            { "upTo": 28, "points": -5, "note": "Warm" },
+            { "upTo": null, "points": -15, "note": "Too hot" }
+          ] },
+        { "id": "visibility", "label": "Visibility", "input": "vv", "unit": "m", "dec": 0,
+          "bands": [
+            { "upTo": 500, "points": -25, "note": "Dense fog" },
+            { "upTo": 1500, "points": -12, "note": "Fog" },
+            { "upTo": 4000, "points": -4 },
+            { "upTo": null, "points": 0 }
+          ] },
+        { "id": "ice", "label": "Ice risk (cold and damp)", "input": "iceRisk", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -30, "note": "Slippery roads possible" }
+          ] },
+        { "id": "dark", "label": "Dark", "input": "night", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -5, "note": "Lights needed" }
+          ] }
+      ],
+      "verdicts": [
+        { "min": 75, "label": "Perfect training weather", "icon": "💪", "color": "#2ecc71" },
+        { "min": 55, "label": "Good training weather", "icon": "👍", "color": "#a3e635" },
+        { "min": 35, "label": "Fine for an easy ride", "icon": "🙂", "color": "#facc15" },
+        { "min": 15, "label": "Meh", "icon": "😕", "color": "#fb923c" },
+        { "min": 0, "label": "Use the trainer", "icon": "🏠", "color": "#ef4444" }
+      ]
+    }
+  },
+
+  "clothing": {
+    "bands": [
+      { "upTo": 0, "label": "Freezing",
+        "items": ["Windproof jacket", "Thermal base layer", "Long thermal bib tights", "Winter gloves", "Skullcap", "Overshoes"] },
+      { "upTo": 5, "label": "Very cold",
+        "items": ["Thermal jersey or winter jacket", "Base layer", "Long bib tights", "Gloves", "Skullcap", "Overshoes"] },
+      { "upTo": 10, "label": "Cold",
+        "items": ["Long-sleeve jersey", "Windproof jacket", "Leg warmers or long tights", "Gloves", "Skullcap"] },
+      { "upTo": 12, "label": "Cool",
+        "items": ["Short jersey", "Arm warmers", "Windproof jacket", "Knee or leg warmers"] },
+      { "upTo": 15, "label": "Mild",
+        "items": ["Short jersey", "Arm warmers", "Bib shorts"] },
+      { "upTo": null, "label": "Warm (short/short)",
+        "items": ["Short jersey", "Bib shorts"],
+        "note": "No leg warmers, no arm warmers." }
+    ],
+    "extras": [
+      { "when": { "input": "rainIntensity", "op": "gt", "value": 0.05 }, "items": ["Rain jacket", "Mudguards"] },
+      { "when": { "input": "rain1h", "op": "gt", "value": 0.5 }, "items": ["Mudguards"] },
+      { "when": [
+          { "input": "rideTemp", "op": "lt", "value": 8 },
+          { "input": "rainIntensity", "op": "gt", "value": 0.05 }
+        ], "items": ["Waterproof gloves", "Waterproof overshoes"] },
+      { "when": { "input": "qg", "op": "gte", "value": 300 }, "items": ["Sunglasses"] },
+      { "when": { "input": "qg", "op": "gte", "value": 600 }, "items": ["Sunscreen"] },
+      { "when": { "input": "rideTemp", "op": "gte", "value": 25 }, "items": ["Extra bottle"] },
+      { "when": { "input": "night", "op": "gte", "value": 1 }, "items": ["Front and rear lights", "Reflective vest"] },
+      { "when": { "input": "vv", "op": "lte", "value": 1500 }, "items": ["Front and rear lights"] },
+      { "when": { "input": "iceRisk", "op": "gte", "value": 1 }, "warning": "Ice risk: roads can be slippery. Take care or use the trainer." }
+    ]
+  },
+
+  "cleaning": {
+    "title": "Bike cleaning after the ride",
+    "rules": [
+      { "id": "rain-now", "label": "Rain right now", "input": "rainIntensity", "unit": "mm/h", "dec": 1,
+        "bands": [
+          { "upTo": 0.05, "points": 0 },
+          { "upTo": 0.5, "points": 2 },
+          { "upTo": 2, "points": 3 },
+          { "upTo": null, "points": 4 }
+        ] },
+      { "id": "rain-1h", "label": "Rain last hour (spray from the road)", "input": "rain1h", "unit": "mm", "dec": 1,
+        "bands": [
+          { "upTo": 0.1, "points": 0 },
+          { "upTo": 1, "points": 2 },
+          { "upTo": null, "points": 3 }
+        ] },
+      { "id": "rain-6h", "label": "Rain last 6 hours", "input": "rain6h", "unit": "mm", "dec": 1,
+        "bands": [
+          { "upTo": 0.5, "points": 0 },
+          { "upTo": 3, "points": 1 },
+          { "upTo": null, "points": 2 }
+        ] },
+      { "id": "rain-24h", "label": "Rain last 24 hours (dirty roads)", "input": "rain24h", "unit": "mm", "dec": 1,
+        "bands": [
+          { "upTo": 1, "points": 0 },
+          { "upTo": 5, "points": 1 },
+          { "upTo": null, "points": 2 }
+        ] },
+      { "id": "salt", "label": "Road salt likely (cold and wet)", "input": "saltRisk", "display": "flag",
+        "bands": [
+          { "upTo": 0, "points": 0 },
+          { "upTo": null, "points": 2, "note": "Rinse off salt" }
+        ] }
+    ],
+    "levels": [
+      { "min": 0, "label": "No cleaning needed", "icon": "✨", "text": "Dry roads. Wipe the chain if it is dusty." },
+      { "min": 2, "label": "Quick rinse and wipe", "icon": "🧽", "text": "Wipe down the frame and drivetrain and add a drop of chain lube." },
+      { "min": 4, "label": "Rinse, brush and re-lube", "icon": "🚿", "text": "Rinse off the grime, brush the drivetrain and re-lube the chain." },
+      { "min": 7, "label": "Full clean", "icon": "🧼", "text": "Degrease the drivetrain, wash the bike, dry it and lube the chain. Check brakes and pads." }
+    ]
+  }
+}
