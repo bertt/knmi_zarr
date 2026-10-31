@@ -82,9 +82,10 @@
           ] },
         { "id": "visibility", "label": "Visibility", "input": "vv", "unit": "m", "dec": 0,
           "bands": [
-            { "upTo": 500, "points": -25, "note": "Dense fog" },
-            { "upTo": 1500, "points": -15, "note": "Fog" },
-            { "upTo": 4000, "points": -6, "note": "Hazy" },
+            { "upTo": 500, "points": -30, "note": "Dense fog" },
+            { "upTo": 1000, "points": -20, "note": "Fog" },
+            { "upTo": 2000, "points": -12, "note": "Mist" },
+            { "upTo": 5000, "points": -5, "note": "Hazy" },
             { "upTo": null, "points": 0 }
           ] },
         { "id": "dewpoint", "label": "Dew point (muggy)", "input": "td", "unit": "°C", "dec": 1,
@@ -223,7 +224,7 @@
       { "when": { "input": "qg", "op": "gte", "value": 600 }, "items": ["Sunscreen"] },
       { "when": { "input": "rideTemp", "op": "gte", "value": 25 }, "items": ["Extra bottle"] },
       { "when": { "input": "night", "op": "gte", "value": 1 }, "items": ["Front and rear lights", "Reflective vest"] },
-      { "when": { "input": "vv", "op": "lte", "value": 1500 }, "items": ["Front and rear lights"] },
+      { "when": { "input": "vv", "op": "lte", "value": 2000 }, "items": ["Front and rear lights"], "warning": "Fog or mist: less pleasant to ride and you are harder to see. Use lights and ride carefully." },
       { "when": { "input": "iceRisk", "op": "gte", "value": 1 }, "warning": "Ice risk: roads can be slippery. Take care or use the trainer." }
     ]
   },
