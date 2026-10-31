@@ -256,7 +256,8 @@
     ],
     "extras": [
       { "when": { "input": "rainIntensity", "op": "gt", "value": 0.05 }, "items": ["Rain jacket", "Mudguards"] },
-      { "when": { "input": "rain1h", "op": "gt", "value": 0.5 }, "items": ["Mudguards"] },
+      { "when": { "input": "rain1h", "op": "gt", "value": 0.1 }, "items": ["Mudguards"], "warning": "Wet roads: take mudguards to keep spray off you and your bike." },
+      { "when": { "input": "rain6h", "op": "gt", "value": 1 }, "items": ["Mudguards"] },
       { "when": [
           { "input": "rideTemp", "op": "lt", "value": 8 },
           { "input": "rainIntensity", "op": "gt", "value": 0.05 }
