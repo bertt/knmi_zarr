@@ -24,6 +24,8 @@
   .sub { color:var(--mut); font-size:12.5px; }
   select { margin-top:8px; max-width:100%; font:inherit; font-size:13px; color:#fff; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:4px 12px; }
   select option { color:#000; }
+  .rule { margin:0 0 10px; font-size:12.5px; font-style:italic; opacity:.85; }
+  .rule a { color:inherit; font-style:normal; font-weight:650; }
   .notice { margin:10px 0 0; padding:7px 11px; border-radius:12px; background:rgba(0,0,0,.25); font-size:12.5px; }
 
   .scores { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
@@ -251,6 +253,10 @@ async function main() {
     document.documentElement.style.setProperty("--bg1", bg1);
     document.documentElement.style.setProperty("--bg2", bg2);
 
+    inp.comfort = cScore;
+    const quotes = (R.velominati ?? []).filter(q => test(q.when, inp));
+    const quote = quotes.length ? quotes[Math.floor(Math.random() * quotes.length)] : null;
+
     const band = inp.rideTemp == null ? null : pick(R.clothing.bands, inp.rideTemp);
     const extras = new Set(), warnings = [];
     for (const e of R.clothing.extras) if (test(e.when, inp)) { (e.items ?? []).forEach(i => extras.add(i)); if (e.warning) warnings.push(e.warning); }
@@ -282,6 +288,7 @@ async function main() {
 
     card.innerHTML = `
       <div class="head">
+        ${quote ? `<div class="rule"><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Velominati Rule #${quote.rule}</a> · “${esc(quote.text)}”</div>` : ""}
         <div class="title">🚴 Cycling weather</div>
         <div class="place">${esc(s.name)}</div>
         <div class="sub">${distance == null ? "KNMI weather station" : `KNMI weather station · ${fmt(distance, distance < 10 ? 1 : 0)} km from you`}</div>
@@ -345,7 +352,8 @@ async function main() {
         <a href="${esc(RULES_URL)}">${esc(RULES_URL)}</a> (add <code>?rules=URL</code> to try your own).<br>
         Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
         <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/">Zarr</a>; not an official KNMI product.<br>
-        Your location stays in your browser. <a href="https://github.com/bertt/knmi_zarr">Source code</a></div>`;
+        Your location stays in your browser. <a href="https://github.com/bertt/knmi_zarr">Source code</a><br>
+        Quotes: <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</div>`;
 
     document.getElementById("share").addEventListener("click", async e => {
       const btn = e.currentTarget, label = btn.textContent;
