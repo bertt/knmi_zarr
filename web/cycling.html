@@ -182,7 +182,7 @@ function derive(o, s, t, R) {
 
 const ITEM_ICONS = [
   [/rain jacket|waterproof jacket/i, "☔"], [/jacket|jersey/i, "👕"], [/base layer/i, "🧥"], [/bib|tights|shorts/i, "🩳"],
-  [/warmers/i, "🦵"], [/gloves/i, "🧤"], [/skullcap|cap/i, "🧢"], [/overshoes|shoe/i, "👟"],
+  [/warmers/i, "🦵"], [/gloves/i, "🧤"], [/skullcap|cap/i, "🧢"], [/neck/i, "🧣"], [/overshoes|shoe/i, "👟"],
   [/mudguard/i, "🛡️"], [/lights/i, "🔦"], [/reflective/i, "🦺"], [/sunglasses/i, "🕶️"], [/sunscreen/i, "🧴"], [/bottle/i, "🥤"],
 ];
 const iconFor = item => ITEM_ICONS.find(([re]) => re.test(item))?.[1] ?? "•";
