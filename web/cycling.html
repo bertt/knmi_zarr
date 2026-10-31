@@ -103,6 +103,7 @@ const readVar = async name => {
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
 const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t => v >= t).length;
+const sunWord = q => q < 10 ? "dark / no sun" : q < 100 ? "overcast" : q < 250 ? "cloudy" : q < 500 ? "partly sunny" : q < 800 ? "sunny" : "very sunny";
 const compass = d => ["N","NE","E","SE","S","SW","W","NW"][Math.round(d/45) % 8];
 const maxOf = (...a) => { const v = a.filter(x => x != null); return v.length ? Math.max(...v) : null; };
 
@@ -237,7 +238,7 @@ async function main() {
       inp.gust != null && `🌬️ gusts <b>${bft(inp.gust)}</b> Bft`,
       inp.rainIntensity != null && `🌧️ <b>${fmt(inp.rainIntensity, 1)}</b> mm/h`,
       o.R1H != null && `☔ <b>${fmt(o.R1H, 1)}</b> mm last hour`,
-      o.qg != null && `☀️ <b>${fmt(o.qg)}</b> W/m²`,
+      o.qg != null && `☀️ <b>${sunWord(o.qg)}</b> <span>${fmt(o.qg)} W/m²</span>`,
       o.td != null && `💧 dew point <b>${fmt(o.td, 1)}°</b>`,
       o.vv != null && `👁️ <b>${fmt(o.vv / 1000, 1)}</b> km`,
     ].filter(Boolean).map(p => `<span class="pill">${p}</span>`).join("");
