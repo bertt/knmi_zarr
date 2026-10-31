@@ -257,6 +257,16 @@
           { "upTo": 5, "points": 1 },
           { "upTo": null, "points": 2 }
         ] },
+      {
+        "id": "damp",
+        "label": "Very damp air (wet roads, mist)",
+        "input": "rh",
+        "unit": "%",
+        "bands": [
+          { "upTo": 94.9, "points": 0 },
+          { "upTo": null, "points": 2 }
+        ]
+      },
       { "id": "salt", "label": "Road salt likely (cold and wet)", "input": "saltRisk", "display": "flag",
         "bands": [
           { "upTo": 0, "points": 0 },
