@@ -154,9 +154,10 @@ async function main() {
     </div>
     ${distance == null ? `<button id="retry">Use my location</button>` : ""}
     <div class="foot">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time)<br>
-      Source: <a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">KNMI</a>,
+      Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
       <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to Zarr; not an official KNMI product.<br>
-      Your location stays in your browser. <a href="./">All stations on a map</a></div>`;
+      Your location stays in your browser. <a href="./">All stations on a map</a> ·
+      <a href="https://github.com/bertt/knmi_zarr">Source code</a></div>`;
   document.getElementById("retry")?.addEventListener("click", () => location.reload());
 }
 

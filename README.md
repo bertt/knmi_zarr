@@ -54,13 +54,27 @@ cd web
 python -m http.server 8765   # open http://localhost:8765
 ```
 
-### Weather near you (`web/nearby.html`)
+### 4. Weather near you (`web/nearby.html`)
 
-A second page, <https://bertt.github.io/knmi_zarr/nearby.html>, asks the browser for your location, picks the nearest KNMI station that reports data and shows its latest observations as a weather card: an icon (sun, moon, clouds, rain, snow, fog, thunderstorm), temperature, wind with direction, humidity, dew point, pressure, visibility and rainfall. The background colour follows the weather. The icon is derived from cloud cover, precipitation, visibility, the present-weather code and the sun's position (day or night).
+🌦️ **Live: <https://bertt.github.io/knmi_zarr/nearby.html>**
 
-Visitors more than 150 km from any station (outside the Netherlands) or who do not share their location get De Bilt (the KNMI main station, in Utrecht) with a notice. The location never leaves the browser.
+A second static page that shows the weather at your location as a card with a weather icon. It uses the same Zarr store (`obs.zarr`) and `stations.json` as the map, read in the browser with zarrita.js. There is no server and no API key.
 
-### 4. Read the latest observations from the online Zarr (Python)
+How it works:
+
+1. The browser location (`navigator.geolocation`) is requested. It never leaves the browser.
+2. The distance to every station that reports a temperature is calculated (haversine); the nearest one is used.
+3. The icon and theme are derived from the observations:
+   - thunderstorm, rain, snow or sleet from precipitation intensity (`rg`, `pg`), temperature and the present-weather code (`ww`),
+   - fog from visibility (`vv` < 1 km) or `ww`,
+   - sun, partly cloudy or cloudy from cloud cover (`n`, in oktas; falls back to global radiation `qg`),
+   - sun or moon from the sun's elevation at the station, computed from the observation time.
+4. The card shows temperature, wind speed and direction, gusts, humidity, dew point, pressure, visibility and rainfall. The background colour follows the weather.
+5. Outside the Netherlands (nearest station more than 150 km away) or without location permission, **De Bilt** (the KNMI main station, in Utrecht) is shown, with a notice.
+
+The page links to KNMI (source), the CC BY 4.0 license and this repository, and states that the data is converted and not an official KNMI product.
+
+### 5. Read the latest observations from the online Zarr (Python)
 
 `latest.py` shows that the published Zarr store can be used directly in a process, without a KNMI API key or a server. It reads `stations.json` to find a station by name (default `De Bilt`, the KNMI station in Utrecht), opens `https://bertt.github.io/knmi_zarr/obs.zarr` with xarray and prints the latest measurements of that station with their units.
 
