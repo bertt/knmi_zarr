@@ -107,6 +107,11 @@ const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
 const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t => v >= t).length;
 const sunWord = q => q < 10 ? "dark / no sun" : q < 100 ? "overcast" : q < 250 ? "cloudy" : q < 500 ? "partly sunny" : q < 800 ? "sunny" : "very sunny";
 const sg = v => `${v < 0 ? "−" : "+"}${Math.abs(v)}°`;
+const INPUT_NAMES = { rainIntensity: "rain now (mm/h)", rain1h: "rain last hour (mm)", rain6h: "rain last 6 h (mm)", rain24h: "rain last 24 h (mm)",
+  rideTemp: "temperature on the bike (°C)", ta: "air temperature (°C)", qg: "sun (W/m²)", vv: "visibility (m)", night: "dark", iceRisk: "ice risk", saltRisk: "salt risk", hail: "hail", ff: "wind (m/s)", gust: "gusts (m/s)", rh: "humidity (%)" };
+const OP_TEXT = { gt: ">", gte: "≥", lt: "<", lte: "≤", eq: "=" };
+const condText = c => ["night", "iceRisk", "saltRisk"].includes(c.input) && c.op === "gte" && c.value === 1
+  ? INPUT_NAMES[c.input] : `${INPUT_NAMES[c.input] ?? c.input} ${OP_TEXT[c.op] ?? c.op} ${c.value}`;
 const compass = d => ["N","NE","E","SE","S","SW","W","NW"][Math.round(d/45) % 8];
 const maxOf = (...a) => { const v = a.filter(x => x != null); return v.length ? Math.max(...v) : null; };
 
@@ -302,7 +307,8 @@ async function main() {
           <b>Flags:</b> ice risk when air is at most ${R.ride.iceTempC}° and the roads are wet or humidity is at least ${R.ride.iceHumidityPct}%;
           road salt likely when air is at most ${R.ride.saltTempC}° and it is wet or rained more than 0.5 mm in 6 hours.<br>
           <b>Clothing</b> is picked from the temperature on the bike: ${R.clothing.bands.map((b, i, a) => `${esc(b.label)} (${b.upTo == null ? `above ${a[i-1].upTo}°` : `up to ${b.upTo}°`})`).join(", ")}.
-          Extras (rain gear, sunglasses, lights, …) are added by their own conditions.<br>
+          <b>Extras</b> are added when their condition is met:
+          ${R.clothing.extras.map(e => `${esc((e.items ?? []).join(" + ") || "Warning")} if ${(Array.isArray(e.when) ? e.when : [e.when]).map(condText).join(" and ")}`).join("; ")}.<br>
           <b>Rain jacket:</b> ${R.rainJacket.levels.map(l => `${esc(l.label)} — ${esc(l.text)}`).join("; ")}.
         </div>
         <table>${table(R.scores.comfort.title + ` — base ${R.scores.comfort.base}`, comfort)}
