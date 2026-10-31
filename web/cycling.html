@@ -65,6 +65,8 @@
   td:nth-child(2) { color:var(--mut); padding:2px 8px; }
   td:last-child { text-align:right; font-weight:650; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .pos { color:#86efac; } .neg { color:#fca5a5; } .zero { color:var(--mut); }
+  .sharelink { display:none; margin-top:14px; padding-top:10px; border-top:1px solid rgba(255,255,255,.15); text-align:center; font-size:15px; font-weight:650; color:var(--acc); }
+  .sharelink small { display:block; margin-top:2px; font-size:11px; font-weight:400; color:var(--mut); }
   .foot { margin-top:14px; font-size:11px; line-height:1.4; color:var(--mut); text-align:center; }
   button { font:inherit; font-size:13px; color:#fff; background:rgba(255,255,255,.18); border:0; border-radius:999px; padding:4px 12px; cursor:pointer; margin-top:8px; }
   button:hover { background:rgba(255,255,255,.28); }
@@ -87,6 +89,7 @@ const ZARR_URL = `${BASE}/obs.zarr`;
 const PARAMS = new URLSearchParams(location.search);
 const RULES_URL = PARAMS.get("rules") || "cycling-rules.json";
 const STATION = PARAMS.get("station");
+const SHARE_URL = "https://bertt.github.io/knmi_zarr/cycling.html";
 const FALLBACK = "De Bilt";
 const MAX_KM = 150;
 const VARS = ["ta","td","rh","ff","dd","gff","fx","qg","vv","n","ss","rg","pg","R1H","R6H","R24H","ww"];
@@ -333,13 +336,40 @@ async function main() {
           ${table(R.cleaning.title + " — points", clean)}</table>
       </details>
 
-      ${user == null ? `<div style="text-align:center"><button id="retry">Use my location</button></div>` : ""}
-      <div class="foot">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time). Indicative advice based on the rules in
+      <div class="sharelink">🚴 ${SHARE_URL}<small>Data: KNMI, CC BY 4.0 · ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })}</small></div>
+      <div class="noshare" style="text-align:center"><button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
+      <div class="foot noshare">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time). Indicative advice based on the rules in
         <a href="${esc(RULES_URL)}">${esc(RULES_URL)}</a> (add <code>?rules=URL</code> to try your own).<br>
         Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
         <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/">Zarr</a>; not an official KNMI product.<br>
         Your location stays in your browser. <a href="https://github.com/bertt/knmi_zarr">Source code</a></div>`;
 
+    document.getElementById("share").addEventListener("click", async e => {
+      const btn = e.currentTarget, label = btn.textContent;
+      btn.disabled = true; btn.textContent = "Making screenshot…";
+      try {
+        const { default: html2canvas } = await import("https://esm.sh/html2canvas@1.4.1");
+        const canvas = await html2canvas(card, {
+          backgroundColor: "#0e1420", scale: 2,
+          onclone: doc => {
+            doc.querySelectorAll(".noshare, select, details").forEach(n => n.style.display = "none");
+            doc.querySelector(".sharelink").style.display = "block";
+          },
+        });
+        const blob = await new Promise(r => canvas.toBlob(r, "image/png"));
+        const file = new File([blob], `cycling-${s.name.replace(/\W+/g, "-").toLowerCase()}.png`, { type: "image/png" });
+        const link = `${SHARE_URL}?station=${encodeURIComponent(s.name)}`;
+        const text = `Cycling weather at ${s.name}: ${link}`;
+        if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], text });
+        else {
+          const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = file.name; a.click();
+          URL.revokeObjectURL(a.href);
+          await navigator.clipboard?.writeText(text).catch(() => {});
+        }
+      } catch (err) {
+        if (err.name !== "AbortError") alert(`Sharing failed: ${err.message}`);
+      } finally { btn.disabled = false; btn.textContent = label; }
+    });
     document.getElementById("retry")?.addEventListener("click", () => {
       const u = new URL(location.href); u.searchParams.delete("station"); location.href = u;
     });
