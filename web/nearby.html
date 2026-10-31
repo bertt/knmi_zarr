@@ -27,6 +27,8 @@
   .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:4px; text-align:left; }
   .grp { margin-top:10px; text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--mut); }
   .count { margin-top:10px; font-size:11.5px; color:var(--mut); }
+  select { margin-top:6px; max-width:100%; font:inherit; font-size:13px; color:#fff; background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:4px 12px; }
+  select option { color:#000; }
   .more { margin-top:10px; text-align:left; }
   .more summary { cursor:pointer; font-size:12px; color:var(--mut); text-transform:uppercase; letter-spacing:.08em; }
   .more .grid { grid-template-columns:repeat(2,1fr); margin-top:8px; max-height:40vh; overflow-y:auto; }
@@ -148,9 +150,10 @@ async function main() {
   const obs = i => Object.fromEntries(keys.map(k => [k, data[k]?.[i] ?? null]));
   const bilt = meta.stations.findIndex(s => s.name === FALLBACK);
 
-  let idx = bilt, notice = "", distance = null;
+  let idx = bilt, notice = "", distance = null, user = null;
   try {
     const { coords } = await getPosition();
+    user = coords;
     const ranked = meta.stations
       .map((s,i) => ({ i, d: km(coords.latitude, coords.longitude, s.lat, s.lon) }))
       .filter(x => data.ta?.[x.i] != null)
@@ -164,6 +167,9 @@ async function main() {
     notice = `Your location is not available (${esc(err.message)}), so ${FALLBACK} is shown instead.`;
   }
 
+  const sorted = meta.stations.map((s, i) => ({ s, i })).sort((x, y) => x.s.name.localeCompare(y.s.name));
+
+  const render = (idx, notice, distance) => {
   const s = meta.stations[idx], o = obs(idx), t = new Date(meta.time);
   const night = sunElevation(t, s.lat, s.lon) < -1;
   const c = condition(o, night);
@@ -204,19 +210,27 @@ async function main() {
   card.innerHTML = `
     <div class="place">${esc(s.name)}</div>
     <div class="sub">${distance == null ? "KNMI weather station" : `KNMI weather station · ${fmt(distance, distance < 10 ? 1 : 0)} km from you`}</div>
+    <select id="pick" aria-label="Choose a station">${sorted.map(({ s: st, i }) =>
+      `<option value="${i}"${i === idx ? " selected" : ""}>${esc(st.name)}${user ? ` · ${fmt(km(user.latitude, user.longitude, st.lat, st.lon))} km` : ""}</option>`).join("")}</select>
     <div class="hero"><div class="icon">${c.icon}</div>
       <div class="main"><div class="temp">${fmt(o.ta, 1)}°</div><div class="desc">${c.text}</div></div></div>
     ${notice ? `<div class="notice">ℹ️ ${notice}</div>` : ""}
     ${sections}
     ${more}
     <div class="count">All ${shown.size} of ${total} variables in the Zarr shown · ${withValue} have a value at this station</div>
-    ${distance == null ? `<button id="retry">Use my location</button>` : ""}
+    ${user == null ? `<button id="retry">Use my location</button>` : ""}
     <div class="foot">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time)<br>
       Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
       <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to Zarr; not an official KNMI product.<br>
       Your location stays in your browser. <a href="./">All stations on a map</a> ·
       <a href="https://github.com/bertt/knmi_zarr">Source code</a></div>`;
   document.getElementById("retry")?.addEventListener("click", () => location.reload());
+  document.getElementById("pick").addEventListener("change", e => {
+    const i = +e.target.value;
+    render(i, "", user ? km(user.latitude, user.longitude, meta.stations[i].lat, meta.stations[i].lon) : null);
+  });
+  };
+  render(idx, notice, distance);
 }
 
 main().catch(err => { card.innerHTML = `<div class="desc">Loading failed: ${esc(err.message)}</div>`; });
