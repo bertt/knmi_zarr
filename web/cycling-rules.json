@@ -123,7 +123,7 @@
         { "id": "dark", "label": "Dark", "input": "night", "display": "flag",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -10, "note": "Lights needed" }
+            { "upTo": null, "points": -25, "note": "Dark: less pleasant and harder to see, lights needed" }
           ] }
       ],
       "verdicts": [
@@ -214,7 +214,7 @@
         { "id": "dark", "label": "Dark", "input": "night", "display": "flag",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -5, "note": "Lights needed" }
+            { "upTo": null, "points": -15, "note": "Dark: less pleasant and harder to see, lights needed" }
           ] }
       ],
       "verdicts": [
