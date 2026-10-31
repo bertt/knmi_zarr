@@ -17,6 +17,8 @@
   #chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
   .chip { cursor:pointer; padding:5px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background:transparent; color:var(--fg); font:inherit; font-size:12.5px; }
   .chip:hover { border-color:var(--acc); }
+  .grp { flex-basis:100%; margin-top:6px; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut); }
+  .grp:first-child { margin-top:0; }
   .chip.on { background:var(--acc); color:#04202b; border-color:var(--acc); font-weight:600; }
   .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
   .stat { background:rgba(255,255,255,.05); border-radius:10px; padding:8px; text-align:center; }
@@ -53,6 +55,7 @@
     #chips { flex-wrap:nowrap; overflow-x:auto; margin:0 -12px 8px; padding:0 12px 2px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
     #chips::-webkit-scrollbar { display:none; }
     .chip { flex:none; padding:7px 12px; }
+    .grp { flex:none; align-self:center; margin:0 0 0 4px; }
     .stats { margin-bottom:8px; gap:6px; }
     .stat { padding:5px; } .stat b { font-size:14px; }
     .row { display:none; }
@@ -244,9 +247,19 @@ function show(i, at) {
 
 // ---------- UI ----------
 const chips = document.getElementById("chips");
-for (const [k,V] of Object.entries(VARS)) {
-  const b = document.createElement("button"); b.className = "chip"; b.textContent = V.label; b.dataset.k = k;
-  b.onclick = () => { cur = k; render(); }; chips.append(b);
+const GROUPS = {
+  "Temperature":      ["ta","td","tb","tg","tn","tx"],
+  "Precipitation":    ["rg","R1H","R24H"],
+  "Wind":             ["ff","gff","fx","dd"],
+  "Humidity & pressure": ["rh","pp","ps"],
+  "Sun, clouds & visibility": ["qg","ss","n","hc","vv"],
+};
+for (const [g, keys] of Object.entries(GROUPS)) {
+  const h = document.createElement("div"); h.className = "grp"; h.textContent = g; chips.append(h);
+  for (const k of keys) {
+    const b = document.createElement("button"); b.className = "chip"; b.textContent = VARS[k].label; b.dataset.k = k;
+    b.onclick = () => { cur = k; render(); }; chips.append(b);
+  }
 }
 document.getElementById("wind").onchange = e =>
   map.setLayoutProperty("wind","visibility", e.target.checked ? "visible" : "none");
