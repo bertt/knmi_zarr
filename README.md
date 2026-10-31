@@ -54,6 +54,12 @@ cd web
 python -m http.server 8765   # open http://localhost:8765
 ```
 
+### Weather near you (`web/nearby.html`)
+
+A second page, <https://bertt.github.io/knmi_zarr/nearby.html>, asks the browser for your location, picks the nearest KNMI station that reports data and shows its latest observations as a weather card: an icon (sun, moon, clouds, rain, snow, fog, thunderstorm), temperature, wind with direction, humidity, dew point, pressure, visibility and rainfall. The background colour follows the weather. The icon is derived from cloud cover, precipitation, visibility, the present-weather code and the sun's position (day or night).
+
+Visitors more than 150 km from any station (outside the Netherlands) or who do not share their location get De Bilt (the KNMI main station, in Utrecht) with a notice. The location never leaves the browser.
+
 ### 4. Read the latest observations from the online Zarr (Python)
 
 `latest.py` shows that the published Zarr store can be used directly in a process, without a KNMI API key or a server. It reads `stations.json` to find a station by name (default `De Bilt`, the KNMI station in Utrecht), opens `https://bertt.github.io/knmi_zarr/obs.zarr` with xarray and prints the latest measurements of that station with their units.

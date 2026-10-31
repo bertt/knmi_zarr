@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weather near you · KNMI Zarr demo</title>
+<style>
+  :root { --fg:#fff; --mut:rgba(255,255,255,.72); --bg1:#1f2a44; --bg2:#4b5d86; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:20px; color:var(--fg);
+    font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(160deg,var(--bg1),var(--bg2)); transition:background .6s; }
+  .card { width:min(440px,100%); padding:28px 24px 20px; border-radius:28px; background:rgba(255,255,255,.14);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 20px 50px rgba(0,0,0,.28); text-align:center; }
+  .place { font-size:22px; font-weight:650; }
+  .sub { color:var(--mut); font-size:13px; margin-top:2px; }
+  .icon { font-size:104px; line-height:1.1; margin:14px 0 0; filter:drop-shadow(0 8px 14px rgba(0,0,0,.25)); }
+  .temp { font-size:72px; font-weight:300; line-height:1; letter-spacing:-2px; }
+  .desc { font-size:20px; margin-top:6px; }
+  .notice { margin:14px 0 0; padding:9px 12px; border-radius:12px; background:rgba(0,0,0,.25); font-size:13.5px; text-align:left; }
+  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:20px; text-align:left; }
+  .tile { padding:11px 13px; border-radius:16px; background:rgba(255,255,255,.12); }
+  .tile .k { font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut); }
+  .tile .v { font-size:20px; font-weight:600; margin-top:2px; }
+  .tile .v small { font-size:13px; font-weight:400; color:var(--mut); }
+  .arrow { display:inline-block; transition:transform .4s; }
+  .foot { margin-top:18px; font-size:11.5px; color:var(--mut); }
+  .foot a { color:#fff; }
+  button { font:inherit; font-size:13px; color:#fff; background:rgba(255,255,255,.18); border:0; border-radius:999px; padding:6px 14px; cursor:pointer; margin-top:12px; }
+  button:hover { background:rgba(255,255,255,.28); }
+</style>
+</head>
+<body>
+<div class="card" id="card"><div class="desc" id="status">Finding your location…</div></div>
+
+<script type="module">
+import * as zarr from "https://esm.sh/zarrita@0.5.1";
+
+const FALLBACK = "De Bilt";   // KNMI's main station, in the middle of the Netherlands
+const MAX_KM = 150;           // farther than this from any station = outside the network
+const WANT = ["ta","td","rh","ff","gff","dd","pp","vv","n","qg","rg","pg","R1H","ww"];
+
+const card = document.getElementById("card");
+const store = new zarr.FetchStore(new URL("obs.zarr", location.href).href);
+const root = zarr.root(store);
+const readVar = async name => {
+  const arr = await zarr.open(root.resolve(name), { kind: "array" });
+  const { data } = await zarr.get(arr);
+  return Array.from(data, v => (Number.isFinite(v) && Math.abs(v) < 1e30) ? v : null);
+};
+
+function km(lat1, lon1, lat2, lon2) {
+  const r = Math.PI/180, a = Math.sin((lat2-lat1)*r/2)**2 +
+    Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin((lon2-lon1)*r/2)**2;
+  return 12742 * Math.asin(Math.sqrt(a));
+}
+
+function getPosition() {
+  return new Promise((res, rej) => navigator.geolocation
+    ? navigator.geolocation.getCurrentPosition(res, rej, { timeout:10000, maximumAge:600000 })
+    : rej(new Error("Geolocation is not supported by this browser")));
+}
+
+// Rough solar elevation, good enough to choose between a sun and a moon icon
+function sunElevation(date, lat, lon) {
+  const r = Math.PI/180, n = Math.floor((date - Date.UTC(date.getUTCFullYear(),0,0)) / 864e5);
+  const decl = 23.44 * Math.sin(2*Math.PI*(284+n)/365) * r;
+  const h = date.getUTCHours() + date.getUTCMinutes()/60 + lon/15;
+  const ha = (h-12) * 15 * r;
+  return Math.asin(Math.sin(lat*r)*Math.sin(decl) + Math.cos(lat*r)*Math.cos(decl)*Math.cos(ha)) / r;
+}
+
+function condition(o, night) {
+  const rain = Math.max(o.rg ?? 0, o.pg ?? 0), ww = o.ww, ta = o.ta;
+  if (ww != null && ww >= 95) return { icon:"⛈️", text:"Thunderstorm", theme:"storm" };
+  if (rain > 0.05 || (ww != null && ((ww >= 50 && ww < 70) || (ww >= 80 && ww < 95)))) {
+    if (ta != null && ta <= 0.5) return { icon:"🌨️", text:"Snow or sleet", theme:"snow" };
+    if (rain >= 4) return { icon:"🌧️", text:"Heavy rain", theme:"rain" };
+    return { icon: rain >= 0.5 ? "🌧️" : "🌦️", text: rain >= 0.5 ? "Rain" : "Light rain", theme:"rain" };
+  }
+  if (ww != null && ww >= 70 && ww < 80) return { icon:"🌨️", text:"Snow", theme:"snow" };
+  if ((o.vv != null && o.vv < 1000) || (ww != null && ww >= 40 && ww < 50)) return { icon:"🌫️", text:"Fog", theme:"fog" };
+  let n = o.n;
+  if (n == null) n = o.qg == null ? null : (night ? 4 : (o.qg > 300 ? 2 : o.qg > 100 ? 5 : 8));
+  if (n == null || n > 8) return { icon:"☁️", text:"Cloudy", theme:"cloud" };
+  if (n <= 1) return night ? { icon:"🌙", text:"Clear night", theme:"night" } : { icon:"☀️", text:"Sunny", theme:"sun" };
+  if (n <= 3) return night ? { icon:"🌙", text:"Mostly clear", theme:"night" } : { icon:"🌤️", text:"Mostly sunny", theme:"sun" };
+  if (n <= 6) return night ? { icon:"☁️", text:"Partly cloudy", theme:"night" } : { icon:"⛅", text:"Partly cloudy", theme:"sun" };
+  return { icon:"☁️", text:"Cloudy", theme:"cloud" };
+}
+
+const THEMES = {
+  sun:   ["#1d6fd1","#64b5f6"], cloud: ["#4a5568","#8795ad"], rain:  ["#2b3a55","#5b6f94"],
+  storm: ["#1b1f33","#4a4466"], snow:  ["#5f7a99","#b9cbe0"], fog:   ["#5d6670","#a3acb5"],
+  night: ["#0b1330","#2b3a6b"],
+};
+const compass = d => ["N","NE","E","SE","S","SW","W","NW"][Math.round(d/45) % 8];
+const fmt = (v, d=0) => v == null ? "–" : v.toFixed(d);
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+
+async function main() {
+  const meta = await (await fetch("stations.json")).json();
+  const data = {};
+  await Promise.all(WANT.filter(k => k in meta.variables)
+    .map(async k => data[k] = await readVar(k)));
+  const obs = i => Object.fromEntries(WANT.map(k => [k, data[k]?.[i] ?? null]));
+  const bilt = meta.stations.findIndex(s => s.name === FALLBACK);
+
+  let idx = bilt, notice = "", distance = null;
+  try {
+    const { coords } = await getPosition();
+    const ranked = meta.stations
+      .map((s,i) => ({ i, d: km(coords.latitude, coords.longitude, s.lat, s.lon) }))
+      .filter(x => data.ta?.[x.i] != null)
+      .sort((a,b) => a.d - b.d);
+    if (ranked[0] && ranked[0].d <= MAX_KM) {
+      idx = ranked[0].i; distance = ranked[0].d;
+    } else {
+      notice = `You appear to be outside the KNMI network (nearest station: ${fmt(ranked[0]?.d)} km away), so ${FALLBACK} is shown instead.`;
+    }
+  } catch (err) {
+    notice = `Your location is not available (${esc(err.message)}), so ${FALLBACK} is shown instead.`;
+  }
+
+  const s = meta.stations[idx], o = obs(idx), t = new Date(meta.time);
+  const night = sunElevation(t, s.lat, s.lon) < -1;
+  const c = condition(o, night);
+  const [a, b] = THEMES[c.theme];
+  document.documentElement.style.setProperty("--bg1", a);
+  document.documentElement.style.setProperty("--bg2", b);
+
+  const rain = Math.max(o.rg ?? 0, o.pg ?? 0);
+  const tile = (k, v, unit = "") => `<div class="tile"><div class="k">${k}</div><div class="v">${v}${unit && v !== "–" ? ` <small>${unit}</small>` : ""}</div></div>`;
+  const wind = o.ff == null ? "–" :
+    `${fmt(o.ff*3.6)} <small>km/h</small>` + (o.dd == null ? "" :
+      ` <span class="arrow" style="transform:rotate(${o.dd+180}deg)">↑</span> <small>from ${compass(o.dd)}</small>`);
+
+  card.innerHTML = `
+    <div class="place">${esc(s.name)}</div>
+    <div class="sub">${distance == null ? "KNMI weather station" : `KNMI weather station · ${fmt(distance, distance < 10 ? 1 : 0)} km from you`}</div>
+    <div class="icon">${c.icon}</div>
+    <div class="temp">${fmt(o.ta, 1)}°</div>
+    <div class="desc">${c.text}</div>
+    ${notice ? `<div class="notice">ℹ️ ${notice}</div>` : ""}
+    <div class="grid">
+      ${tile("Wind", wind)}
+      ${tile("Gusts", fmt(o.gff == null ? null : o.gff*3.6), "km/h")}
+      ${tile("Humidity", fmt(o.rh), "%")}
+      ${tile("Dew point", fmt(o.td, 1), "°C")}
+      ${tile("Pressure", fmt(o.pp, 1), "hPa")}
+      ${tile("Visibility", fmt(o.vv == null ? null : o.vv/1000, 1), "km")}
+      ${tile("Rain now", fmt(rain, 1), "mm/h")}
+      ${tile("Rain last hour", fmt(o.R1H, 1), "mm")}
+    </div>
+    ${distance == null ? `<button id="retry">Use my location</button>` : ""}
+    <div class="foot">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time)<br>
+      Source: <a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">KNMI</a>,
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to Zarr; not an official KNMI product.<br>
+      Your location stays in your browser. <a href="./">All stations on a map</a></div>`;
+  document.getElementById("retry")?.addEventListener("click", () => location.reload());
+}
+
+main().catch(err => { card.innerHTML = `<div class="desc">Loading failed: ${esc(err.message)}</div>`; });
+</script>
+</body>
+</html>
