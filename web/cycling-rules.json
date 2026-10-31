@@ -58,6 +58,18 @@
             { "upTo": 32, "points": -15, "note": "Hot" },
             { "upTo": null, "points": -30, "note": "Very hot" }
           ] },
+        { "id": "deep-cold", "label": "Deep cold (air below -10°C)", "input": "ta", "unit": "°C", "dec": 1,
+          "bands": [
+            { "upTo": -15, "points": -35, "note": "Dangerous cold" },
+            { "upTo": -10, "points": -20, "note": "Too cold" },
+            { "upTo": null, "points": 0 }
+          ] },
+        { "id": "heat", "label": "Heat (air above 30°C)", "input": "ta", "unit": "°C", "dec": 1,
+          "bands": [
+            { "upTo": 30, "points": 0 },
+            { "upTo": 35, "points": -20, "note": "Too hot" },
+            { "upTo": null, "points": -35, "note": "Dangerous heat" }
+          ] },
         { "id": "wind", "label": "Wind", "input": "ff", "unit": "m/s", "dec": 1,
           "bands": [
             { "upTo": 4, "points": 0, "note": "Calm to light" },
@@ -131,6 +143,18 @@
             { "upTo": 1, "points": -5 },
             { "upTo": 3, "points": -10 },
             { "upTo": null, "points": -15 }
+          ] },
+        { "id": "deep-cold", "label": "Deep cold (air below -10°C)", "input": "ta", "unit": "°C", "dec": 1,
+          "bands": [
+            { "upTo": -15, "points": -30, "note": "Dangerous cold" },
+            { "upTo": -10, "points": -15, "note": "Too cold" },
+            { "upTo": null, "points": 0 }
+          ] },
+        { "id": "heat", "label": "Heat (air above 30°C)", "input": "ta", "unit": "°C", "dec": 1,
+          "bands": [
+            { "upTo": 30, "points": 0 },
+            { "upTo": 35, "points": -15, "note": "Too hot" },
+            { "upTo": null, "points": -30, "note": "Dangerous heat" }
           ] },
         { "id": "wind", "label": "Wind (resistance is training)", "input": "ff", "unit": "m/s", "dec": 1,
           "bands": [
