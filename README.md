@@ -63,16 +63,17 @@ A second static page that shows the weather at your location as a card with a we
 How it works:
 
 1. The browser location (`navigator.geolocation`) is requested. It never leaves the browser.
-2. The distance to every station that reports a temperature is calculated (haversine); the nearest one is used.
-3. The icon and theme are derived from the observations:
+2. The data is always read from the Zarr published on GitHub Pages (`https://bertt.github.io/knmi_zarr/obs.zarr` and `stations.json`), also when the page is opened locally.
+3. The distance to every station that reports a temperature is calculated (haversine); the nearest one is used.
+4. The icon and theme are derived from the observations:
    - thunderstorm, rain, snow or sleet from precipitation intensity (`rg`, `pg`), temperature and the present-weather code (`ww`),
    - fog from visibility (`vv` < 1 km) or `ww`,
    - sun, partly cloudy or cloudy from cloud cover (`n`, in oktas; falls back to global radiation `qg`),
    - sun or moon from the sun's elevation at the station, computed from the observation time.
-4. The card shows temperature, wind speed and direction, gusts, humidity, dew point, pressure, visibility and rainfall. The background colour follows the weather.
-5. Outside the Netherlands (nearest station more than 150 km away) or without location permission, **De Bilt** (the KNMI main station, in Utrecht) is shown, with a notice.
+5. The card shows temperature, wind speed and direction, gusts, humidity, dew point, pressure, visibility and rainfall. The background colour follows the weather.
+6. Outside the Netherlands (nearest station more than 150 km away) or without location permission, **De Bilt** (the KNMI main station, in Utrecht) is shown, with a notice.
 
-The page links to KNMI (source), the CC BY 4.0 license and this repository, and states that the data is converted and not an official KNMI product.
+The page links to KNMI (source), the CC BY 4.0 license, the Zarr store URL it reads (`https://bertt.github.io/knmi_zarr/obs.zarr`) and this repository, and states that the data is converted and not an official KNMI product.
 
 ### 5. Read the latest observations from the online Zarr (Python)
 

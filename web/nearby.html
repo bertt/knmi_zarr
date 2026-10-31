@@ -7,41 +7,83 @@
 <style>
   :root { --fg:#fff; --mut:rgba(255,255,255,.72); --bg1:#1f2a44; --bg2:#4b5d86; }
   * { box-sizing:border-box; }
-  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:20px; color:var(--fg);
+  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:12px; color:var(--fg);
     font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
     background:linear-gradient(160deg,var(--bg1),var(--bg2)); transition:background .6s; }
-  .card { width:min(440px,100%); padding:28px 24px 20px; border-radius:28px; background:rgba(255,255,255,.14);
+  .wrap { width:min(540px,100%); }
+  .banner { margin-bottom:8px; padding:6px 12px; border-radius:14px; background:rgba(0,0,0,.28); text-align:center; font-size:12px; line-height:1.35; color:var(--mut); }
+  .banner b { color:#fff; font-size:14px; letter-spacing:.02em; }
+  .banner a { color:#fff; word-break:break-all; }
+  .card { width:100%; padding:16px 20px 12px; border-radius:24px; background:rgba(255,255,255,.14);
     backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 20px 50px rgba(0,0,0,.28); text-align:center; }
-  .place { font-size:22px; font-weight:650; }
-  .sub { color:var(--mut); font-size:13px; margin-top:2px; }
-  .icon { font-size:104px; line-height:1.1; margin:14px 0 0; filter:drop-shadow(0 8px 14px rgba(0,0,0,.25)); }
-  .temp { font-size:72px; font-weight:300; line-height:1; letter-spacing:-2px; }
-  .desc { font-size:20px; margin-top:6px; }
-  .notice { margin:14px 0 0; padding:9px 12px; border-radius:12px; background:rgba(0,0,0,.25); font-size:13.5px; text-align:left; }
-  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:20px; text-align:left; }
-  .tile { padding:11px 13px; border-radius:16px; background:rgba(255,255,255,.12); }
-  .tile .k { font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut); }
-  .tile .v { font-size:20px; font-weight:600; margin-top:2px; }
-  .tile .v small { font-size:13px; font-weight:400; color:var(--mut); }
+  .place { font-size:19px; font-weight:650; }
+  .sub { color:var(--mut); font-size:12.5px; margin-top:0; }
+  .hero { display:flex; align-items:center; justify-content:center; gap:16px; margin-top:6px; }
+  .hero .main { text-align:left; }
+  .icon { font-size:96px; line-height:1.1; margin:0; filter:drop-shadow(0 8px 14px rgba(0,0,0,.25)); }
+  .temp { font-size:68px; font-weight:300; line-height:1; letter-spacing:-2px; }
+  .desc { font-size:20px; margin-top:2px; }
+  .notice { margin:8px 0 0; padding:6px 10px; border-radius:10px; background:rgba(0,0,0,.25); font-size:12.5px; text-align:left; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:4px; text-align:left; }
+  .grp { margin-top:10px; text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--mut); }
+  .count { margin-top:10px; font-size:11.5px; color:var(--mut); }
+  .more { margin-top:10px; text-align:left; }
+  .more summary { cursor:pointer; font-size:12px; color:var(--mut); text-transform:uppercase; letter-spacing:.08em; }
+  .more .grid { grid-template-columns:repeat(2,1fr); margin-top:8px; max-height:40vh; overflow-y:auto; }
+  .more .tile .k { text-transform:none; letter-spacing:0; font-size:10.5px; }
+  .more .tile .k i { opacity:.7; }
+  .tile { padding:6px 11px; border-radius:12px; background:rgba(255,255,255,.12); }
+  .tile .k { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut); }
+  .tile .v { font-size:16px; font-weight:600; margin-top:0; }
+  .tile .v small { font-size:12px; font-weight:400; color:var(--mut); }
   .arrow { display:inline-block; transition:transform .4s; }
-  .foot { margin-top:18px; font-size:11.5px; color:var(--mut); }
+  .foot { margin-top:10px; font-size:10.5px; line-height:1.35; color:var(--mut); }
   .foot a { color:#fff; }
-  button { font:inherit; font-size:13px; color:#fff; background:rgba(255,255,255,.18); border:0; border-radius:999px; padding:6px 14px; cursor:pointer; margin-top:12px; }
+  .foot code { word-break:break-all; }
+  button { font:inherit; font-size:13px; color:#fff; background:rgba(255,255,255,.18); border:0; border-radius:999px; padding:4px 12px; cursor:pointer; margin-top:8px; }
   button:hover { background:rgba(255,255,255,.28); }
 </style>
 </head>
 <body>
-<div class="card" id="card"><div class="desc" id="status">Finding your location…</div></div>
+<div class="wrap">
+  <div class="banner"><b>Zarr demo</b> · live KNMI observations read straight from a Zarr store in your browser<br>
+    Zarr source: <a id="zsrc" href="#"></a><br>
+    <a href="./">🗺️ All stations on a map</a></div>
+  <div class="card" id="card"><div class="desc" id="status">Finding your location…</div></div>
+</div>
 
 <script type="module">
 import * as zarr from "https://esm.sh/zarrita@0.5.1";
 
 const FALLBACK = "De Bilt";   // KNMI's main station, in the middle of the Netherlands
 const MAX_KM = 150;           // farther than this from any station = outside the network
-const WANT = ["ta","td","rh","ff","gff","dd","pp","vv","n","qg","rg","pg","R1H","ww"];
+const GROUPS = [
+  ["Wind", [
+    ["Wind", "ff", "km/h", 0, 3.6], ["Gusts (10 min)", "fx", "km/h", 0, 3.6], ["Gusts (1 h)", "gff", "km/h", 0, 3.6],
+  ]],
+  ["Temperature", [
+    ["Dew point", "td", "°C", 1], ["Wet bulb", "tb", "°C", 1], ["Ground", "tg", "°C", 1],
+    ["Min (10 min)", "tn", "°C", 1], ["Max (10 min)", "tx", "°C", 1],
+  ]],
+  ["Precipitation", [
+    ["Rain now", "rg", "mm/h", 1], ["Last hour", "R1H", "mm", 1], ["Last 6 h", "R6H", "mm", 1],
+    ["Last 24 h", "R24H", "mm", 1], ["Rain duration (1 h)", "D1H", "min", 0],
+  ]],
+  ["Humidity & pressure", [
+    ["Humidity", "rh", "%", 0], ["Pressure (sea level)", "pp", "hPa", 1], ["Pressure (station)", "ps", "hPa", 1],
+  ]],
+  ["Sun, clouds & visibility", [
+    ["Cloud cover", "n", "/8", 0], ["Cloud base", "hc", "ft", 0], ["Visibility", "vv", "km", 1, 0.001],
+    ["Radiation", "qg", "W/m²", 0], ["Sunshine (10 min)", "ss", "min", 0], ["Radiation (1 h)", "Q1H", "J/cm²", 0],
+  ]],
+];
 
+const BASE = "https://bertt.github.io/knmi_zarr";   // always read the Zarr published on GitHub Pages
+const ZARR_URL = `${BASE}/obs.zarr`;
 const card = document.getElementById("card");
-const store = new zarr.FetchStore(new URL("obs.zarr", location.href).href);
+const zsrc = document.getElementById("zsrc");
+zsrc.href = ZARR_URL; zsrc.textContent = ZARR_URL;
+const store = new zarr.FetchStore(ZARR_URL);
 const root = zarr.root(store);
 const readVar = async name => {
   const arr = await zarr.open(root.resolve(name), { kind: "array" });
@@ -99,11 +141,11 @@ const fmt = (v, d=0) => v == null ? "–" : v.toFixed(d);
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 
 async function main() {
-  const meta = await (await fetch("stations.json")).json();
+  const meta = await (await fetch(`${BASE}/stations.json`)).json();
   const data = {};
-  await Promise.all(WANT.filter(k => k in meta.variables)
-    .map(async k => data[k] = await readVar(k)));
-  const obs = i => Object.fromEntries(WANT.map(k => [k, data[k]?.[i] ?? null]));
+  const keys = Object.keys(meta.variables);
+  await Promise.all(keys.map(async k => data[k] = await readVar(k)));
+  const obs = i => Object.fromEntries(keys.map(k => [k, data[k]?.[i] ?? null]));
   const bilt = meta.stations.findIndex(s => s.name === FALLBACK);
 
   let idx = bilt, notice = "", distance = null;
@@ -129,29 +171,45 @@ async function main() {
   document.documentElement.style.setProperty("--bg1", a);
   document.documentElement.style.setProperty("--bg2", b);
 
-  const rain = Math.max(o.rg ?? 0, o.pg ?? 0);
-  const tile = (k, v, unit = "") => `<div class="tile"><div class="k">${k}</div><div class="v">${v}${unit && v !== "–" ? ` <small>${unit}</small>` : ""}</div></div>`;
-  const wind = o.ff == null ? "–" :
-    `${fmt(o.ff*3.6)} <small>km/h</small>` + (o.dd == null ? "" :
-      ` <span class="arrow" style="transform:rotate(${o.dd+180}deg)">↑</span> <small>from ${compass(o.dd)}</small>`);
+  const shown = new Set(o.ta == null ? [] : ["ta"]);
+  const tile = (k, v, unit = "") => `<div class="tile"><div class="k">${k}</div><div class="v">${v}${unit ? ` <small>${unit}</small>` : ""}</div></div>`;
+  const sections = GROUPS.map(([title, items]) => {
+    const tiles = items.flatMap(([label, key, unit, dec, scale = 1]) => {
+      const v = o[key];
+      if (v == null) return [];
+      shown.add(key);
+      let value = fmt(v * scale, dec);
+      if (key === "ff" && o.dd != null) {
+        shown.add("dd");
+        value += ` <span class="arrow" style="transform:rotate(${o.dd+180}deg)">↑</span> <small>from ${compass(o.dd)}</small>`;
+      }
+      return [tile(label, value, unit)];
+    });
+    return tiles.length ? `<div class="grp">${title}</div><div class="grid">${tiles.join("")}</div>` : "";
+  }).join("");
+  const total = keys.length;
+
+  const rest = keys.filter(k => !shown.has(k)).sort((x, y) => ((o[y] != null) - (o[x] != null)) || x.localeCompare(y));
+  const withValue = keys.filter(k => o[k] != null).length;
+  const restTiles = rest.map(k => {
+    const info = meta.variables[k], v = o[k];
+    const unit = info.units && info.units !== "1" ? info.units : "";
+    const value = v == null ? "–" : (Math.abs(v) >= 100 || Number.isInteger(v) ? v.toFixed(0) : v.toFixed(1));
+    return tile(`${esc(info.long_name)} <i>(${esc(k)})</i>`, value, v == null ? "" : unit);
+  }).join("");
+  const more = rest.length
+    ? `<details class="more"><summary>All other variables (${rest.length})</summary><div class="grid wide">${restTiles}</div></details>` : "";
+  rest.forEach(k => shown.add(k));
 
   card.innerHTML = `
     <div class="place">${esc(s.name)}</div>
     <div class="sub">${distance == null ? "KNMI weather station" : `KNMI weather station · ${fmt(distance, distance < 10 ? 1 : 0)} km from you`}</div>
-    <div class="icon">${c.icon}</div>
-    <div class="temp">${fmt(o.ta, 1)}°</div>
-    <div class="desc">${c.text}</div>
+    <div class="hero"><div class="icon">${c.icon}</div>
+      <div class="main"><div class="temp">${fmt(o.ta, 1)}°</div><div class="desc">${c.text}</div></div></div>
     ${notice ? `<div class="notice">ℹ️ ${notice}</div>` : ""}
-    <div class="grid">
-      ${tile("Wind", wind)}
-      ${tile("Gusts", fmt(o.gff == null ? null : o.gff*3.6), "km/h")}
-      ${tile("Humidity", fmt(o.rh), "%")}
-      ${tile("Dew point", fmt(o.td, 1), "°C")}
-      ${tile("Pressure", fmt(o.pp, 1), "hPa")}
-      ${tile("Visibility", fmt(o.vv == null ? null : o.vv/1000, 1), "km")}
-      ${tile("Rain now", fmt(rain, 1), "mm/h")}
-      ${tile("Rain last hour", fmt(o.R1H, 1), "mm")}
-    </div>
+    ${sections}
+    ${more}
+    <div class="count">All ${shown.size} of ${total} variables in the Zarr shown · ${withValue} have a value at this station</div>
     ${distance == null ? `<button id="retry">Use my location</button>` : ""}
     <div class="foot">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time)<br>
       Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
