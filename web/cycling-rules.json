@@ -3,7 +3,8 @@
     "Rules for web/cycling.html. Edit freely; the page reads this file on every load.",
     "A 'band' list is evaluated top to bottom: the first band where value <= upTo applies (upTo null = everything above).",
     "Units: temperature in degC, wind and gusts in m/s, rain in mm (1h/6h/24h) or mm/h (now), radiation in W/m2, visibility in m.",
-    "Inputs you can use: ta, td, rh, rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, night.",
+    "hail is 0 (none) to 4 (severe), derived from the KNMI weather code since hail size is not measured.",
+    "Inputs you can use: ta, td, rh, rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, hail, night.",
     "Scores: result = clamp(base + sum of band points, 0, 100). Cleaning: base + sum of points, then the highest level with min <= total."
   ],
 
@@ -63,6 +64,14 @@
             { "upTo": -15, "points": -35, "note": "Dangerous cold" },
             { "upTo": -10, "points": -20, "note": "Too cold" },
             { "upTo": null, "points": 0 }
+          ] },
+        { "id": "hail", "label": "Hail (1 = small/soft, 4 = heavy with thunderstorm)", "input": "hail",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": 1, "points": -20, "note": "Small hail" },
+            { "upTo": 2, "points": -35, "note": "Hail" },
+            { "upTo": 3, "points": -50, "note": "Heavy hail" },
+            { "upTo": null, "points": -65, "note": "Severe hail, seek shelter" }
           ] },
         { "id": "heat", "label": "Heat (air above 30°C)", "input": "ta", "unit": "°C", "dec": 1,
           "bands": [
@@ -149,6 +158,14 @@
             { "upTo": -15, "points": -30, "note": "Dangerous cold" },
             { "upTo": -10, "points": -15, "note": "Too cold" },
             { "upTo": null, "points": 0 }
+          ] },
+        { "id": "hail", "label": "Hail (1 = small/soft, 4 = heavy with thunderstorm)", "input": "hail",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": 1, "points": -15, "note": "Small hail" },
+            { "upTo": 2, "points": -25, "note": "Hail" },
+            { "upTo": 3, "points": -40, "note": "Heavy hail" },
+            { "upTo": null, "points": -55, "note": "Severe hail, seek shelter" }
           ] },
         { "id": "heat", "label": "Heat (air above 30°C)", "input": "ta", "unit": "°C", "dec": 1,
           "bands": [

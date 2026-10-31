@@ -87,7 +87,7 @@ const ZARR_URL = `${BASE}/obs.zarr`;
 const RULES_URL = new URLSearchParams(location.search).get("rules") || "cycling-rules.json";
 const FALLBACK = "De Bilt";
 const MAX_KM = 150;
-const VARS = ["ta","td","rh","ff","dd","gff","fx","qg","vv","n","ss","rg","pg","R1H","R6H","R24H"];
+const VARS = ["ta","td","rh","ff","dd","gff","fx","qg","vv","n","ss","rg","pg","R1H","R6H","R24H","ww"];
 
 const card = document.getElementById("card");
 const zsrc = document.getElementById("zsrc");
@@ -167,6 +167,7 @@ function derive(o, s, t, R) {
     rainIntensity, rain1h: o.R1H, rain6h: o.R6H, rain24h: o.R24H, rideTemp,
     iceRisk: o.ta != null && o.ta <= r.iceTempC && (wetNow || (o.rh != null && o.rh >= r.iceHumidityPct)) ? 1 : 0,
     saltRisk: o.ta != null && o.ta <= r.saltTempC && (wetNow || (o.R6H ?? 0) > 0.5) ? 1 : 0,
+    hail: { 87: 1, 27: 2, 89: 2, 88: 3, 90: 3, 96: 3, 99: 4 }[o.ww] ?? 0,
     night: sunElevation(t, s.lat, s.lon) < -1 ? 1 : 0,
     _parts: parts,
   };
