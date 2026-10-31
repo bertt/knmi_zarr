@@ -44,7 +44,28 @@
   .pop table { width:100%; margin-top:8px; border-collapse:collapse; }
   .pop td { padding:2px 0; } .pop td:last-child { text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
   #status { position:absolute; inset:0; display:grid; place-items:center; background:var(--bg); z-index:10; color:var(--mut); }
-  @media (max-width:700px){ #side{ width:auto; right:14px; max-height:38%; } #legend{ left:14px; right:auto; bottom:24px; } #nav{display:none} }
+  #toggle { display:none; }
+  @media (max-width:700px){
+    #side { top:auto; left:8px; right:8px; bottom:8px; width:auto; max-height:55%; padding:10px 12px; border-radius:14px 14px 10px 10px; }
+    h1 { font-size:15px; }
+    .sub { margin-bottom:8px; }
+    #chips { flex-wrap:nowrap; overflow-x:auto; margin:0 -12px 8px; padding:0 12px 2px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    #chips::-webkit-scrollbar { display:none; }
+    .chip { flex:none; padding:7px 12px; }
+    .stats { margin-bottom:8px; gap:6px; }
+    .stat { padding:5px; } .stat b { font-size:14px; }
+    .row { display:none; }
+    #toggle { display:block; width:100%; margin-top:2px; }
+    #list { display:none; margin-top:8px; }
+    #side.open #list { display:block; }
+    #side.open #toggle { margin-bottom:0; }
+    .item { padding:9px 6px; }
+    #legend { top:8px; left:8px; right:auto; bottom:auto; width:190px; padding:7px 10px; }
+    #nav { top:8px; right:8px; padding:4px; flex-direction:column; }
+    #nav button { padding:6px 10px; font-size:12px; }
+    .maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right { display:none; }
+    .maplibregl-popup-content { min-width:180px; max-width:75vw; }
+  }
 </style>
 </head>
 <body>
@@ -58,6 +79,7 @@
   <div class="stats" id="stats"></div>
   <label class="row"><input type="checkbox" id="wind" checked> Windpijlen tonen (richting waar de wind naartoe waait)</label>
   <div id="list"></div>
+  <button class="chip" id="toggle">Toon stationslijst</button>
 </div>
 
 <div id="nav" class="panel">
@@ -110,9 +132,17 @@ async function readVar(name) {
   const { data } = await zarr.get(arr);
   return Array.from(data, v => (Number.isFinite(v) && Math.abs(v) < 1e30) ? v : null);
 }
-const meta = await (await fetch("stations.json")).json();
-const data = {};
-await Promise.all(Object.keys(VARS).map(async k => data[k] = await readVar(k)));
+const statusEl = document.getElementById("status");
+let meta; const data = {};
+try {
+  const r = await fetch("stations.json");
+  if (!r.ok) throw new Error("stations.json: HTTP " + r.status);
+  meta = await r.json();
+  await Promise.all(Object.keys(VARS).map(async k => data[k] = await readVar(k)));
+} catch (err) {
+  statusEl.textContent = "Laden mislukt: " + err.message;
+  throw err;
+}
 
 document.getElementById("time").textContent =
   new Date(meta.time).toLocaleString("nl-NL", { dateStyle:"full", timeStyle:"short" }) + " · uit Zarr";
@@ -122,15 +152,26 @@ const val = (k, i) => {
 };
 
 // ---------- Map ----------
+const isMobile = () => matchMedia("(max-width:700px)").matches;
+const sideEl = document.getElementById("side");
+const pad = () => isMobile()
+  ? { left:20, right:20, top:90, bottom:sideEl.offsetHeight + 20 }
+  : { left:360, top:30, right:30, bottom:30 };
+const NL = [[2.4,50.6],[7.6,54.2]], BES = [[-69.4,11.9],[-62.8,17.8]];
 const map = new maplibregl.Map({
   container: "map",
   style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
-  bounds: [[2.4,50.6],[7.6,54.2]], fitBoundsOptions:{ padding:{ left:360, top:30, right:30, bottom:30 } },
+  bounds: NL, fitBoundsOptions:{ padding:pad() },
   attributionControl: { compact:true },
 });
 map.addControl(new maplibregl.NavigationControl({ showCompass:false }), "bottom-left");
-document.getElementById("goNL").onclick = () => map.fitBounds([[2.4,50.6],[7.6,54.2]], { padding:{left:360,top:30,right:30,bottom:30} });
-document.getElementById("goBES").onclick = () => map.fitBounds([[-69.4,11.9],[-62.8,17.8]], { padding:{left:360,top:30,right:30,bottom:30} });
+document.getElementById("goNL").onclick = () => map.fitBounds(NL, { padding:pad() });
+document.getElementById("goBES").onclick = () => map.fitBounds(BES, { padding:pad() });
+document.getElementById("toggle").onclick = e => {
+  const open = sideEl.classList.toggle("open");
+  e.target.textContent = open ? "Verberg stationslijst" : "Toon stationslijst";
+};
+map.on("error", e => { if (statusEl.isConnected) statusEl.textContent = "Kaart laden mislukt: " + (e.error?.message ?? "onbekende fout"); });
 
 function arrowIcon() {
   const s = 64, c = document.createElement("canvas"); c.width = c.height = s;
@@ -216,7 +257,8 @@ function render() {
      <span class="n">${s.name}</span><span class="v">${fmt(v,V.dec)} ${V.unit}</span></div>`).join("");
   document.querySelectorAll(".item").forEach(el => el.onclick = () => {
     const i = +el.dataset.i, s = meta.stations[i];
-    map.flyTo({ center:[s.lon,s.lat], zoom: Math.max(map.getZoom(), 8), offset:[150,0] }); show(i);
+    if (isMobile()) { sideEl.classList.remove("open"); document.getElementById("toggle").textContent = "Toon stationslijst"; }
+    map.flyTo({ center:[s.lon,s.lat], zoom: Math.max(map.getZoom(), 8), offset: isMobile() ? [0,-sideEl.offsetHeight/2] : [150,0] }); show(i);
   });
 
   const grad = RAMPS[V.ramp].join(",");
