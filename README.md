@@ -98,4 +98,12 @@ The `concurrency` group `pages` cancels a still-running deployment when a new on
 
 ## Data & license
 
-Data © KNMI, available under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Basemap © OpenStreetMap contributors © CARTO.
+**Source:** [KNMI](https://www.knmi.nl/) (Royal Netherlands Meteorological Institute), dataset [Near real-time 10-minute automated in-situ ground-based meteorological observations in the Netherlands](https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0), via the KNMI Data Platform Open Data API.
+
+**License:** the KNMI dataset is published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (verified on the dataset page). This allows use, adaptation and redistribution, also commercially, as long as KNMI is credited as the source. Please credit: *"Source: KNMI"* with a link to the dataset above.
+
+**Modified data:** `web/obs.zarr` and `web/stations.json` are derived from the KNMI NetCDF files (converted to Zarr, string variables moved to JSON). They are not official KNMI products and may lag behind the original data by up to an hour.
+
+The KNMI [fair use policy](https://developer.dataplatform.knmi.nl/fair-use) applies: the API key is kept in a repository secret (never published), and the workflow downloads one file per hour.
+
+Basemap © OpenStreetMap contributors © CARTO.
