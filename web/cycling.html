@@ -84,7 +84,9 @@ import * as zarr from "https://esm.sh/zarrita@0.5.1";
 
 const BASE = "https://bertt.github.io/knmi_zarr";   // always read the Zarr published on GitHub Pages
 const ZARR_URL = `${BASE}/obs.zarr`;
-const RULES_URL = new URLSearchParams(location.search).get("rules") || "cycling-rules.json";
+const PARAMS = new URLSearchParams(location.search);
+const RULES_URL = PARAMS.get("rules") || "cycling-rules.json";
+const STATION = PARAMS.get("station");
 const FALLBACK = "De Bilt";
 const MAX_KM = 150;
 const VARS = ["ta","td","rh","ff","dd","gff","fx","qg","vv","n","ss","rg","pg","R1H","R6H","R24H","ww"];
@@ -193,7 +195,10 @@ async function main() {
   const obs = i => Object.fromEntries(VARS.map(k => [k, data[k]?.[i] ?? null]));
 
   let idx = meta.stations.findIndex(s => s.name === FALLBACK), notice = "", distance = null, user = null;
-  try {
+  const wanted = STATION ? meta.stations.findIndex(s => s.name.toLowerCase() === STATION.trim().toLowerCase()) : -1;
+  if (wanted >= 0) idx = wanted;
+  else try {
+    if (STATION) notice = `Unknown station "${esc(STATION)}", showing the nearest station instead.`;
     const { coords } = await getPosition();
     user = coords;
     const ranked = meta.stations
@@ -312,9 +317,13 @@ async function main() {
         <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/">Zarr</a>; not an official KNMI product.<br>
         Your location stays in your browser. <a href="https://github.com/bertt/knmi_zarr">Source code</a></div>`;
 
-    document.getElementById("retry")?.addEventListener("click", () => location.reload());
+    document.getElementById("retry")?.addEventListener("click", () => {
+      const u = new URL(location.href); u.searchParams.delete("station"); location.href = u;
+    });
     document.getElementById("pick").addEventListener("change", e => {
       const i = +e.target.value;
+      const u = new URL(location.href); u.searchParams.set("station", meta.stations[i].name);
+      history.replaceState(null, "", u);
       render(i, "", user ? km(user.latitude, user.longitude, meta.stations[i].lat, meta.stations[i].lon) : null);
     });
   };

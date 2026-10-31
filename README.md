@@ -88,7 +88,14 @@ A third page that turns the same Zarr data (<https://bertt.github.io/knmi_zarr/o
 - **What to wear**: based on the temperature *on the bike* (air temperature about 2 °C lower, extra for rain, damp air via the dew point and wind chill), e.g. short/short above 15 °C, gloves and skullcap below 10 °C, windjacket below 12 °C, windjacket + base layer below 0 °C. Extras for rain, darkness, sun and ice.
 - **Bike cleaning**: estimate from rain now, the last 1/6/24 hours and salt risk.
 
-All rules and thresholds live in [`web/cycling-rules.json`](web/cycling-rules.json), so they can be tuned without touching the code. Rules are `bands` (`upTo` value, `points`, `note`; `upTo: null` = everything above), clothing bands/extras, and cleaning rules/levels. Try your own rules with `cycling.html?rules=<url-to-json>`. The page has a "How were these scores calculated?" section showing every rule's contribution. The advice is indicative only.
+All rules and thresholds live in [`web/cycling-rules.json`](web/cycling-rules.json), so they can be tuned without touching the code. Rules are `bands` (`upTo` value, `points`, `note`; `upTo: null` = everything above), clothing bands/extras, and cleaning rules/levels. The page has these URL parameters:
+
+| Parameter | Example | Meaning |
+|---|---|---|
+| `station` | `cycling.html?station=De%20Bilt` | Show this station (exact KNMI station name, case-insensitive) instead of the one nearest to you. The URL is updated when you pick another station in the drop-down, so you can share a link. An unknown name falls back to the nearest station. |
+| `rules` | `cycling.html?rules=<url-to-json>` | Load your own rules file instead of `cycling-rules.json`. |
+
+Parameters can be combined, e.g. `cycling.html?station=Rotterdam&rules=my-rules.json`. The page has a "How were these scores calculated?" section showing every rule's contribution. The advice is indicative only.
 
 Source data: [KNMI 10-minute in-situ meteorological observations](https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0), © KNMI, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Converted to Zarr here; not an official KNMI product. The page footer repeats this attribution and links to the Zarr store (<https://bertt.github.io/knmi_zarr/obs.zarr>).
 
