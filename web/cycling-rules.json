@@ -241,8 +241,6 @@
       "when": { "input": "comfort", "op": "lt", "value": 40 } },
     { "rule": 67, "text": "Do your time in the wind.",
       "when": [{ "input": "ff", "op": "gte", "value": 5 }, { "input": "comfort", "op": "gte", "value": 40 }] },
-    { "rule": 82, "text": "Close the gap.",
-      "when": [{ "input": "rideTemp", "op": "lt", "value": 8 }, { "input": "comfort", "op": "gte", "value": 40 }] },
     { "rule": 21, "text": "Cold weather gear is for cold weather.",
       "when": [{ "input": "rideTemp", "op": "gte", "value": 14 }, { "input": "comfort", "op": "gte", "value": 60 }] }
   ],
