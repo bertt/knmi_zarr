@@ -4,7 +4,7 @@
     "A 'band' list is evaluated top to bottom: the first band where value <= upTo applies (upTo null = everything above).",
     "Units: temperature in degC, wind and gusts in m/s, rain in mm (1h/6h/24h) or mm/h (now), radiation in W/m2, visibility in m.",
     "hail is 0 (none) to 4 (severe), derived from the KNMI weather code since hail size is not measured.",
-    "Inputs you can use: ta, td, rh, rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, hail, night, darkSoon.",
+    "Inputs you can use: ta, td, rh, rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, hail, night, darkness (0-100, dusk to full dark), darkSoon.",
     "Scores: result = clamp(base + sum of band points, 0, 100). Cleaning: base + sum of points, then the highest level with min <= total."
   ],
 
@@ -20,7 +20,9 @@
     "iceTempC": 1,
     "iceHumidityPct": 90,
     "saltTempC": 3,
-    "darkSoonHours": 2
+    "darkSoonHours": 2,
+    "twilightStartDeg": 4,
+    "fullDarkDeg": -12
   },
 
   "scores": {
@@ -121,10 +123,13 @@
             { "upTo": 0, "points": 0 },
             { "upTo": null, "points": -30, "note": "Slippery roads possible" }
           ] },
-        { "id": "dark", "label": "Dark", "input": "night", "display": "flag",
+        { "id": "dark", "label": "Dusk / darkness", "input": "darkness", "unit": "%", "dec": 0,
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -25, "note": "Dark: less pleasant and harder to see, lights needed" }
+            { "upTo": 25, "points": -5, "note": "Dusk: light is fading" },
+            { "upTo": 50, "points": -12, "note": "Twilight: harder to see" },
+            { "upTo": 75, "points": -20, "note": "Getting dark: lights needed" },
+            { "upTo": null, "points": -30, "note": "Dark: less pleasant and harder to see, lights needed" }
           ] }
       ],
       "verdicts": [
@@ -212,9 +217,12 @@
             { "upTo": 0, "points": 0 },
             { "upTo": null, "points": -30, "note": "Slippery roads possible" }
           ] },
-        { "id": "dark", "label": "Dark", "input": "night", "display": "flag",
+        { "id": "dark", "label": "Dusk / darkness", "input": "darkness", "unit": "%", "dec": 0,
           "bands": [
             { "upTo": 0, "points": 0 },
+            { "upTo": 25, "points": -3 },
+            { "upTo": 50, "points": -7, "note": "Twilight: harder to see" },
+            { "upTo": 75, "points": -11, "note": "Getting dark: lights needed" },
             { "upTo": null, "points": -15, "note": "Dark: less pleasant and harder to see, lights needed" }
           ] }
       ],
