@@ -160,7 +160,8 @@ try {
 }
 
 document.getElementById("time").textContent =
-  new Date(meta.time).toLocaleString("en-GB", { dateStyle:"full", timeStyle:"short" }) + " · from Zarr";
+  new Date(meta.time).toLocaleString("en-GB", { dateStyle:"full", timeStyle:"short" }) + " · from Zarr · " +
+  `${Object.keys(VARS).length} of ${Object.keys(meta.variables).length} variables shown`;
 
 const val = (k, i) => {
   const v = data[k][i]; return v==null ? null : v * (VARS[k].scale ?? 1);
