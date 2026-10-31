@@ -138,6 +138,12 @@
           "bands": [
             { "upTo": 0, "points": 0 },
             { "upTo": null, "points": 10, "note": "Moonlit and clear: better to see and nicer to ride" }
+          ] },
+        { "id": "thunder", "label": "Thunderstorm (1 = thunder, 2 = severe)", "input": "thunder",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": 1, "points": -60, "note": "Thunderstorm: lightning risk, stay inside" },
+            { "upTo": null, "points": -80, "note": "Severe thunderstorm: stay inside" }
           ] }
       ],
       "verdicts": [
@@ -293,6 +299,7 @@
       { "when": { "input": "rideTemp", "op": "gte", "value": 25 }, "items": ["Extra bottle"] },
       { "when": { "input": "night", "op": "gte", "value": 1 }, "items": ["Front and rear lights", "Reflective vest"], "warning": "It is dark: use front and rear lights and wear a reflective vest." },
       { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }], "items": ["Front and rear lights"], "warning": "Twilight: it is getting dark, use your lights." },
+      { "when": { "input": "thunder", "op": "gte", "value": 1 }, "warning": "Thunderstorm: lightning is dangerous on a bike. Stay inside." },
       { "when": { "input": "moonlight", "op": "gte", "value": 1 }, "warning": "Clear sky and a bright moon: nice moonlit ride, but still use your lights." },
       { "when": [{ "input": "darkSoon", "op": "gte", "value": 1 }, { "input": "darkness", "op": "lte", "value": 0 }], "items": ["Front and rear lights"], "warning": "It gets dark within 2 hours: take lights in case you are still out." },
       { "when": { "input": "vv", "op": "lte", "value": 2000 }, "items": ["Front and rear lights"], "warning": "Fog or mist: less pleasant to ride and you are harder to see. Use lights and ride carefully." },
