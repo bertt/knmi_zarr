@@ -520,9 +520,9 @@ async function main() {
         </div>
       </dialog>
 
-      <div class="sharelink">🚴 ${SHARE_URL}<span class="when">🕒 Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (local time)</span><small>Data: KNMI, CC BY 4.0</small></div>
+      <div class="sharelink">🚴 ${SHARE_URL}<span class="when">🕒 Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (local time)</span><small>Data: KNMI, CC BY 4.0 · © Bert Temme</small></div>
       <div class="noshare" style="text-align:center"><button id="calcbtn" type="button">🧮 How are scores calculated?</button> <button id="aboutbtn" type="button">ℹ️ About</button> <button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
-      <div class="foot noshare">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time).</div>`;
+      <div class="foot noshare">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time) · © Bert Temme</div>`;
 
     const calcDlg = document.getElementById("calc");
     document.getElementById("aboutbtn").addEventListener("click", () => document.getElementById("info").showModal());
