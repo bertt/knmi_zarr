@@ -17,10 +17,25 @@
   .banner b { color:var(--acc); font-size:14px; letter-spacing:.02em; }
   .banner a { word-break:break-all; }
   .wrap { position:relative; }
-  .infobtn { position:absolute; top:8px; right:10px; z-index:2; background:none; border:0; font-size:16px; cursor:pointer; padding:2px; }
-  dialog#info { border:1px solid rgba(255,255,255,.15); border-radius:16px; background:rgba(16,23,38,.98); color:var(--fg); padding:12px; max-width:min(92vw,420px); }
-  dialog#info::backdrop { background:rgba(0,0,0,.55); }
-  .closebtn { margin-top:10px; font:inherit; font-size:13px; color:#fff; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:3px 14px; cursor:pointer; }
+  .infobtn { position:absolute; top:8px; right:10px; z-index:2; width:28px; height:28px; display:grid; place-items:center; margin:0; padding:0; font-size:15px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); cursor:pointer; transition:background .2s, transform .2s; }
+  .infobtn:hover { background:rgba(76,201,240,.3); transform:scale(1.08); }
+  dialog#info { width:min(92vw,440px); margin:auto; border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:0; overflow:hidden; color:var(--fg);
+    background:radial-gradient(circle at 100% 0%, rgba(76,201,240,.18), transparent 55%), rgba(16,23,38,.98); box-shadow:0 20px 60px rgba(0,0,0,.6); }
+  dialog#info[open] { animation:pop .18s ease-out; }
+  dialog#info::backdrop { background:rgba(5,8,16,.65); backdrop-filter:blur(3px); }
+  @keyframes pop { from { opacity:0; transform:translateY(10px) scale(.97); } to { opacity:1; transform:none; } }
+  .ihead { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin:0; padding:16px 16px 12px; border-bottom:1px solid rgba(255,255,255,.08); }
+  .ititle { font-size:20px; font-weight:750; color:var(--acc); }
+  .isub { margin-top:3px; font-size:12.5px; color:var(--mut); line-height:1.4; }
+  .iclose { flex:none; width:28px; height:28px; margin:0; padding:0; display:grid; place-items:center; font-size:13px; border-radius:50%; background:rgba(255,255,255,.12); }
+  .inav { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px 16px 4px; }
+  .inav a { display:block; text-align:center; padding:9px 8px; border-radius:14px; background:rgba(76,201,240,.14); border:1px solid rgba(76,201,240,.35); color:var(--fg); text-decoration:none; font-size:13px; font-weight:600; }
+  .inav a:hover { background:rgba(76,201,240,.26); }
+  .isec { margin:10px 16px 0; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.05); font-size:12.5px; color:var(--mut); line-height:1.45; }
+  .isec h4 { margin:0 0 4px; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--fg); }
+  .isec p { margin:3px 0; word-break:break-word; }
+  .ifoot { padding:12px 16px 16px; text-align:center; font-size:13px; font-weight:600; }
+  .iauthor { margin-top:6px; font-size:11.5px; font-weight:400; color:var(--mut); }
   .card { padding:12px 16px 12px; border-radius:22px; background:rgba(16,23,38,.92); border:1px solid rgba(255,255,255,.08);
     backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:0 8px 30px rgba(0,0,0,.4); }
   .head { text-align:center; }
@@ -83,6 +98,8 @@
   .loading .road { width:140px; height:4px; border-radius:2px; background:linear-gradient(90deg,transparent,var(--acc),transparent); background-size:200% 100%; animation:road 1s linear infinite; }
   .loading .lt { margin-top:10px; font-size:18px; font-weight:650; }
   .loading .ls { font-size:12.5px; color:var(--mut); }
+  .loading .steps { margin-top:6px; display:grid; gap:4px; text-align:left; font-size:13.5px; }
+  .loading .step.run { color:var(--mut); } .loading .step.fail { color:#fca5a5; }
   @keyframes ride { from { transform:translateX(-28px) rotate(-3deg); } to { transform:translateX(28px) rotate(3deg); } }
   @keyframes road { from { background-position:200% 0; } to { background-position:0 0; } }
   @media (prefers-reduced-motion:reduce) { .loading .bike, .loading .road { animation:none; } }
@@ -114,16 +131,25 @@
 <body>
 <div class="wrap">
   <button class="infobtn" id="infobtn" aria-label="About this demo" title="About this demo">ℹ️</button>
-  <dialog id="info"><div class="banner" style="margin:0"><b>Zarr demo</b> · live KNMI observations read straight from a <a href="https://zarr.dev/">Zarr</a> store in your browser<br>
-    Zarr source: <a id="zsrc" href="#"></a><br>
-    <a href="./">🗺️ All stations on a map</a> · <a href="nearby.html">🌦️ Weather near you</a><br><br>
-    Indicative advice based on the rules in <a id="rulesurl" href="#"></a> (add <code>?rules=URL</code> to try your own).<br>
-    Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
-    <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/">Zarr</a>; not an official KNMI product.<br>
-    Your location stays in your browser. <a href="https://github.com/bertt/knmi_zarr">Source code</a><br>
-    Quotes: <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</div>
-    <form method="dialog"><button class="closebtn">Close</button></form></dialog>
-  <div class="card" id="card"><div class="loading"><div class="bike">🚴</div><div class="road"></div><div class="lt">Checking the weather…</div><div class="ls">Reading live KNMI data</div></div></div>
+  <dialog id="info">
+    <form method="dialog" class="ihead"><div><div class="ititle">Zarr demo</div><div class="isub">Live KNMI observations, read straight from a <a href="https://zarr.dev/">Zarr</a> store in your browser</div></div>
+      <button class="iclose" aria-label="Close">✕</button></form>
+    <div class="inav"><a href="./">🗺️ All stations on a map</a><a href="nearby.html">🌦️ Weather near you</a></div>
+    <div class="isec"><h4>🧊 What is Zarr?</h4>
+      <p><a href="https://zarr.dev/">Zarr</a> is an open format for chunked, compressed multi-dimensional arrays. Because the data is split into small files, a browser can fetch just the pieces it needs straight from static storage, with no server or API in between.</p></div>
+    <div class="isec"><h4>📦 Data</h4>
+      <p>Zarr source: <a id="zsrc" href="#"></a></p>
+      <p><a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/">Zarr</a>; not an official KNMI product.</p></div>
+    <div class="isec"><h4>🧮 Advice</h4>
+      <p>Indicative advice based on the rules in <a id="rulesurl" href="#"></a>. Add <code>?rules=URL</code> to try your own.</p>
+      <p>Quotes: <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</p></div>
+    <div class="isec"><h4>🔒 Privacy</h4>
+      <p>Your location stays in your browser.</p></div>
+    <div class="ifoot"><a href="https://github.com/bertt/knmi_zarr">⭐ Source code on GitHub</a><div class="iauthor">Author © Bert Temme</div></div>
+  </dialog>
+  <div class="card" id="card"><div class="loading"><div class="bike">🚴</div><div class="road"></div><div class="lt">Checking the weather…</div>
+  <div class="steps"><div class="step run" id="s-loc"><span class="si">⏳</span> <span class="st">Determining your location</span></div>
+    <div class="step run" id="s-data"><span class="si">⏳</span> <span class="st">Fetching KNMI data</span></div></div></div></div>
 </div>
 
 <script type="module">
@@ -145,6 +171,7 @@ const card = document.getElementById("card");
 const zsrc = document.getElementById("zsrc");
 zsrc.href = `${ZARR_URL}/zarr.json`; zsrc.textContent = ZARR_URL;
 document.getElementById("infobtn").onclick = () => document.getElementById("info").showModal();
+document.getElementById("info").addEventListener("click", e => { if (e.target.id === "info") e.target.close(); });
 const store = new zarr.FetchStore(ZARR_URL);
 const root = zarr.root(store);
 const readVar = async name => {
@@ -277,6 +304,18 @@ const SENSORS = [
 ];
 
 async function main() {
+  const step = (id, state, text) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = `step ${state}`;
+    el.querySelector(".si").textContent = { run: "⏳", ok: "✅", fail: "⚠️", skip: "➖" }[state];
+    if (text) el.querySelector(".st").textContent = text;
+  };
+  const makePos = () => getPosition().then(c => { step("s-loc", "ok", "Location found"); return c; },
+    e => { step("s-loc", "fail", "Location unavailable"); throw e; });
+  const posP = STATION ? null : makePos();
+  posP?.catch(() => {});
+  if (STATION) step("s-loc", "skip", "Using the station from the link");
   const [meta, R] = await Promise.all([
     fetch(`${BASE}/stations.json`).then(r => r.json()),
     fetch(RULES_URL, { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(`${RULES_URL}: HTTP ${r.status}`); return r.json(); }),
@@ -284,6 +323,7 @@ async function main() {
   const keys = VARS.filter(k => k in meta.variables);
   const data = {};
   await Promise.all(keys.map(async k => data[k] = await readVar(k)));
+  step("s-data", "ok", "KNMI data loaded");
   const obs = i => Object.fromEntries(VARS.map(k => [k, data[k]?.[i] ?? null]));
 
   let idx = meta.stations.findIndex(s => s.name === FALLBACK), notice = "", distance = null, user = null;
@@ -291,7 +331,7 @@ async function main() {
   if (wanted >= 0) idx = wanted;
   else try {
     if (STATION) notice = `Unknown station "${esc(STATION)}", showing the nearest station instead.`;
-    const { coords } = await getPosition();
+    const { coords } = await (posP ?? makePos());
     user = coords;
     const ranked = meta.stations
       .map((s, i) => ({ i, d: km(coords.latitude, coords.longitude, s.lat, s.lon) }))
