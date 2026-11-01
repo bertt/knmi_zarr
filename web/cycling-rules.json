@@ -23,6 +23,8 @@
     "darkSoonHours": 2,
     "twilightStartDeg": 4,
     "fullDarkDeg": -12,
+    "dullMinCloudOctas": 7,
+    "dullMaxWindMs": 2.5,
     "moonMaxCloudOctas": 2,
     "moonMinIlluminationPct": 50,
     "moonMinAltitudeDeg": 5
@@ -106,6 +108,11 @@
             { "upTo": 200, "points": 3 },
             { "upTo": 400, "points": 7, "note": "Some sun" },
             { "upTo": null, "points": 10, "note": "Sunny" }
+          ] },
+        { "id": "dull", "label": "Dull weather (overcast and no wind)", "input": "dull", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -10, "note": "Grey and windless: boring ride" }
           ] },
         { "id": "visibility", "label": "Visibility", "input": "vv", "unit": "m", "dec": 0,
           "bands": [
