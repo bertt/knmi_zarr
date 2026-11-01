@@ -408,7 +408,7 @@ async function main() {
       ? `No ${missing.join(", ")} data from this station right now, so the scores and advice are incomplete.` +
         (better ? ` <a href="?station=${encodeURIComponent(meta.stations[better.j].name)}" class="goto" data-i="${better.j}">Try ${esc(meta.stations[better.j].name)}</a> (${fmt(better.d)} km away) instead.` : "")
       : "";
-    const s = meta.stations[idx], o = obs(idx), inp = derive(o, s, t, R);
+    const s = meta.stations[idx], o = obs(idx), inp = derive(o, s, new Date(), R);
     const comfort = evalRules(R.scores.comfort.rules, inp, R.scores.comfort.base);
     const training = evalRules(R.scores.training.rules, inp, R.scores.training.base);
     const cScore = Math.round(Math.max(0, Math.min(100, comfort.total)));
