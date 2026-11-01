@@ -406,7 +406,7 @@
         ] }
     ],
     "tips": [
-      { "when": { "input": "wetDrive", "op": "gte", "value": 1 }, "text": "Wet ride: dry the chain, cassette and chainrings right after the ride to prevent rust." },
+      { "when": { "input": "wetDrive", "op": "gte", "value": 1 }, "text": "Wet ride: dry the chain, cassette and chainrings right after riding to prevent rust." },
       { "when": { "input": "saltRisk", "op": "gte", "value": 1 }, "text": "Road salt: also rinse the brake calipers, rims or discs, derailleurs and bottom bracket area." },
       { "when": { "input": "rain24h", "op": "gte", "value": 5 }, "text": "Several wet days: lube the chain more often, it washes out quickly." },
       { "when": [{ "input": "rain6h", "op": "gte", "value": 3 }, { "input": "ta", "op": "gte", "value": 5 }], "text": "Muddy roads: brush the cassette and derailleurs and clean the brake pads." }
@@ -415,7 +415,7 @@
       { "min": 0, "label": "No cleaning needed", "icon": "✨", "text": "Dry roads. Wipe the chain if it is dusty." },
       { "min": 2, "label": "Quick rinse and wipe", "icon": "🧽", "text": "Wipe down the frame and drivetrain, dry the chain well to prevent rust and add a drop of chain lube." },
       { "min": 4, "label": "Rinse, brush and re-lube", "icon": "🚿", "text": "Rinse off the grime, brush the drivetrain, dry the chain and cassette thoroughly to prevent rust and re-lube the chain." },
-      { "min": 7, "label": "Full clean", "icon": "🧼", "text": "Degrease the drivetrain, wash the bike, dry it (especially the drivetrain, to prevent rust) and lube the chain. Check brakes and pads." }
+      { "min": 7, "label": "Full clean", "icon": "🧼", "text": "Degrease the drivetrain, wash the bike, dry it well (especially the drivetrain) and lube the chain. Check brakes and pads." }
     ]
   }
 }
