@@ -415,9 +415,6 @@ async function main() {
     const cleanTips = (R.cleaning.tips ?? []).filter(x => test(x.when, inp)).map(x => x.text);
 
     const feels = inp.rideTemp == null ? null : inp.rideTemp;
-    const why = inp._parts.length
-      ? `Air ${fmt(o.ta, 1)}° → ${fmt(feels, 1)}° on the bike (${inp._parts.map(([l, v]) => `${l} ${v > 0 ? "+" : ""}${fmt(v, 1)}`).join(", ")})`
-      : "";
     const pills = [
       o.ta != null && `🌡️ <b>${fmt(o.ta, 1)}°</b> <span>feels ${fmt(feels, 1)}° on the bike</span>`,
       o.ff != null && `💨 <b>${bft(o.ff)}</b> Bft${o.dd != null ? ` from <b>${compass(o.dd)}</b>` : ""}`,
@@ -455,11 +452,10 @@ async function main() {
       <div class="chips">${pills}</div>
 
       <div class="sec wear"><h2>👕 What to wear</h2>
-        ${band ? `<div class="outfit">${esc(band.label)} <small>· feels ${fmt(feels, 0)}° on the bike</small></div>
+        ${band ? `<div class="outfit">${esc(band.label)}</div>
           <div class="items">${(band.items).map(i => `<span class="item">${iconFor(i)} ${esc(i)}</span>`).join("")}
             ${extraOnly.map(i => `<span class="item extra">${iconFor(i)} ${esc(i)}</span>`).join("")}</div>
-          ${band.note ? `<div class="why">${esc(band.note)}</div>` : ""}
-          <div class="why">${esc(why)}</div>` : `<div class="why">No temperature data for this station.</div>`}
+          ${band.note ? `<div class="why">${esc(band.note)}</div>` : ""}` : `<div class="why">No temperature data for this station.</div>`}
         ${warnings.map(w => `<div class="warn">⚠️ ${esc(w)}</div>`).join("")}
       </div>
 
