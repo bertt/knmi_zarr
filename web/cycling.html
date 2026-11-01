@@ -177,7 +177,7 @@
     <div class="inav"><a href="./">🗺️ All stations on a map</a><a href="nearby.html">🌦️ Weather near you</a></div>
     <div class="isec"><h4>👋 About this site</h4>
       <p>This page finds the nearest KNMI weather station and turns its latest measurements into practical advice for cyclists: a ride comfort score, a training score, what to wear, whether you need a rain jacket, and how to clean your bike afterwards. It also warns about ice, fog, darkness and thunder.</p>
-      <p>It uses <b>17 weather parameters</b>: temperature, dew point, humidity, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p></div>
+      <p>It uses <b>18 weather parameters</b>: temperature, dew point, humidity, air pressure, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p></div>
     <div class="isec"><h4>🧊 Data and Zarr</h4>
       <p>The observations are 10-minute <a href="https://www.knmi.nl/">KNMI</a> measurements (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), published as NetCDF and converted to <a href="https://zarr.dev/">Zarr</a>. Not an official KNMI product.</p>
       <p>Zarr is an open format for chunked, compressed multi-dimensional arrays. Because the data is split into small files, your browser can fetch just the pieces it needs straight from static storage, with no server or API in between.</p>
@@ -207,7 +207,7 @@ const STATION = PARAMS.get("station");
 const SHARE_URL = "https://bertt.github.io/knmi_zarr/cycling.html";
 const FALLBACK = "De Bilt";
 const MAX_KM = 150;
-const VARS = ["ta","td","rh","ff","dd","gff","fx","qg","vv","n","ss","rg","pg","R1H","R6H","R24H","ww"];
+const VARS = ["ta","td","rh","ff","dd","gff","fx","qg","vv","n","ss","rg","pg","R1H","R6H","R24H","ww","pp"];
 
 const card = document.getElementById("card");
 const zsrc = document.getElementById("zsrc");
@@ -227,7 +227,7 @@ const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
 const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t => v >= t).length;
 const sunWord = q => q < 10 ? "dark / no sun" : q < 100 ? "overcast" : q < 250 ? "cloudy" : q < 500 ? "partly sunny" : q < 800 ? "sunny" : "very sunny";
 const sg = v => `${v < 0 ? "−" : "+"}${Math.abs(v)}°`;
-const INPUT_NAMES = { comfort: "ride comfort score", rainIntensity: "rain now (mm/h)", rain1h: "rain last hour (mm)", rain6h: "rain last 6 h (mm)", rain24h: "rain last 24 h (mm)",
+const INPUT_NAMES = { pp: "air pressure (hPa)", comfort: "ride comfort score", rainIntensity: "rain now (mm/h)", rain1h: "rain last hour (mm)", rain6h: "rain last 6 h (mm)", rain24h: "rain last 24 h (mm)",
   rideTemp: "temperature on the bike (°C)", ta: "air temperature (°C)", qg: "sun (W/m²)", vv: "visibility (m)", night: "dark", darkness: "darkness (%)", moonlight: "bright moon and clear sky", dull: "overcast and windless", coldEastWind: "cold easterly wind", sunGlare: "low sun glare", leafRisk: "wet autumn leaves", foggyCold: "fog and cold", bridgeIce: "ice on bridges", dryCold: "dry cold air", intervalWeather: "calm and dry", wetDrive: "wet drivetrain", moonIllumination: "moon illuminated (%)", darkSoon: "dark within 2 hours", iceRisk: "ice risk", saltRisk: "salt risk", hail: "hail", thunder: "thunderstorm", ff: "wind (m/s)", gust: "gusts (m/s)", rh: "humidity (%)" };
 const OP_TEXT = { gt: ">", gte: "≥", lt: "<", lte: "≤", eq: "=" };
 const condText = c => ["night", "darkSoon", "iceRisk", "saltRisk", "coldEastWind", "sunGlare", "leafRisk", "foggyCold", "bridgeIce", "dryCold", "intervalWeather", "wetDrive"].includes(c.input) && c.op === "gte" && c.value === 1
@@ -308,7 +308,7 @@ function derive(o, s, t, R) {
   const moonlight = darkness >= 50 && o.n != null && o.n <= (r.moonMaxCloudOctas ?? 2) &&
     moon.illumination >= (r.moonMinIlluminationPct ?? 50) && moon.altitude >= (r.moonMinAltitudeDeg ?? 5) ? 1 : 0;
   return {
-    ta: o.ta, td: o.td, rh: o.rh, ff: o.ff, gust: maxOf(o.gff, o.fx), qg: o.qg, vv: o.vv, n: o.n, ss: o.ss,
+    ta: o.ta, td: o.td, rh: o.rh, ff: o.ff, gust: maxOf(o.gff, o.fx), qg: o.qg, vv: o.vv, n: o.n, ss: o.ss, pp: o.pp,
     rainIntensity, rain1h: o.R1H, rain6h: o.R6H, rain24h: o.R24H, rideTemp,
     iceRisk: o.ta != null && o.ta <= r.iceTempC && (wetNow || (o.rh != null && o.rh >= r.iceHumidityPct)) ? 1 : 0,
     saltRisk: o.ta != null && o.ta <= r.saltTempC && (wetNow || (o.R6H ?? 0) > 0.5) ? 1 : 0,
@@ -434,6 +434,7 @@ async function main() {
       o.R1H != null && `☔ <b>${fmt(o.R1H, 1)}</b> mm last hour`,
       o.qg != null && `☀️ <b>${sunWord(o.qg)}</b> <span>${fmt(o.qg)} W/m²</span>`,
       o.td != null && `💧 dew point <b>${fmt(o.td, 1)}°</b>`,
+      o.pp != null && `🧭 <b>${fmt(o.pp)}</b> hPa`,
       o.vv != null && `👁️ <b>${fmt(o.vv / 1000, 1)}</b> km`,
     ].filter(Boolean).map(p => `<span class="pill">${p}</span>`).join("");
 

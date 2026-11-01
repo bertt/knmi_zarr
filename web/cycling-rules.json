@@ -4,7 +4,7 @@
     "A 'band' list is evaluated top to bottom: the first band where value <= upTo applies (upTo null = everything above).",
     "Units: temperature in degC, wind and gusts in m/s, rain in mm (1h/6h/24h) or mm/h (now), radiation in W/m2, visibility in m.",
     "hail is 0 (none) to 4 (severe), derived from the KNMI weather code since hail size is not measured.",
-    "Inputs you can use: ta, td, rh, rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, hail, night, darkness (0-100, dusk to full dark), darkSoon.",
+    "Inputs you can use: ta, td, rh, pp (sea-level pressure, hPa), rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, hail, night, darkness (0-100, dusk to full dark), darkSoon.",
     "Scores: result = clamp(base + sum of band points, 0, 100). Cleaning: base + sum of points, then the highest level with min <= total."
   ],
 
@@ -102,6 +102,14 @@
             { "upTo": 15, "points": -5 },
             { "upTo": 20, "points": -12 },
             { "upTo": null, "points": -20, "note": "Dangerous gusts" }
+          ] },
+        { "id": "pressure", "label": "Air pressure (sea level)", "input": "pp", "unit": "hPa", "dec": 0,
+          "bands": [
+            { "upTo": 995, "points": -6, "note": "Deep low: unsettled, wet and windy weather" },
+            { "upTo": 1005, "points": -3, "note": "Low pressure: changeable weather" },
+            { "upTo": 1020, "points": 0 },
+            { "upTo": 1030, "points": 3, "note": "High pressure: stable weather" },
+            { "upTo": null, "points": 5, "note": "Strong high: settled, calm weather" }
           ] },
         { "id": "sun", "label": "Sun (global radiation)", "input": "qg", "unit": "W/m²", "dec": 0,
           "bands": [
