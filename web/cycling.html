@@ -163,14 +163,16 @@
 <body>
 <div class="wrap">
   <dialog id="info">
-    <form method="dialog" class="ihead"><div><div class="ititle">Zarr demo</div><div class="isub">Live KNMI observations, read straight from a <a href="https://zarr.dev/">Zarr</a> store in your browser</div></div>
+    <form method="dialog" class="ihead"><div><div class="ititle">🚴 Cycling weather</div><div class="isub">Should you ride today, and what should you wear? Advice based on live weather observations.</div></div>
       <button class="iclose" aria-label="Close">✕</button></form>
     <div class="inav"><a href="./">🗺️ All stations on a map</a><a href="nearby.html">🌦️ Weather near you</a></div>
-    <div class="isec"><h4>🧊 What is Zarr?</h4>
-      <p><a href="https://zarr.dev/">Zarr</a> is an open format for chunked, compressed multi-dimensional arrays. Because the data is split into small files, a browser can fetch just the pieces it needs straight from static storage, with no server or API in between.</p></div>
-    <div class="isec"><h4>📦 Data</h4>
-      <p>Zarr source: <a id="zsrc" href="#"></a></p>
-      <p><a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/">Zarr</a>; not an official KNMI product.</p></div>
+    <div class="isec"><h4>👋 About this site</h4>
+      <p>This page finds the nearest KNMI weather station and turns its latest measurements into practical advice for cyclists: a ride comfort score, a training score, what to wear, whether you need a rain jacket, and how to clean your bike afterwards. It also warns about ice, fog, darkness and thunder.</p>
+      <p>It uses <b>17 weather parameters</b>: temperature, dew point, humidity, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p></div>
+    <div class="isec"><h4>🧊 Data and Zarr</h4>
+      <p>The observations are 10-minute <a href="https://www.knmi.nl/">KNMI</a> measurements (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), published as NetCDF and converted to <a href="https://zarr.dev/">Zarr</a>. Not an official KNMI product.</p>
+      <p>Zarr is an open format for chunked, compressed multi-dimensional arrays. Because the data is split into small files, your browser can fetch just the pieces it needs straight from static storage, with no server or API in between.</p>
+      <p>Zarr source: <a id="zsrc" href="#"></a></p></div>
     <div class="isec"><h4>🧮 Advice</h4>
       <p>Indicative advice based on the rules in <a id="rulesurl" href="#"></a>. Add <code>?rules=URL</code> to try your own.</p>
       <p>Quotes: <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</p></div>
