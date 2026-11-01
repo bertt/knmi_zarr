@@ -19,10 +19,35 @@
   .wrap { position:relative; }
   .infobtn { position:absolute; top:8px; right:10px; z-index:2; width:28px; height:28px; display:grid; place-items:center; margin:0; padding:0; font-size:15px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); cursor:pointer; transition:background .2s, transform .2s; }
   .infobtn:hover { background:rgba(76,201,240,.3); transform:scale(1.08); }
-  dialog#info { width:min(92vw,440px); margin:auto; border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:0; overflow:hidden; color:var(--fg);
+  dialog#info, dialog#calc { width:min(92vw,440px); margin:auto; border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:0; overflow:hidden; color:var(--fg);
     background:radial-gradient(circle at 100% 0%, rgba(76,201,240,.18), transparent 55%), rgba(16,23,38,.98); box-shadow:0 20px 60px rgba(0,0,0,.6); }
-  dialog#info[open] { animation:pop .18s ease-out; }
-  dialog#info::backdrop { background:rgba(5,8,16,.65); backdrop-filter:blur(3px); }
+  dialog#info[open], dialog#calc[open] { animation:pop .18s ease-out; }
+  dialog#info::backdrop, dialog#calc::backdrop { background:rgba(5,8,16,.65); backdrop-filter:blur(3px); }
+  dialog#calc { width:min(94vw,640px); max-height:88vh; }
+  dialog#calc[open] { display:flex; flex-direction:column; }
+  .ctabs { display:flex; gap:6px; padding:10px 16px 0; }
+  .ctabs .ctab { margin:0; padding:6px 14px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid transparent; font-size:13px; }
+  .ctabs .ctab.on { background:rgba(76,201,240,.25); border-color:rgba(76,201,240,.5); font-weight:650; }
+  .cpane[hidden] { display:none; }
+  .calcbody { overflow:auto; padding:4px 16px 16px; }
+  .cs { margin-top:12px; padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.05); }
+  .cs h4 { margin:0 0 8px; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--fg); }
+  .cdesc { font-size:12.5px; color:var(--mut); }
+  .cchips { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+  .cchip { padding:5px 10px; border-radius:12px; background:rgba(0,0,0,.25); font-size:12.5px; }
+  .cchip b { color:var(--acc); margin-left:4px; }
+  .cchip small, .crow small, .cband small { display:block; font-size:11.5px; color:var(--mut); }
+  .crow { display:flex; gap:10px; align-items:center; padding:6px 0; border-top:1px solid rgba(255,255,255,.07); font-size:13px; }
+  .cs h4 + .crow { border-top:0; }
+  .cicon { font-size:22px; width:28px; text-align:center; flex:none; }
+  .cwhat { display:flex; flex-wrap:wrap; gap:4px; flex:1 1 45%; }
+  .cwhat .item { font-size:12px; padding:2px 8px; }
+  .warnchip { background:rgba(239,68,68,.3); border-color:rgba(239,68,68,.5); }
+  .cif { flex:1 1 55%; font-size:12px; color:var(--mut); }
+  .cif i { color:var(--acc); font-style:normal; font-weight:600; }
+  .cbands { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:6px; }
+  .cband { padding:7px 9px; border-radius:12px; background:linear-gradient(135deg, rgba(76,201,240,.22), rgba(76,201,240,.06)); border:1px solid rgba(76,201,240,.3); font-size:13px; }
+  .calcbody .why { font-size:12.5px; line-height:1.5; }
   @keyframes pop { from { opacity:0; transform:translateY(10px) scale(.97); } to { opacity:1; transform:none; } }
   .ihead { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin:0; padding:16px 16px 12px; border-bottom:1px solid rgba(255,255,255,.08); }
   .ititle { font-size:20px; font-weight:750; color:var(--acc); }
@@ -51,7 +76,7 @@
   .scores { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
   .score { padding:14px 10px 12px; border-radius:20px; background:rgba(255,255,255,.05); text-align:center; }
   .score h3 { margin:0 0 8px; font-size:11.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--mut); }
-  .ring { --p:0%; --c:#2ecc71; width:112px; height:112px; margin:0 auto; border-radius:50%;
+  .ring { --p:0%; width:112px; height:112px; margin:0 auto; border-radius:50%;
     background:conic-gradient(var(--c) var(--p), rgba(255,255,255,.18) 0); display:grid; place-items:center; transition:background .5s; }
   .ring > div { width:88px; height:88px; border-radius:50%; background:rgba(18,26,48,.62); display:grid; place-items:center; align-content:center; }
   .ring .em { font-size:30px; line-height:1; }
@@ -105,12 +130,17 @@
   @media (prefers-reduced-motion:reduce) { .loading .bike, .loading .road { animation:none; } }
   /* compact layout: small side-by-side rings, tighter spacing, two columns on wide screens */
   .scores { margin-top:8px; gap:8px; }
-  .score { display:grid; grid-template-columns:auto 1fr; grid-template-areas:"ring h" "ring v"; align-items:center; column-gap:12px; padding:8px 12px; text-align:left; border-radius:16px; }
-  .score h3 { grid-area:h; margin:0; align-self:end; }
-  .score .verdict { grid-area:v; margin:2px 0 0; align-self:start; }
-  .ring { grid-area:ring; width:72px; height:72px; margin:0; }
-  .ring > div { width:56px; height:56px; }
-  .ring .em { font-size:20px; } .ring .n { font-size:14px; }
+  .score { --c:#2ecc71; display:grid; grid-template-columns:auto 1fr; grid-template-areas:"ring h" "ring v" "ring b"; align-items:center; column-gap:12px; padding:10px 12px; text-align:left; border-radius:18px;
+    border:1px solid color-mix(in srgb, var(--c) 45%, transparent);
+    background:linear-gradient(135deg, color-mix(in srgb, var(--c) 24%, transparent), rgba(255,255,255,.03) 70%);
+    box-shadow:0 4px 18px color-mix(in srgb, var(--c) 18%, transparent); }
+  .score h3 { grid-area:h; margin:0; align-self:end; color:var(--fg); opacity:.75; }
+  .score .verdict { grid-area:v; margin:2px 0 0; align-self:center; font-size:15px; }
+  .score .bar { grid-area:b; align-self:start; margin-top:6px; height:5px; border-radius:3px; background:rgba(255,255,255,.14); overflow:hidden; }
+  .score .bar i { display:block; height:100%; border-radius:3px; background:linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, #fff 0%), var(--c)); }
+  .ring { grid-area:ring; width:84px; height:84px; margin:0; box-shadow:0 0 14px color-mix(in srgb, var(--c) 45%, transparent); }
+  .ring > div { width:64px; height:64px; }
+  .ring .em { font-size:22px; } .ring .n { font-size:18px; }
   .chips { margin-top:8px; gap:4px; }
   .pill { padding:2px 8px; font-size:12px; }
   .sec { margin-top:8px; padding:9px 12px; border-radius:16px; }
@@ -125,7 +155,7 @@
   @media (min-width:800px) {
     .wrap { width:min(620px,100%); }
   }
-  @media (max-width:480px) { .ring { width:64px; height:64px; } .ring > div { width:50px; height:50px; } .ring .n { font-size:13px; } .verdict { font-size:13.5px; } }
+  @media (max-width:480px) { .ring { width:68px; height:68px; } .ring > div { width:52px; height:52px; } .ring .n { font-size:15px; } .ring .em { font-size:18px; } .score { column-gap:9px; padding:8px 9px; } .score .verdict { font-size:13px; } }
 </style>
 </head>
 <body>
@@ -413,12 +443,12 @@ async function main() {
       </div>
 
       <div class="scores">
-        <div class="score"><h3>Ride comfort</h3>
-          <div class="ring" style="--p:${cScore}%;--c:${cV.color}"><div><span class="em">${cV.icon}</span><span class="n">${cScore}</span></div></div>
-          <div class="verdict">${esc(cV.label)}</div></div>
-        <div class="score"><h3>Training</h3>
-          <div class="ring" style="--p:${tScore}%;--c:${tV.color}"><div><span class="em">${tV.icon}</span><span class="n">${tScore}</span></div></div>
-          <div class="verdict">${esc(tV.label)}</div></div>
+        <div class="score" style="--c:${cV.color}"><h3>Ride comfort</h3>
+          <div class="ring" style="--p:${cScore}%"><div><span class="em">${cV.icon}</span><span class="n">${cScore}</span></div></div>
+          <div class="verdict">${esc(cV.label)}</div><div class="bar"><i style="width:${cScore}%"></i></div></div>
+        <div class="score" style="--c:${tV.color}"><h3>Training</h3>
+          <div class="ring" style="--p:${tScore}%"><div><span class="em">${tV.icon}</span><span class="n">${tScore}</span></div></div>
+          <div class="verdict">${esc(tV.label)}</div><div class="bar"><i style="width:${tScore}%"></i></div></div>
       </div>
 
       <div class="chips">${pills}</div>
@@ -442,29 +472,60 @@ async function main() {
         ${cleanTips.map(x => `<div class="why">🔧 ${esc(x)}</div>`).join("")}
       </div>
 
-      <details><summary>How were these scores calculated?</summary>
-        <div class="why" style="margin:8px 0">
-          <b>Temperature on the bike</b> (used for clothing, the jacket advice and the scores) = air temperature
-          ${sg(R.ride.bikeOffsetC)} for riding speed,
-          ${sg(R.ride.rainOffsetC)} if it rains (more than ${R.ride.rainThresholdMmH} mm/h),
-          ${sg(R.ride.dampOffsetC)} for damp air (air temperature minus dew point below ${R.ride.dampSpreadBelowC}° and air at most ${R.ride.dampMaxTempC}°),
-          and −${R.ride.windChillPerMs}° per m/s of wind above ${R.ride.windChillAboveMs} m/s.<br>
-          <b>Flags:</b> ice risk when air is at most ${R.ride.iceTempC}° and the roads are wet or humidity is at least ${R.ride.iceHumidityPct}%;
-          road salt likely when air is at most ${R.ride.saltTempC}° and it is wet or rained more than 0.5 mm in 6 hours.<br>
-          <b>Clothing</b> is picked from the temperature on the bike: ${R.clothing.bands.map((b, i, a) => `${esc(b.label)} (${b.upTo == null ? `above ${a[i-1].upTo}°` : `up to ${b.upTo}°`})`).join(", ")}.
-          <b>Extras</b> are added when their condition is met:
-          ${R.clothing.extras.map(e => `${esc((e.items ?? []).join(" + ") || "Warning")} if ${(Array.isArray(e.when) ? e.when : [e.when]).map(condText).join(" and ")}`).join("; ")}.<br>
-          <b>Rain jacket:</b> ${R.rainJacket.levels.map(l => `${esc(l.label)} — ${esc(l.text)}`).join("; ")}.
+      <dialog id="calc" class="noshare">
+        <form method="dialog" class="ihead"><div><div class="ititle">How are the scores calculated?</div><div class="isub">Every rule adds or subtracts points from a base score.</div></div>
+          <button class="iclose" aria-label="Close">✕</button></form>
+        <div class="ctabs" role="tablist">
+          <button type="button" class="ctab on" data-tab="rules" role="tab">📖 Rules</button>
+          <button type="button" class="ctab" data-tab="scores" role="tab">📊 Scores</button></div>
+        <div class="calcbody">
+         <div class="cpane" data-pane="rules">
+          <div class="cs"><h4>🌡️ Temperature on the bike</h4>
+            <div class="cdesc">Used for clothing, the jacket advice and the scores. It starts from the air temperature:</div>
+            <div class="cchips">
+              <span class="cchip">🚴 riding speed <b>${sg(R.ride.bikeOffsetC)}</b></span>
+              <span class="cchip">🌧️ rain &gt; ${R.ride.rainThresholdMmH} mm/h <b>${sg(R.ride.rainOffsetC)}</b></span>
+              <span class="cchip">💧 damp air <b>${sg(R.ride.dampOffsetC)}</b><small>spread &lt; ${R.ride.dampSpreadBelowC}°, air ≤ ${R.ride.dampMaxTempC}°</small></span>
+              <span class="cchip">💨 wind above ${R.ride.windChillAboveMs} m/s <b>−${R.ride.windChillPerMs}° per m/s</b></span>
+            </div></div>
+
+          <div class="cs"><h4>🚩 Flags</h4>
+            <div class="crow"><span class="cicon">🧊</span><div><b>Ice risk</b><small>air ≤ ${R.ride.iceTempC}° and wet roads or humidity ≥ ${R.ride.iceHumidityPct}%</small></div></div>
+            <div class="crow"><span class="cicon">🧂</span><div><b>Road salt likely</b><small>air ≤ ${R.ride.saltTempC}° and wet, or &gt; 0.5 mm rain in 6 hours</small></div></div></div>
+
+          <div class="cs"><h4>👕 Clothing by temperature on the bike</h4>
+            <div class="cbands">${R.clothing.bands.map((b, i, a) => `<div class="cband"><b>${esc(b.label)}</b><small>${b.upTo == null ? `above ${a[i-1].upTo}°` : i === 0 ? `up to ${b.upTo}°` : `${a[i-1].upTo}° – ${b.upTo}°`}</small></div>`).join("")}</div></div>
+
+          <div class="cs"><h4>➕ Extras and warnings</h4>
+            ${R.clothing.extras.map(e => `<div class="crow"><div class="cwhat">${(e.items ?? []).length
+              ? e.items.map(i => `<span class="item">${iconFor(i)} ${esc(i)}</span>`).join("")
+              : `<span class="item warnchip">⚠️ Warning</span>`}</div>
+              <div class="cif">${(Array.isArray(e.when) ? e.when : [e.when]).map(condText).map(esc).join(" <i>and</i> ")}</div></div>`).join("")}</div>
+
+          <div class="cs"><h4>☔ Rain jacket</h4>
+            ${R.rainJacket.levels.map(l => `<div class="crow"><span class="cicon">${l.icon}</span><div><b>${esc(l.label)}</b><small>${esc(l.text)}</small></div></div>`).join("")}</div>
+         </div>
+
+         <div class="cpane" data-pane="scores" hidden>
+          <div class="cs"><h4>📊 Points per rule</h4>
+            <table>${table(R.scores.comfort.title + ` — base ${R.scores.comfort.base}`, comfort)}
+              ${table(R.scores.training.title + ` — base ${R.scores.training.base}`, training)}
+              ${table(R.cleaning.title + " — points", clean)}</table></div>
+         </div>
         </div>
-        <table>${table(R.scores.comfort.title + ` — base ${R.scores.comfort.base}`, comfort)}
-          ${table(R.scores.training.title + ` — base ${R.scores.training.base}`, training)}
-          ${table(R.cleaning.title + " — points", clean)}</table>
-      </details>
+      </dialog>
 
       <div class="sharelink">🚴 ${SHARE_URL}<span class="when">🕒 Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (local time)</span><small>Data: KNMI, CC BY 4.0</small></div>
-      <div class="noshare" style="text-align:center"><button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
+      <div class="noshare" style="text-align:center"><button id="calcbtn" type="button">🧮 How are scores calculated?</button> <button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
       <div class="foot noshare">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time).</div>`;
 
+    const calcDlg = document.getElementById("calc");
+    document.getElementById("calcbtn").addEventListener("click", () => calcDlg.showModal());
+    calcDlg.querySelectorAll(".ctab").forEach(b => b.addEventListener("click", () => {
+      calcDlg.querySelectorAll(".ctab").forEach(x => x.classList.toggle("on", x === b));
+      calcDlg.querySelectorAll(".cpane").forEach(p => p.hidden = p.dataset.pane !== b.dataset.tab);
+    }));
+    calcDlg.addEventListener("click", e => { if (e.target === calcDlg) calcDlg.close(); });
     document.getElementById("share").addEventListener("click", async e => {
       const btn = e.currentTarget, label = btn.textContent;
       btn.disabled = true; btn.textContent = "Making screenshot…";
