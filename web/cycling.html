@@ -47,6 +47,14 @@
   .crow { display:flex; gap:10px; align-items:center; padding:6px 0; border-top:1px solid rgba(255,255,255,.07); font-size:13px; }
   .cs h4 + .crow { border-top:0; }
   .cicon { font-size:22px; width:28px; text-align:center; flex:none; }
+  .cpts { margin-left:auto; font-weight:650; font-variant-numeric:tabular-nums; }
+  .cs h4 small { text-transform:none; letter-spacing:0; font-weight:400; color:var(--mut); }
+  .srule { padding:6px 0; border-top:1px solid rgba(255,255,255,.07); }
+  .cs h4 + .srule { border-top:0; }
+  .sl { font-size:12.5px; font-weight:600; }
+  .sbands { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
+  .sband { padding:2px 8px; border-radius:999px; background:rgba(0,0,0,.25); font-size:11.5px; color:var(--mut); white-space:nowrap; }
+  .sband b { margin-left:3px; }
   .cwhat { display:flex; flex-wrap:wrap; gap:4px; flex:1 1 45%; }
   .cwhat .item { font-size:12px; padding:2px 8px; }
   .warnchip { background:rgba(239,68,68,.3); border-color:rgba(239,68,68,.5); }
@@ -441,6 +449,16 @@ async function main() {
     const table = (title, res) => `<tr><th colspan="3">${esc(title)}</th></tr>` + res.rows.map(({ r, v, points, note }) =>
       `<tr><td>${esc(r.label)}</td><td>${esc(valueText(r, v))}${note ? ` · ${esc(note)}` : ""}</td><td>${signed(points)}</td></tr>`).join("");
 
+    const scale = rules => rules.map(r => {
+      const u = r.unit ? ` ${r.unit}` : "";
+      const chips = r.bands.map((b, i, a) => {
+        const range = r.display === "flag" ? (b.upTo === 0 ? "no" : "yes")
+          : b.upTo == null ? `> ${a[i-1].upTo}${u}` : i === 0 ? `≤ ${b.upTo}${u}` : `${a[i-1].upTo} – ${b.upTo}${u}`;
+        return `<span class="sband" title="${esc(b.note ?? "")}">${esc(range)} <b>${signed(b.points)}</b></span>`;
+      }).join("");
+      return `<div class="srule"><div class="sl">${esc(r.label)}</div><div class="sbands">${chips}</div></div>`;
+    }).join("");
+
     card.innerHTML = `
       <div class="head">
         ${quote ? `<div class="rule"><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Velominati Rule #${quote.rule}</a> · “${esc(quote.text)}”</div>` : ""}
@@ -498,6 +516,10 @@ async function main() {
               <span class="cchip">💧 damp air <b>${sg(R.ride.dampOffsetC)}</b><small>spread &lt; ${R.ride.dampSpreadBelowC}°, air ≤ ${R.ride.dampMaxTempC}°</small></span>
               <span class="cchip">💨 wind above ${R.ride.windChillAboveMs} m/s <b>−${R.ride.windChillPerMs}° per m/s</b></span>
             </div></div>
+
+          <div class="cs"><h4>📏 Point scale: ride comfort <small>(base ${R.scores.comfort.base})</small></h4>${scale(R.scores.comfort.rules)}</div>
+          <div class="cs"><h4>📏 Point scale: training <small>(base ${R.scores.training.base})</small></h4>${scale(R.scores.training.rules)}</div>
+          <div class="cs"><h4>📏 Point scale: bike cleaning <small>(levels: ${R.cleaning.levels.map(l => `${l.min}+ ${esc(l.label)}`).join(", ")})</small></h4>${scale(R.cleaning.rules)}</div>
 
           <div class="cs"><h4>🚩 Flags</h4>
             <div class="crow"><span class="cicon">🧊</span><div><b>Ice risk</b><small>air ≤ ${R.ride.iceTempC}° and wet roads or humidity ≥ ${R.ride.iceHumidityPct}%</small></div></div>
