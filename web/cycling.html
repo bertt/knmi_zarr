@@ -17,8 +17,6 @@
   .banner b { color:var(--acc); font-size:14px; letter-spacing:.02em; }
   .banner a { word-break:break-all; }
   .wrap { position:relative; }
-  .infobtn { position:absolute; top:8px; right:10px; z-index:2; width:28px; height:28px; display:grid; place-items:center; margin:0; padding:0; font-size:15px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); cursor:pointer; transition:background .2s, transform .2s; }
-  .infobtn:hover { background:rgba(76,201,240,.3); transform:scale(1.08); }
   dialog#info, dialog#calc { width:min(92vw,440px); margin:auto; border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:0; overflow:hidden; color:var(--fg);
     background:radial-gradient(circle at 100% 0%, rgba(76,201,240,.18), transparent 55%), rgba(16,23,38,.98); box-shadow:0 20px 60px rgba(0,0,0,.6); }
   dialog#info[open], dialog#calc[open] { animation:pop .18s ease-out; }
@@ -160,7 +158,6 @@
 </head>
 <body>
 <div class="wrap">
-  <button class="infobtn" id="infobtn" aria-label="About this demo" title="About this demo">ℹ️</button>
   <dialog id="info">
     <form method="dialog" class="ihead"><div><div class="ititle">Zarr demo</div><div class="isub">Live KNMI observations, read straight from a <a href="https://zarr.dev/">Zarr</a> store in your browser</div></div>
       <button class="iclose" aria-label="Close">✕</button></form>
@@ -200,7 +197,6 @@ const VARS = ["ta","td","rh","ff","dd","gff","fx","qg","vv","n","ss","rg","pg","
 const card = document.getElementById("card");
 const zsrc = document.getElementById("zsrc");
 zsrc.href = `${ZARR_URL}/zarr.json`; zsrc.textContent = ZARR_URL;
-document.getElementById("infobtn").onclick = () => document.getElementById("info").showModal();
 document.getElementById("info").addEventListener("click", e => { if (e.target.id === "info") e.target.close(); });
 const store = new zarr.FetchStore(ZARR_URL);
 const root = zarr.root(store);
@@ -516,10 +512,11 @@ async function main() {
       </dialog>
 
       <div class="sharelink">🚴 ${SHARE_URL}<span class="when">🕒 Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (local time)</span><small>Data: KNMI, CC BY 4.0</small></div>
-      <div class="noshare" style="text-align:center"><button id="calcbtn" type="button">🧮 How are scores calculated?</button> <button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
+      <div class="noshare" style="text-align:center"><button id="calcbtn" type="button">🧮 How are scores calculated?</button> <button id="aboutbtn" type="button">ℹ️ About</button> <button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
       <div class="foot noshare">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time).</div>`;
 
     const calcDlg = document.getElementById("calc");
+    document.getElementById("aboutbtn").addEventListener("click", () => document.getElementById("info").showModal());
     document.getElementById("calcbtn").addEventListener("click", () => calcDlg.showModal());
     calcDlg.querySelectorAll(".ctab").forEach(b => b.addEventListener("click", () => {
       calcDlg.querySelectorAll(".ctab").forEach(x => x.classList.toggle("on", x === b));
