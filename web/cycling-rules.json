@@ -318,7 +318,7 @@
       { "upTo": 5, "label": "Very cold",
         "items": ["Thermal jersey or winter jacket", "Base layer", "Long bib tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
       { "upTo": 10, "label": "Cold",
-        "items": ["Long-sleeve jersey", "Windproof jacket", "Leg warmers or long tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
+        "items": ["Short jersey", "Windproof jacket", "Leg warmers or long tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
       { "upTo": 12, "label": "Cool",
         "items": ["Short jersey", "Arm warmers", "Windproof jacket", "Knee or leg warmers"] },
       { "upTo": 15, "label": "Mild",
