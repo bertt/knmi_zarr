@@ -25,6 +25,7 @@
     "fullDarkDeg": -12,
     "dullMinCloudOctas": 7,
     "dullMaxWindMs": 2.5,
+    "glareMaxElevationDeg": 12,
     "moonMaxCloudOctas": 2,
     "moonMinIlluminationPct": 50,
     "moonMinAltitudeDeg": 5
@@ -108,6 +109,26 @@
             { "upTo": 200, "points": 3 },
             { "upTo": 400, "points": 7, "note": "Some sun" },
             { "upTo": null, "points": 10, "note": "Sunny" }
+          ] },
+        { "id": "east-wind", "label": "Cold easterly wind", "input": "coldEastWind", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -4, "note": "Easterly wind feels extra cold" }
+          ] },
+        { "id": "glare", "label": "Low sun glare", "input": "sunGlare", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -3, "note": "Low sun: glare in your eyes" }
+          ] },
+        { "id": "leaves", "label": "Wet autumn leaves", "input": "leafRisk", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -6, "note": "Slippery leaves and mud on the road" }
+          ] },
+        { "id": "fog-cold", "label": "Fog and cold", "input": "foggyCold", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": -8, "note": "Cold fog: damp, dark and slippery" }
           ] },
         { "id": "dull", "label": "Dull weather (overcast and no wind)", "input": "dull", "display": "flag",
           "bands": [
@@ -226,6 +247,11 @@
             { "upTo": 28, "points": -5, "note": "Warm" },
             { "upTo": null, "points": -15, "note": "Too hot" }
           ] },
+        { "id": "intervals", "label": "Calm and dry (ideal for intervals)", "input": "intervalWeather", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": 8, "note": "Little wind, dry, 8-18°C: good for intervals" }
+          ] },
         { "id": "visibility", "label": "Visibility", "input": "vv", "unit": "m", "dec": 0,
           "bands": [
             { "upTo": 500, "points": -25, "note": "Dense fog" },
@@ -304,6 +330,17 @@
       { "when": { "input": "qg", "op": "gte", "value": 300 }, "items": ["Sunglasses"] },
       { "when": { "input": "qg", "op": "gte", "value": 600 }, "items": ["Sunscreen"] },
       { "when": { "input": "rideTemp", "op": "gte", "value": 25 }, "items": ["Extra bottle"] },
+      { "when": { "input": "ta", "op": "gte", "value": 25 }, "warning": "Heat: drink regularly, even if you are not thirsty." },
+      { "when": [{ "input": "ff", "op": "gte", "value": 7 }, { "input": "rideTemp", "op": "lt", "value": 8 }], "items": ["Windproof gloves", "Neck warmer"] },
+      { "when": { "input": "dryCold", "op": "gte", "value": 1 }, "items": ["Lip balm"], "warning": "Dry, cold air: lip balm and a buff over your nose and mouth help." },
+      { "when": { "input": "sunGlare", "op": "gte", "value": 1 }, "items": ["Sunglasses"], "warning": "Low sun: glare can hide obstacles. Wear sunglasses." },
+      { "when": [{ "input": "qg", "op": "gte", "value": 600 }, { "input": "rideTemp", "op": "gte", "value": 18 }], "items": ["Sun sleeves or light jersey"] },
+      { "when": [{ "input": "darkSoon", "op": "gte", "value": 1 }, { "input": "rideTemp", "op": "lt", "value": 12 }], "items": ["Extra layer in your pocket"], "warning": "It gets dark soon and cooler: take an extra layer in case you ride longer." },
+      { "when": { "input": "leafRisk", "op": "gte", "value": 1 }, "warning": "Wet leaves and mud: slippery, especially in corners and on cycle paths. Brake early." },
+      { "when": { "input": "coldEastWind", "op": "gte", "value": 1 }, "warning": "Cold easterly wind: it feels colder than the temperature suggests." },
+      { "when": { "input": "bridgeIce", "op": "gte", "value": 1 }, "warning": "Near freezing and damp: bridges and viaducts can be icy first." },
+      { "when": [{ "input": "foggyCold", "op": "gte", "value": 1 }], "warning": "Cold fog: damp, cold and slippery. Dress warmer and use lights." },
+      { "when": [{ "input": "rainIntensity", "op": "gt", "value": 2 }, { "input": "darkness", "op": "gt", "value": 0 }], "warning": "Heavy rain in the dark: very poor visibility. Consider skipping the ride." },
       { "when": { "input": "night", "op": "gte", "value": 1 }, "items": ["Front and rear lights", "Reflective vest"], "warning": "It is dark: use front and rear lights and wear a reflective vest." },
       { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }], "items": ["Front and rear lights"], "warning": "Twilight: it is getting dark, use your lights." },
       { "when": { "input": "thunder", "op": "gte", "value": 1 }, "warning": "Thunderstorm: lightning is dangerous on a bike. Stay inside." },
@@ -358,6 +395,12 @@
           { "upTo": 0, "points": 0 },
           { "upTo": null, "points": 2, "note": "Rinse off salt" }
         ] }
+    ],
+    "tips": [
+      { "when": { "input": "wetDrive", "op": "gte", "value": 1 }, "text": "Wet ride: dry the chain, cassette and chainrings right after the ride to prevent rust." },
+      { "when": { "input": "saltRisk", "op": "gte", "value": 1 }, "text": "Road salt: also rinse the brake calipers, rims or discs, derailleurs and bottom bracket area." },
+      { "when": { "input": "rain24h", "op": "gte", "value": 5 }, "text": "Several wet days: lube the chain more often, it washes out quickly." },
+      { "when": [{ "input": "rain6h", "op": "gte", "value": 3 }, { "input": "ta", "op": "gte", "value": 5 }], "text": "Muddy roads: brush the cassette and derailleurs and clean the brake pads." }
     ],
     "levels": [
       { "min": 0, "label": "No cleaning needed", "icon": "✨", "text": "Dry roads. Wipe the chain if it is dusty." },

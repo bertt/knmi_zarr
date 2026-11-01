@@ -1,1 +1,759 @@
-{"time": "2026-10-30T22:50Z", "stations": [{"id": "06201", "name": "D15-FA-1", "lat": 54.3256, "lon": 2.9358, "height": 42.7}, {"id": "06203", "name": "P11-B", "lat": 52.36, "lon": 3.3417, "height": 41.84}, {"id": "06205", "name": "A12-CPP", "lat": 55.3992, "lon": 3.8103, "height": 48.35}, {"id": "06207", "name": "L9-FF-1", "lat": 53.6144, "lon": 4.9603, "height": 45.31}, {"id": "06208", "name": "AWG-1", "lat": 53.4917, "lon": 5.9417, "height": 40.5}, {"id": "06211", "name": "J6-A", "lat": 53.8242, "lon": 2.9453, "height": 45.7}, {"id": "06213", "name": "Hollandse Kust Noord", "lat": 52.6978, "lon": 4.2933, "height": 39.66}, {"id": "06214", "name": "Buitengaats BG-OHVS2", "lat": 54.0369, "lon": 6.0417, "height": 43.56}, {"id": "06215", "name": "Voorschoten", "lat": 52.1397, "lon": 4.4364, "height": -1.15}, {"id": "06216", "name": "Hollandse Kust Zuid Alpha", "lat": 52.3194, "lon": 4.0422, "height": 44.0}, {"id": "06218", "name": "Hollandse Kust West Alpha", "lat": 52.6797, "lon": 3.8044, "height": 40.77}, {"id": "06225", "name": "IJmuiden", "lat": 52.4622, "lon": 4.555, "height": 4.4}, {"id": "06229", "name": "Texelhors", "lat": 52.995, "lon": 4.72, "height": 1.0}, {"id": "06233", "name": "Assendelft", "lat": 52.4819, "lon": 4.7258, "height": -1.6}, {"id": "06235", "name": "De Kooy Airport", "lat": 52.9269, "lon": 4.7811, "height": 0.57}, {"id": "06236", "name": "Muiden", "lat": 52.3353, "lon": 5.0922, "height": -0.9}, {"id": "06237", "name": "Nieuw-Vennep", "lat": 52.255, "lon": 4.6478, "height": -4.8}, {"id": "06238", "name": "Nieuwkoop", "lat": 52.1514, "lon": 4.765, "height": -5.77}, {"id": "06239", "name": "F3-FB-1", "lat": 54.8539, "lon": 4.6961, "height": 50.6}, {"id": "06240", "name": "Schiphol Airport", "lat": 52.3172, "lon": 4.7897, "height": -3.87}, {"id": "06242", "name": "Vlieland Vliehors", "lat": 53.24, "lon": 4.9208, "height": 1.72}, {"id": "06248", "name": "Wijdenes", "lat": 52.6325, "lon": 5.1736, "height": 0.8}, {"id": "06249", "name": "Berkhout", "lat": 52.6428, "lon": 4.9789, "height": -2.4}, {"id": "06251", "name": "Hoorn Terschelling", "lat": 53.3911, "lon": 5.3458, "height": 0.73}, {"id": "06257", "name": "Wijk aan Zee", "lat": 52.5053, "lon": 4.6031, "height": 8.5}, {"id": "06258", "name": "Houtribdijk", "lat": 52.6481, "lon": 5.4006, "height": 7.25}, {"id": "06260", "name": "De Bilt", "lat": 52.0989, "lon": 5.1797, "height": 1.9}, {"id": "06267", "name": "Stavoren", "lat": 52.8967, "lon": 5.3833, "height": -1.3}, {"id": "06269", "name": "Lelystad Airport", "lat": 52.4483, "lon": 5.5081, "height": -4.52}, {"id": "06270", "name": "Leeuwarden Airport", "lat": 53.2231, "lon": 5.7517, "height": 0.27}, {"id": "06273", "name": "Marknesse", "lat": 52.7019, "lon": 5.8875, "height": -3.35}, {"id": "06275", "name": "Deelen Airport", "lat": 52.0589, "lon": 5.8731, "height": 44.92}, {"id": "06277", "name": "Lauwersoog", "lat": 53.4117, "lon": 6.1992, "height": 2.9}, {"id": "06278", "name": "Heino", "lat": 52.4344, "lon": 6.2589, "height": 3.6}, {"id": "06279", "name": "Hoogeveen", "lat": 52.7489, "lon": 6.5731, "height": 15.82}, {"id": "06280", "name": "Groningen Airport Eelde", "lat": 53.1236, "lon": 6.5847, "height": 3.23}, {"id": "06283", "name": "Hupsel", "lat": 52.0678, "lon": 6.6567, "height": 29.07}, {"id": "06290", "name": "Twenthe Airport", "lat": 52.2731, "lon": 6.8908, "height": 33.02}, {"id": "06310", "name": "Vlissingen", "lat": 51.4414, "lon": 3.5958, "height": 8.03}, {"id": "06317", "name": "Borssele Alpha", "lat": 51.7, "lon": 3.0567, "height": 43.42}, {"id": "06319", "name": "Westdorpe", "lat": 51.2247, "lon": 3.8611, "height": 1.68}, {"id": "06323", "name": "Wilhelminadorp", "lat": 51.5258, "lon": 3.8836, "height": 1.65}, {"id": "06330", "name": "Hoek van Holland", "lat": 51.9911, "lon": 4.1217, "height": 11.86}, {"id": "06340", "name": "Woensdrecht Airport", "lat": 51.4478, "lon": 4.3419, "height": 15.04}, {"id": "06343", "name": "Rotterdam Geulhaven", "lat": 51.8919, "lon": 4.3125, "height": 3.5}, {"id": "06344", "name": "Rotterdam Airport", "lat": 51.9606, "lon": 4.4469, "height": -5.14}, {"id": "06348", "name": "Cabauw", "lat": 51.9692, "lon": 4.9258, "height": -0.71}, {"id": "06350", "name": "Gilze-Rijen Airport", "lat": 51.565, "lon": 4.9353, "height": 11.95}, {"id": "06356", "name": "Herwijnen", "lat": 51.8578, "lon": 5.1453, "height": 0.66}, {"id": "06370", "name": "Eindhoven Airport", "lat": 51.4631, "lon": 5.3856, "height": 19.54}, {"id": "06375", "name": "Volkel Airport", "lat": 51.6586, "lon": 5.7067, "height": 19.85}, {"id": "06380", "name": "Maastricht Airport", "lat": 50.9053, "lon": 5.7619, "height": 112.72}, {"id": "06392", "name": "Horst", "lat": 51.4869, "lon": 6.0561, "height": 21.88}, {"id": "78871", "name": "Saba Airport", "lat": 17.6461, "lon": -63.2208, "height": 31.0}, {"id": "78873", "name": "Sint Eustatius Airport", "lat": 17.4956, "lon": -62.9828, "height": 36.02}, {"id": "78990", "name": "Bonaire Airport", "lat": 12.13, "lon": -68.2758, "height": 2.11}], "variables": {"D1H": {"long_name": "Rainfall Duration in last Hour", "units": "min"}, "Q1H": {"long_name": "Global Solar Radiation 1 Hour Sum", "units": "J/cm²"}, "Q24H": {"long_name": "Global Solar Radiation 24 Hour Sum", "units": "J/cm²"}, "R12H": {"long_name": "Rainfall in last 12 Hours", "units": "mm"}, "R1H": {"long_name": "Rainfall in last Hour", "units": "mm"}, "R24H": {"long_name": "Rainfall in last 24 Hours", "units": "mm"}, "R6H": {"long_name": "Rainfall in last 6 Hours", "units": "mm"}, "Sav1H": {"long_name": "Wind Speed Mean last 1 Hour", "units": "m/s"}, "Sax1H": {"long_name": "Wind Speed Maximum last 1 Hour", "units": "m/s"}, "Sax3H": {"long_name": "Wind Speed Maximum last 3 Hours", "units": "m/s"}, "Sax6H": {"long_name": "Wind Speed Maximum last 6 Hours", "units": "m/s"}, "Sx1H": {"long_name": "Wind Gust Maximum last 1 Hour", "units": "m/s"}, "Sx3H": {"long_name": "Wind Gust Maximum last 3 Hours", "units": "m/s"}, "Sx6H": {"long_name": "Wind Gust Maximum last 6 Hours", "units": "m/s"}, "Tb1n6": {"long_name": "Soil Temperature -5 cm Minimum last 6 Hours", "units": "°C"}, "Tb1x6": {"long_name": "Soil Temperature -5 cm Maximum last 6 Hours", "units": "°C"}, "Tb2n6": {"long_name": "Soil Temperature -10 cm Minimum past 6 Hours", "units": "°C"}, "Tb2x6": {"long_name": "Soil Temperature -10 cm Maximum past 6 Hours", "units": "°C"}, "Tgn12": {"long_name": "Air Temperature 10 cm Minimum last 12 Hours", "units": "°C"}, "Tgn14": {"long_name": "Air Temperature 10 cm Minimum last 14 Hours", "units": "°C"}, "Tgn6": {"long_name": "Air Temperature 10 cm Minimum last 6 Hours", "units": "°C"}, "Tn12": {"long_name": "Air Temperature Minimum last 12 Hours", "units": "°C"}, "Tn14": {"long_name": "Air Temperature Minimum last 14 Hours", "units": "°C"}, "Tn6": {"long_name": "Air Temperature Minimum last 6 Hours", "units": "°C"}, "Tx12": {"long_name": "Air Temperature Maximum last 12 Hours", "units": "°C"}, "Tx24": {"long_name": "Air Temperature Maximum last 24 Hours", "units": "°C"}, "Tx6": {"long_name": "Air Temperature Maximum last 6 Hours", "units": "°C"}, "W10": {"long_name": "Past Weather Indicator", "units": "1"}, "W10-10": {"long_name": "Past Weather Indicator for previous 10 min interval", "units": "1"}, "dd": {"long_name": "Wind Direction Mean with MD", "units": "°"}, "dn": {"long_name": "Wind Direction Minimum with MD", "units": "°"}, "dr": {"long_name": "Precipitation Duration (Rain Gauge)", "units": "s"}, "dsd": {"long_name": "Wind Direction Std Dev with MD", "units": "°"}, "dx": {"long_name": "Wind Direction Maximum with MD", "units": "°"}, "ff": {"long_name": "Wind Speed at 10 m Mean with MD", "units": "m/s"}, "ffs": {"long_name": "Wind Speed Sensor Mean with MD", "units": "m/s"}, "fsd": {"long_name": "Wind Speed Std Dev with MD", "units": "m/s"}, "fx": {"long_name": "Wind Gust at 10 m Maximum last Interval", "units": "m/s"}, "fxs": {"long_name": "Wind Gust Sensor Maximum last Interval", "units": "m/s"}, "gff": {"long_name": "Wind Gust at 10 m Maximum with MD", "units": "m/s"}, "gffs": {"long_name": "Wind Gust Sensor Maximum with MD", "units": "m/s"}, "h": {"long_name": "Cloud Base", "units": "ft"}, "h1": {"long_name": "Cloud Base First Layer", "units": "ft"}, "h2": {"long_name": "Cloud Base Second Layer", "units": "ft"}, "h3": {"long_name": "Cloud Base Third Layer", "units": "ft"}, "hc": {"long_name": "Cloud Base Ceilometer", "units": "ft"}, "hc1": {"long_name": "Cloud Base Ceilometer First Layer", "units": "ft"}, "hc2": {"long_name": "Cloud Base Ceilometer Second Layer", "units": "ft"}, "hc3": {"long_name": "Cloud Base Ceilometer Third Layer", "units": "ft"}, "n": {"long_name": "Total Cloud Cover", "units": "okta"}, "n1": {"long_name": "Cloud Amount First Layer", "units": "okta"}, "n2": {"long_name": "Cloud Amount Second Layer", "units": "okta"}, "n3": {"long_name": "Cloud Amount Third Layer", "units": "okta"}, "nc": {"long_name": "Total Cloud Cover Ceilometer", "units": "okta"}, "nc1": {"long_name": "Cloud Amount Ceilometer First Layer", "units": "okta"}, "nc2": {"long_name": "Cloud Amount Ceilometer Second Layer", "units": "okta"}, "nc3": {"long_name": "Cloud Amount Ceilometer Third Layer", "units": "okta"}, "nhc": {"long_name": "Low and Middle Cloud Amount Ceilometer", "units": "okta"}, "p0": {"long_name": "Air Pressure at Station Level 1 Min Mean", "units": "hPa"}, "pg": {"long_name": "Precipitation Intensity (Present Weather Sensor) Mean", "units": "mm/h"}, "pp": {"long_name": "Air Pressure at Mean Sea Level 1 Min Mean", "units": "hPa"}, "pr": {"long_name": "Precipitation Duration (Present Weather Sensor)", "units": "s"}, "ps": {"long_name": "Air Pressure at Sensor Level Mean", "units": "hPa"}, "pwc": {"long_name": "Corrected Precipitation Type Maximum", "units": "1"}, "qg": {"long_name": "Global Solar Radiation Mean", "units": "W/m²"}, "qgn": {"long_name": "Global Solar Radiation Minimum", "units": "W/m²"}, "qgx": {"long_name": "Global Solar Radiation Maximum", "units": "W/m²"}, "qnh": {"long_name": "QNH 1 Min Mean", "units": "hPa"}, "rg": {"long_name": "Precipitation Intensity (Rain Gauge) Mean", "units": "mm/h"}, "rh": {"long_name": "Relative Humidity 1 Min Mean", "units": "%"}, "sq": {"long_name": "Squall Indicator", "units": "1"}, "ss": {"long_name": "Sunshine Duration", "units": "min"}, "ta": {"long_name": "Air Temperature 1 Min Mean", "units": "°C"}, "tb": {"long_name": "Wet Bulb Temperature Mean", "units": "°C"}, "tb1": {"long_name": "Soil Temperature -5 cm Mean", "units": "°C"}, "tb2": {"long_name": "Soil Temperature -10 cm Mean", "units": "°C"}, "tb3": {"long_name": "Soil Temperature -20 cm Mean", "units": "°C"}, "tb4": {"long_name": "Soil Temperature -50 cm Mean", "units": "°C"}, "tb5": {"long_name": "Soil Temperature -100 cm Mean", "units": "°C"}, "td": {"long_name": "Dew Point Temperature 1 Min Mean", "units": "°C"}, "tg": {"long_name": "Air Temperature 10 cm Mean", "units": "°C"}, "tgn": {"long_name": "Air Temperature 10 cm Minimum", "units": "°C"}, "tn": {"long_name": "Air Temperature Minimum", "units": "°C"}, "tsd": {"long_name": "Air Temperature Std Dev", "units": "°C"}, "tx": {"long_name": "Air Temperature Maximum", "units": "°C"}, "vv": {"long_name": "Horizontal Visibility Mean", "units": "m"}, "ww": {"long_name": "WaWa Weather Code", "units": "1"}, "ww-10": {"long_name": "WaWa Weather Code for previous 10 min interval", "units": "1"}, "za": {"long_name": "Background Luminance Mean", "units": "cd/m²"}, "zm": {"long_name": "Meteorological Optical Range Mean", "units": "m"}}}
+{
+    "time": "2026-10-30T22:50Z",
+    "stations": [
+        {
+            "id": "06201",
+            "name": "D15-FA-1",
+            "lat": 54.3256,
+            "lon": 2.9358,
+            "height": 42.7
+        },
+        {
+            "id": "06203",
+            "name": "P11-B",
+            "lat": 52.36,
+            "lon": 3.3417,
+            "height": 41.84
+        },
+        {
+            "id": "06205",
+            "name": "A12-CPP",
+            "lat": 55.3992,
+            "lon": 3.8103,
+            "height": 48.35
+        },
+        {
+            "id": "06207",
+            "name": "L9-FF-1",
+            "lat": 53.6144,
+            "lon": 4.9603,
+            "height": 45.31
+        },
+        {
+            "id": "06208",
+            "name": "AWG-1",
+            "lat": 53.4917,
+            "lon": 5.9417,
+            "height": 40.5
+        },
+        {
+            "id": "06211",
+            "name": "J6-A",
+            "lat": 53.8242,
+            "lon": 2.9453,
+            "height": 45.7
+        },
+        {
+            "id": "06213",
+            "name": "Hollandse Kust Noord",
+            "lat": 52.6978,
+            "lon": 4.2933,
+            "height": 39.66
+        },
+        {
+            "id": "06214",
+            "name": "Buitengaats BG-OHVS2",
+            "lat": 54.0369,
+            "lon": 6.0417,
+            "height": 43.56
+        },
+        {
+            "id": "06215",
+            "name": "Voorschoten",
+            "lat": 52.1397,
+            "lon": 4.4364,
+            "height": -1.15
+        },
+        {
+            "id": "06216",
+            "name": "Hollandse Kust Zuid Alpha",
+            "lat": 52.3194,
+            "lon": 4.0422,
+            "height": 44.0
+        },
+        {
+            "id": "06218",
+            "name": "Hollandse Kust West Alpha",
+            "lat": 52.6797,
+            "lon": 3.8044,
+            "height": 40.77
+        },
+        {
+            "id": "06225",
+            "name": "IJmuiden",
+            "lat": 52.4622,
+            "lon": 4.555,
+            "height": 4.4
+        },
+        {
+            "id": "06229",
+            "name": "Texelhors",
+            "lat": 52.995,
+            "lon": 4.72,
+            "height": 1.0
+        },
+        {
+            "id": "06233",
+            "name": "Assendelft",
+            "lat": 52.4819,
+            "lon": 4.7258,
+            "height": -1.6
+        },
+        {
+            "id": "06235",
+            "name": "De Kooy Airport",
+            "lat": 52.9269,
+            "lon": 4.7811,
+            "height": 0.57
+        },
+        {
+            "id": "06236",
+            "name": "Muiden",
+            "lat": 52.3353,
+            "lon": 5.0922,
+            "height": -0.9
+        },
+        {
+            "id": "06237",
+            "name": "Nieuw-Vennep",
+            "lat": 52.255,
+            "lon": 4.6478,
+            "height": -4.8
+        },
+        {
+            "id": "06238",
+            "name": "Nieuwkoop",
+            "lat": 52.1514,
+            "lon": 4.765,
+            "height": -5.77
+        },
+        {
+            "id": "06239",
+            "name": "F3-FB-1",
+            "lat": 54.8539,
+            "lon": 4.6961,
+            "height": 50.6
+        },
+        {
+            "id": "06240",
+            "name": "Schiphol Airport",
+            "lat": 52.3172,
+            "lon": 4.7897,
+            "height": -3.87
+        },
+        {
+            "id": "06242",
+            "name": "Vlieland Vliehors",
+            "lat": 53.24,
+            "lon": 4.9208,
+            "height": 1.72
+        },
+        {
+            "id": "06248",
+            "name": "Wijdenes",
+            "lat": 52.6325,
+            "lon": 5.1736,
+            "height": 0.8
+        },
+        {
+            "id": "06249",
+            "name": "Berkhout",
+            "lat": 52.6428,
+            "lon": 4.9789,
+            "height": -2.4
+        },
+        {
+            "id": "06251",
+            "name": "Hoorn Terschelling",
+            "lat": 53.3911,
+            "lon": 5.3458,
+            "height": 0.73
+        },
+        {
+            "id": "06257",
+            "name": "Wijk aan Zee",
+            "lat": 52.5053,
+            "lon": 4.6031,
+            "height": 8.5
+        },
+        {
+            "id": "06258",
+            "name": "Houtribdijk",
+            "lat": 52.6481,
+            "lon": 5.4006,
+            "height": 7.25
+        },
+        {
+            "id": "06260",
+            "name": "De Bilt",
+            "lat": 52.0989,
+            "lon": 5.1797,
+            "height": 1.9
+        },
+        {
+            "id": "06267",
+            "name": "Stavoren",
+            "lat": 52.8967,
+            "lon": 5.3833,
+            "height": -1.3
+        },
+        {
+            "id": "06269",
+            "name": "Lelystad Airport",
+            "lat": 52.4483,
+            "lon": 5.5081,
+            "height": -4.52
+        },
+        {
+            "id": "06270",
+            "name": "Leeuwarden Airport",
+            "lat": 53.2231,
+            "lon": 5.7517,
+            "height": 0.27
+        },
+        {
+            "id": "06273",
+            "name": "Marknesse",
+            "lat": 52.7019,
+            "lon": 5.8875,
+            "height": -3.35
+        },
+        {
+            "id": "06275",
+            "name": "Deelen Airport",
+            "lat": 52.0589,
+            "lon": 5.8731,
+            "height": 44.92
+        },
+        {
+            "id": "06277",
+            "name": "Lauwersoog",
+            "lat": 53.4117,
+            "lon": 6.1992,
+            "height": 2.9
+        },
+        {
+            "id": "06278",
+            "name": "Heino",
+            "lat": 52.4344,
+            "lon": 6.2589,
+            "height": 3.6
+        },
+        {
+            "id": "06279",
+            "name": "Hoogeveen",
+            "lat": 52.7489,
+            "lon": 6.5731,
+            "height": 15.82
+        },
+        {
+            "id": "06280",
+            "name": "Groningen Airport Eelde",
+            "lat": 53.1236,
+            "lon": 6.5847,
+            "height": 3.23
+        },
+        {
+            "id": "06283",
+            "name": "Hupsel",
+            "lat": 52.0678,
+            "lon": 6.6567,
+            "height": 29.07
+        },
+        {
+            "id": "06290",
+            "name": "Twenthe Airport",
+            "lat": 52.2731,
+            "lon": 6.8908,
+            "height": 33.02
+        },
+        {
+            "id": "06310",
+            "name": "Vlissingen",
+            "lat": 51.4414,
+            "lon": 3.5958,
+            "height": 8.03
+        },
+        {
+            "id": "06317",
+            "name": "Borssele Alpha",
+            "lat": 51.7,
+            "lon": 3.0567,
+            "height": 43.42
+        },
+        {
+            "id": "06319",
+            "name": "Westdorpe",
+            "lat": 51.2247,
+            "lon": 3.8611,
+            "height": 1.68
+        },
+        {
+            "id": "06323",
+            "name": "Wilhelminadorp",
+            "lat": 51.5258,
+            "lon": 3.8836,
+            "height": 1.65
+        },
+        {
+            "id": "06330",
+            "name": "Hoek van Holland",
+            "lat": 51.9911,
+            "lon": 4.1217,
+            "height": 11.86
+        },
+        {
+            "id": "06340",
+            "name": "Woensdrecht Airport",
+            "lat": 51.4478,
+            "lon": 4.3419,
+            "height": 15.04
+        },
+        {
+            "id": "06343",
+            "name": "Rotterdam Geulhaven",
+            "lat": 51.8919,
+            "lon": 4.3125,
+            "height": 3.5
+        },
+        {
+            "id": "06344",
+            "name": "Rotterdam Airport",
+            "lat": 51.9606,
+            "lon": 4.4469,
+            "height": -5.14
+        },
+        {
+            "id": "06348",
+            "name": "Cabauw",
+            "lat": 51.9692,
+            "lon": 4.9258,
+            "height": -0.71
+        },
+        {
+            "id": "06350",
+            "name": "Gilze-Rijen Airport",
+            "lat": 51.565,
+            "lon": 4.9353,
+            "height": 11.95
+        },
+        {
+            "id": "06356",
+            "name": "Herwijnen",
+            "lat": 51.8578,
+            "lon": 5.1453,
+            "height": 0.66
+        },
+        {
+            "id": "06370",
+            "name": "Eindhoven Airport",
+            "lat": 51.4631,
+            "lon": 5.3856,
+            "height": 19.54
+        },
+        {
+            "id": "06375",
+            "name": "Volkel Airport",
+            "lat": 51.6586,
+            "lon": 5.7067,
+            "height": 19.85
+        },
+        {
+            "id": "06380",
+            "name": "Maastricht Airport",
+            "lat": 50.9053,
+            "lon": 5.7619,
+            "height": 112.72
+        },
+        {
+            "id": "06392",
+            "name": "Horst",
+            "lat": 51.4869,
+            "lon": 6.0561,
+            "height": 21.88
+        },
+        {
+            "id": "78871",
+            "name": "Saba Airport",
+            "lat": 17.6461,
+            "lon": -63.2208,
+            "height": 31.0
+        },
+        {
+            "id": "78873",
+            "name": "Sint Eustatius Airport",
+            "lat": 17.4956,
+            "lon": -62.9828,
+            "height": 36.02
+        },
+        {
+            "id": "78990",
+            "name": "Bonaire Airport",
+            "lat": 12.13,
+            "lon": -68.2758,
+            "height": 2.11
+        }
+    ],
+    "variables": {
+        "D1H": {
+            "long_name": "Rainfall Duration in last Hour",
+            "units": "min"
+        },
+        "Q1H": {
+            "long_name": "Global Solar Radiation 1 Hour Sum",
+            "units": "J/cmï¿½"
+        },
+        "Q24H": {
+            "long_name": "Global Solar Radiation 24 Hour Sum",
+            "units": "J/cmï¿½"
+        },
+        "R12H": {
+            "long_name": "Rainfall in last 12 Hours",
+            "units": "mm"
+        },
+        "R1H": {
+            "long_name": "Rainfall in last Hour",
+            "units": "mm"
+        },
+        "R24H": {
+            "long_name": "Rainfall in last 24 Hours",
+            "units": "mm"
+        },
+        "R6H": {
+            "long_name": "Rainfall in last 6 Hours",
+            "units": "mm"
+        },
+        "Sav1H": {
+            "long_name": "Wind Speed Mean last 1 Hour",
+            "units": "m/s"
+        },
+        "Sax1H": {
+            "long_name": "Wind Speed Maximum last 1 Hour",
+            "units": "m/s"
+        },
+        "Sax3H": {
+            "long_name": "Wind Speed Maximum last 3 Hours",
+            "units": "m/s"
+        },
+        "Sax6H": {
+            "long_name": "Wind Speed Maximum last 6 Hours",
+            "units": "m/s"
+        },
+        "Sx1H": {
+            "long_name": "Wind Gust Maximum last 1 Hour",
+            "units": "m/s"
+        },
+        "Sx3H": {
+            "long_name": "Wind Gust Maximum last 3 Hours",
+            "units": "m/s"
+        },
+        "Sx6H": {
+            "long_name": "Wind Gust Maximum last 6 Hours",
+            "units": "m/s"
+        },
+        "Tb1n6": {
+            "long_name": "Soil Temperature -5 cm Minimum last 6 Hours",
+            "units": "ï¿½C"
+        },
+        "Tb1x6": {
+            "long_name": "Soil Temperature -5 cm Maximum last 6 Hours",
+            "units": "ï¿½C"
+        },
+        "Tb2n6": {
+            "long_name": "Soil Temperature -10 cm Minimum past 6 Hours",
+            "units": "ï¿½C"
+        },
+        "Tb2x6": {
+            "long_name": "Soil Temperature -10 cm Maximum past 6 Hours",
+            "units": "ï¿½C"
+        },
+        "Tgn12": {
+            "long_name": "Air Temperature 10 cm Minimum last 12 Hours",
+            "units": "ï¿½C"
+        },
+        "Tgn14": {
+            "long_name": "Air Temperature 10 cm Minimum last 14 Hours",
+            "units": "ï¿½C"
+        },
+        "Tgn6": {
+            "long_name": "Air Temperature 10 cm Minimum last 6 Hours",
+            "units": "ï¿½C"
+        },
+        "Tn12": {
+            "long_name": "Air Temperature Minimum last 12 Hours",
+            "units": "ï¿½C"
+        },
+        "Tn14": {
+            "long_name": "Air Temperature Minimum last 14 Hours",
+            "units": "ï¿½C"
+        },
+        "Tn6": {
+            "long_name": "Air Temperature Minimum last 6 Hours",
+            "units": "ï¿½C"
+        },
+        "Tx12": {
+            "long_name": "Air Temperature Maximum last 12 Hours",
+            "units": "ï¿½C"
+        },
+        "Tx24": {
+            "long_name": "Air Temperature Maximum last 24 Hours",
+            "units": "ï¿½C"
+        },
+        "Tx6": {
+            "long_name": "Air Temperature Maximum last 6 Hours",
+            "units": "ï¿½C"
+        },
+        "W10": {
+            "long_name": "Past Weather Indicator",
+            "units": "1"
+        },
+        "W10-10": {
+            "long_name": "Past Weather Indicator for previous 10 min interval",
+            "units": "1"
+        },
+        "dd": {
+            "long_name": "Wind Direction Mean with MD",
+            "units": "ï¿½"
+        },
+        "dn": {
+            "long_name": "Wind Direction Minimum with MD",
+            "units": "ï¿½"
+        },
+        "dr": {
+            "long_name": "Precipitation Duration (Rain Gauge)",
+            "units": "s"
+        },
+        "dsd": {
+            "long_name": "Wind Direction Std Dev with MD",
+            "units": "ï¿½"
+        },
+        "dx": {
+            "long_name": "Wind Direction Maximum with MD",
+            "units": "ï¿½"
+        },
+        "ff": {
+            "long_name": "Wind Speed at 10 m Mean with MD",
+            "units": "m/s"
+        },
+        "ffs": {
+            "long_name": "Wind Speed Sensor Mean with MD",
+            "units": "m/s"
+        },
+        "fsd": {
+            "long_name": "Wind Speed Std Dev with MD",
+            "units": "m/s"
+        },
+        "fx": {
+            "long_name": "Wind Gust at 10 m Maximum last Interval",
+            "units": "m/s"
+        },
+        "fxs": {
+            "long_name": "Wind Gust Sensor Maximum last Interval",
+            "units": "m/s"
+        },
+        "gff": {
+            "long_name": "Wind Gust at 10 m Maximum with MD",
+            "units": "m/s"
+        },
+        "gffs": {
+            "long_name": "Wind Gust Sensor Maximum with MD",
+            "units": "m/s"
+        },
+        "h": {
+            "long_name": "Cloud Base",
+            "units": "ft"
+        },
+        "h1": {
+            "long_name": "Cloud Base First Layer",
+            "units": "ft"
+        },
+        "h2": {
+            "long_name": "Cloud Base Second Layer",
+            "units": "ft"
+        },
+        "h3": {
+            "long_name": "Cloud Base Third Layer",
+            "units": "ft"
+        },
+        "hc": {
+            "long_name": "Cloud Base Ceilometer",
+            "units": "ft"
+        },
+        "hc1": {
+            "long_name": "Cloud Base Ceilometer First Layer",
+            "units": "ft"
+        },
+        "hc2": {
+            "long_name": "Cloud Base Ceilometer Second Layer",
+            "units": "ft"
+        },
+        "hc3": {
+            "long_name": "Cloud Base Ceilometer Third Layer",
+            "units": "ft"
+        },
+        "n": {
+            "long_name": "Total Cloud Cover",
+            "units": "okta"
+        },
+        "n1": {
+            "long_name": "Cloud Amount First Layer",
+            "units": "okta"
+        },
+        "n2": {
+            "long_name": "Cloud Amount Second Layer",
+            "units": "okta"
+        },
+        "n3": {
+            "long_name": "Cloud Amount Third Layer",
+            "units": "okta"
+        },
+        "nc": {
+            "long_name": "Total Cloud Cover Ceilometer",
+            "units": "okta"
+        },
+        "nc1": {
+            "long_name": "Cloud Amount Ceilometer First Layer",
+            "units": "okta"
+        },
+        "nc2": {
+            "long_name": "Cloud Amount Ceilometer Second Layer",
+            "units": "okta"
+        },
+        "nc3": {
+            "long_name": "Cloud Amount Ceilometer Third Layer",
+            "units": "okta"
+        },
+        "nhc": {
+            "long_name": "Low and Middle Cloud Amount Ceilometer",
+            "units": "okta"
+        },
+        "p0": {
+            "long_name": "Air Pressure at Station Level 1 Min Mean",
+            "units": "hPa"
+        },
+        "pg": {
+            "long_name": "Precipitation Intensity (Present Weather Sensor) Mean",
+            "units": "mm/h"
+        },
+        "pp": {
+            "long_name": "Air Pressure at Mean Sea Level 1 Min Mean",
+            "units": "hPa"
+        },
+        "pr": {
+            "long_name": "Precipitation Duration (Present Weather Sensor)",
+            "units": "s"
+        },
+        "ps": {
+            "long_name": "Air Pressure at Sensor Level Mean",
+            "units": "hPa"
+        },
+        "pwc": {
+            "long_name": "Corrected Precipitation Type Maximum",
+            "units": "1"
+        },
+        "qg": {
+            "long_name": "Global Solar Radiation Mean",
+            "units": "W/mï¿½"
+        },
+        "qgn": {
+            "long_name": "Global Solar Radiation Minimum",
+            "units": "W/mï¿½"
+        },
+        "qgx": {
+            "long_name": "Global Solar Radiation Maximum",
+            "units": "W/mï¿½"
+        },
+        "qnh": {
+            "long_name": "QNH 1 Min Mean",
+            "units": "hPa"
+        },
+        "rg": {
+            "long_name": "Precipitation Intensity (Rain Gauge) Mean",
+            "units": "mm/h"
+        },
+        "rh": {
+            "long_name": "Relative Humidity 1 Min Mean",
+            "units": "%"
+        },
+        "sq": {
+            "long_name": "Squall Indicator",
+            "units": "1"
+        },
+        "ss": {
+            "long_name": "Sunshine Duration",
+            "units": "min"
+        },
+        "ta": {
+            "long_name": "Air Temperature 1 Min Mean",
+            "units": "ï¿½C"
+        },
+        "tb": {
+            "long_name": "Wet Bulb Temperature Mean",
+            "units": "ï¿½C"
+        },
+        "tb1": {
+            "long_name": "Soil Temperature -5 cm Mean",
+            "units": "ï¿½C"
+        },
+        "tb2": {
+            "long_name": "Soil Temperature -10 cm Mean",
+            "units": "ï¿½C"
+        },
+        "tb3": {
+            "long_name": "Soil Temperature -20 cm Mean",
+            "units": "ï¿½C"
+        },
+        "tb4": {
+            "long_name": "Soil Temperature -50 cm Mean",
+            "units": "ï¿½C"
+        },
+        "tb5": {
+            "long_name": "Soil Temperature -100 cm Mean",
+            "units": "ï¿½C"
+        },
+        "td": {
+            "long_name": "Dew Point Temperature 1 Min Mean",
+            "units": "ï¿½C"
+        },
+        "tg": {
+            "long_name": "Air Temperature 10 cm Mean",
+            "units": "ï¿½C"
+        },
+        "tgn": {
+            "long_name": "Air Temperature 10 cm Minimum",
+            "units": "ï¿½C"
+        },
+        "tn": {
+            "long_name": "Air Temperature Minimum",
+            "units": "ï¿½C"
+        },
+        "tsd": {
+            "long_name": "Air Temperature Std Dev",
+            "units": "ï¿½C"
+        },
+        "tx": {
+            "long_name": "Air Temperature Maximum",
+            "units": "ï¿½C"
+        },
+        "vv": {
+            "long_name": "Horizontal Visibility Mean",
+            "units": "m"
+        },
+        "ww": {
+            "long_name": "WaWa Weather Code",
+            "units": "1"
+        },
+        "ww-10": {
+            "long_name": "WaWa Weather Code for previous 10 min interval",
+            "units": "1"
+        },
+        "za": {
+            "long_name": "Background Luminance Mean",
+            "units": "cd/mï¿½"
+        },
+        "zm": {
+            "long_name": "Meteorological Optical Range Mean",
+            "units": "m"
+        }
+    }
+}
