@@ -143,7 +143,7 @@
   .loading .lt { margin-top:10px; font-size:18px; font-weight:650; }
   .loading .ls { font-size:12.5px; color:var(--mut); }
   .loading .steps { margin-top:6px; display:grid; gap:4px; text-align:left; font-size:13.5px; }
-  .loading .step.run { color:var(--mut); } .loading .step.fail { color:#fca5a5; }
+  .loading .step.run { color:var(--mut); } .loading .step.wait { color:var(--mut); opacity:.5; } .loading .step.fail { color:#fca5a5; }
   @keyframes ride { from { transform:translateX(-28px) rotate(-3deg); } to { transform:translateX(28px) rotate(3deg); } }
   @keyframes road { from { background-position:200% 0; } to { background-position:0 0; } }
   @media (prefers-reduced-motion:reduce) { .loading .bike, .loading .road { animation:none; } }
@@ -199,7 +199,8 @@
   </dialog>
   <div class="card" id="card"><div class="loading"><div class="bike">🚴</div><div class="road"></div><div class="lt">Checking the weather…</div>
   <div class="steps"><div class="step run" id="s-loc"><span class="si">⏳</span> <span class="st">Determining your location</span></div>
-    <div class="step run" id="s-data"><span class="si">⏳</span> <span class="st">Fetching KNMI data</span></div></div></div></div>
+    <div class="step run" id="s-data"><span class="si">⏳</span> <span class="st">Fetching KNMI data</span></div>
+    <div class="step wait" id="s-calc"><span class="si">⚪</span> <span class="st">Analysing data</span></div></div></div></div>
 </div>
 
 <script type="module">
@@ -358,7 +359,7 @@ async function main() {
     const el = document.getElementById(id);
     if (!el) return;
     el.className = `step ${state}`;
-    el.querySelector(".si").textContent = { run: "⏳", ok: "✅", fail: "⚠️", skip: "➖" }[state];
+    el.querySelector(".si").textContent = { run: "⏳", ok: "✅", fail: "⚠️", skip: "➖", wait: "⚪" }[state];
     if (text) el.querySelector(".st").textContent = text;
   };
   const makePos = () => getPosition().then(c => { step("s-loc", "ok", "Location found"); return c; },
@@ -603,6 +604,8 @@ async function main() {
     document.getElementById("pick").addEventListener("change", e => show(+e.target.value));
     document.querySelector(".goto")?.addEventListener("click", e => { e.preventDefault(); show(+e.target.dataset.i); });
   };
+  step("s-calc", "run");
+  await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
   render(idx, notice, distance);
 }
 
