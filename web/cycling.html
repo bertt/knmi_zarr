@@ -129,14 +129,14 @@
   /* compact layout: small side-by-side rings, tighter spacing, two columns on wide screens */
   .scores { margin-top:8px; gap:8px; }
   .score { --c:#2ecc71; display:grid; grid-template-columns:auto 1fr; grid-template-areas:"ring h" "ring v" "ring b"; align-items:center; column-gap:12px; padding:10px 12px; text-align:left; border-radius:18px;
-    border:1px solid color-mix(in srgb, var(--c) 45%, transparent);
-    background:linear-gradient(135deg, color-mix(in srgb, var(--c) 24%, transparent), rgba(255,255,255,.03) 70%);
-    box-shadow:0 4px 18px color-mix(in srgb, var(--c) 18%, transparent); }
+    border:1px solid rgba(var(--cr), .45);
+    background:linear-gradient(135deg, rgba(var(--cr), .24), rgba(255,255,255,.03) 70%);
+    box-shadow:0 4px 18px rgba(var(--cr), .18); }
   .score h3 { grid-area:h; margin:0; align-self:end; color:var(--fg); opacity:.75; }
   .score .verdict { grid-area:v; margin:2px 0 0; align-self:center; font-size:15px; }
   .score .bar { grid-area:b; align-self:start; margin-top:6px; height:5px; border-radius:3px; background:rgba(255,255,255,.14); overflow:hidden; }
-  .score .bar i { display:block; height:100%; border-radius:3px; background:linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, #fff 0%), var(--c)); }
-  .ring { grid-area:ring; width:84px; height:84px; margin:0; box-shadow:0 0 14px color-mix(in srgb, var(--c) 45%, transparent); }
+  .score .bar i { display:block; height:100%; border-radius:3px; background:var(--c); }
+  .ring { grid-area:ring; width:84px; height:84px; margin:0; box-shadow:0 0 14px rgba(var(--cr), .45); }
   .ring > div { width:64px; height:64px; }
   .ring .em { font-size:22px; } .ring .n { font-size:18px; }
   .chips { margin-top:8px; gap:4px; }
@@ -207,6 +207,7 @@ const readVar = async name => {
 };
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const rgbOf = hex => { const h = String(hex).replace("#", ""); const n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16); return `${n >> 16 & 255},${n >> 8 & 255},${n & 255}`; };
 const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
 const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t => v >= t).length;
 const sunWord = q => q < 10 ? "dark / no sun" : q < 100 ? "overcast" : q < 250 ? "cloudy" : q < 500 ? "partly sunny" : q < 800 ? "sunny" : "very sunny";
@@ -439,10 +440,10 @@ async function main() {
       </div>
 
       <div class="scores">
-        <div class="score" style="--c:${cV.color}"><h3>Ride comfort</h3>
+        <div class="score" style="--c:${cV.color};--cr:${rgbOf(cV.color)}"><h3>Ride comfort</h3>
           <div class="ring" style="--p:${cScore}%"><div><span class="em">${cV.icon}</span><span class="n">${cScore}</span></div></div>
           <div class="verdict">${esc(cV.label)}</div><div class="bar"><i style="width:${cScore}%"></i></div></div>
-        <div class="score" style="--c:${tV.color}"><h3>Training</h3>
+        <div class="score" style="--c:${tV.color};--cr:${rgbOf(tV.color)}"><h3>Training</h3>
           <div class="ring" style="--p:${tScore}%"><div><span class="em">${tV.icon}</span><span class="n">${tScore}</span></div></div>
           <div class="verdict">${esc(tV.label)}</div><div class="bar"><i style="width:${tScore}%"></i></div></div>
       </div>
