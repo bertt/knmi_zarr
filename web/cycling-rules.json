@@ -277,7 +277,7 @@
       { "upTo": 5, "label": "Very cold",
         "items": ["Thermal jersey or winter jacket", "Base layer", "Long bib tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
       { "upTo": 10, "label": "Cold",
-        "items": ["Long-sleeve jersey", "Windproof jacket", "Leg warmers or long tights", "Gloves", "Skullcap", "Neck warmer"] },
+        "items": ["Long-sleeve jersey", "Windproof jacket", "Leg warmers or long tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
       { "upTo": 12, "label": "Cool",
         "items": ["Short jersey", "Arm warmers", "Windproof jacket", "Knee or leg warmers"] },
       { "upTo": 15, "label": "Mild",
@@ -291,7 +291,7 @@
       { "when": { "input": "rain1h", "op": "gt", "value": 0.1 }, "items": ["Mudguards"], "warning": "Wet roads: take mudguards to keep spray off you and your bike." },
       { "when": { "input": "rain6h", "op": "gt", "value": 1 }, "items": ["Mudguards"] },
       { "when": [
-          { "input": "rideTemp", "op": "lt", "value": 8 },
+          { "input": "rideTemp", "op": "lt", "value": 12 },
           { "input": "rainIntensity", "op": "gt", "value": 0.05 }
         ], "items": ["Waterproof gloves", "Waterproof overshoes"] },
       { "when": { "input": "qg", "op": "gte", "value": 300 }, "items": ["Sunglasses"] },
