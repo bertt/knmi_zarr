@@ -43,6 +43,10 @@
   .warnchip { background:rgba(239,68,68,.3); border-color:rgba(239,68,68,.5); }
   .cif { flex:1 1 55%; font-size:12px; color:var(--mut); }
   .cif i { color:var(--acc); font-style:normal; font-weight:600; }
+  .velo .cicon { width:40px; font-size:15px; font-weight:750; color:var(--acc); }
+  .velo i { color:var(--fg); font-style:italic; font-weight:400; }
+  .velo small i { color:var(--acc); font-style:normal; font-weight:600; }
+  .velo a { color:var(--acc); text-decoration:none; }
   .cbands { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:6px; }
   .cband { padding:7px 9px; border-radius:12px; background:linear-gradient(135deg, rgba(76,201,240,.22), rgba(76,201,240,.06)); border:1px solid rgba(76,201,240,.3); font-size:13px; }
   .calcbody .why { font-size:12.5px; line-height:1.5; }
@@ -212,7 +216,7 @@ const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
 const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t => v >= t).length;
 const sunWord = q => q < 10 ? "dark / no sun" : q < 100 ? "overcast" : q < 250 ? "cloudy" : q < 500 ? "partly sunny" : q < 800 ? "sunny" : "very sunny";
 const sg = v => `${v < 0 ? "−" : "+"}${Math.abs(v)}°`;
-const INPUT_NAMES = { rainIntensity: "rain now (mm/h)", rain1h: "rain last hour (mm)", rain6h: "rain last 6 h (mm)", rain24h: "rain last 24 h (mm)",
+const INPUT_NAMES = { comfort: "ride comfort score", rainIntensity: "rain now (mm/h)", rain1h: "rain last hour (mm)", rain6h: "rain last 6 h (mm)", rain24h: "rain last 24 h (mm)",
   rideTemp: "temperature on the bike (°C)", ta: "air temperature (°C)", qg: "sun (W/m²)", vv: "visibility (m)", night: "dark", darkness: "darkness (%)", moonlight: "bright moon and clear sky", dull: "overcast and windless", coldEastWind: "cold easterly wind", sunGlare: "low sun glare", leafRisk: "wet autumn leaves", foggyCold: "fog and cold", bridgeIce: "ice on bridges", dryCold: "dry cold air", intervalWeather: "calm and dry", wetDrive: "wet drivetrain", moonIllumination: "moon illuminated (%)", darkSoon: "dark within 2 hours", iceRisk: "ice risk", saltRisk: "salt risk", hail: "hail", thunder: "thunderstorm", ff: "wind (m/s)", gust: "gusts (m/s)", rh: "humidity (%)" };
 const OP_TEXT = { gt: ">", gte: "≥", lt: "<", lte: "≤", eq: "=" };
 const condText = c => ["night", "darkSoon", "iceRisk", "saltRisk", "coldEastWind", "sunGlare", "leafRisk", "foggyCold", "bridgeIce", "dryCold", "intervalWeather", "wetDrive"].includes(c.input) && c.op === "gte" && c.value === 1
@@ -474,7 +478,8 @@ async function main() {
           <button class="iclose" aria-label="Close">✕</button></form>
         <div class="ctabs" role="tablist">
           <button type="button" class="ctab on" data-tab="rules" role="tab">📖 Rules</button>
-          <button type="button" class="ctab" data-tab="scores" role="tab">📊 Scores</button></div>
+          <button type="button" class="ctab" data-tab="scores" role="tab">📊 Scores</button>
+          <button type="button" class="ctab" data-tab="velo" role="tab">🏆 Velominati</button></div>
         <div class="calcbody">
          <div class="cpane" data-pane="rules">
           <div class="cs"><h4>🌡️ Temperature on the bike</h4>
@@ -508,6 +513,13 @@ async function main() {
             <table>${table(R.scores.comfort.title + ` — base ${R.scores.comfort.base}`, comfort)}
               ${table(R.scores.training.title + ` — base ${R.scores.training.base}`, training)}
               ${table(R.cleaning.title + " — points", clean)}</table></div>
+         </div>
+
+         <div class="cpane" data-pane="velo" hidden>
+          <div class="cs"><h4>🏆 Velominati rules</h4>
+            <div class="cdesc">One matching rule is shown at random at the top of the page. <a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Read all the rules</a></div>
+            ${(R.velominati ?? []).map(q => `<div class="crow velo"><span class="cicon">#${q.rule}</span><div><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener"><b>Rule #${q.rule}</b></a> <i>“${esc(q.text)}”</i>
+              <small>Shown when ${(Array.isArray(q.when) ? q.when : [q.when]).map(condText).map(esc).join(" <i>and</i> ")}</small></div></div>`).join("")}</div>
          </div>
         </div>
       </dialog>
