@@ -351,7 +351,7 @@ const ITEM_ICONS = [
 ];
 const iconFor = item => ITEM_ICONS.find(([re]) => re.test(item))?.[1] ?? "•";
 const valueText = (r, v) => v == null ? "–" : r.display === "flag" ? (v ? "yes" : "no") : `${fmt(v, r.dec ?? 1)}${r.unit ? " " + r.unit : ""}`;
-const signed = p => p > 0 ? `<span class="pos">+${p}</span>` : p < 0 ? `<span class="neg">${p}</span>` : `<span class="zero">0</span>`;
+const signed = (p, dirt = false) => p === 0 ? `<span class="zero">0</span>` : `<span class="${(p > 0) !== dirt ? "pos" : "neg"}">${p > 0 ? "+" : ""}${p}</span>`;
 
 const SENSORS = [
   { label: "temperature", vars: ["ta"] }, { label: "wind", vars: ["ff"] }, { label: "rain", vars: ["rg", "pg", "R1H"] },
@@ -458,15 +458,15 @@ async function main() {
       o.vv != null && `👁️ <b>${fmt(o.vv / 1000, 1)}</b> km`,
     ].filter(Boolean).map(p => `<span class="pill">${p}</span>`).join("");
 
-    const table = (title, res) => `<tr><th colspan="3">${esc(title)}</th></tr>` + res.rows.map(({ r, v, points, note }) =>
-      `<tr><td>${esc(r.label)}</td><td>${esc(valueText(r, v))}${note ? ` · ${esc(note)}` : ""}</td><td>${signed(points)}</td></tr>`).join("");
+    const table = (title, res, dirt) => `<tr><th colspan="3">${esc(title)}</th></tr>` + res.rows.map(({ r, v, points, note }) =>
+      `<tr><td>${esc(r.label)}</td><td>${esc(valueText(r, v))}${note ? ` · ${esc(note)}` : ""}</td><td>${signed(points, dirt)}</td></tr>`).join("");
 
-    const scale = rules => rules.map(r => {
+    const scale = (rules, dirt) => rules.map(r => {
       const u = r.unit ? ` ${r.unit}` : "";
       const chips = r.bands.map((b, i, a) => {
         const range = r.display === "flag" ? (b.upTo === 0 ? "no" : "yes")
           : b.upTo == null ? `> ${a[i-1].upTo}${u}` : i === 0 ? `≤ ${b.upTo}${u}` : `${a[i-1].upTo} – ${b.upTo}${u}`;
-        return `<span class="sband" title="${esc(b.note ?? "")}">${esc(range)} <b>${signed(b.points)}</b></span>`;
+        return `<span class="sband" title="${esc(b.note ?? "")}">${esc(range)} <b>${signed(b.points, dirt)}</b></span>`;
       }).join("");
       return `<div class="srule"><div class="sl">${esc(r.label)}</div><div class="sbands">${chips}</div></div>`;
     }).join("");
@@ -527,7 +527,7 @@ async function main() {
             </div></div>
 
           <div class="cs"><h4>📏 Point scale: ride score <small>(base ${R.scores.ride.base})</small></h4>${scale(R.scores.ride.rules)}</div>
-          <div class="cs"><h4>📏 Point scale: bike cleaning <small>(levels: ${R.cleaning.levels.map(l => `${l.min}+ ${esc(l.label)}`).join(", ")})</small></h4>${scale(R.cleaning.rules)}</div>
+          <div class="cs"><h4>📏 Point scale: bike cleaning <small>(levels: ${R.cleaning.levels.map(l => `${l.min}+ ${esc(l.label)}`).join(", ")})</small></h4>${scale(R.cleaning.rules, true)}</div>
 
           <div class="cs"><h4>🚩 Flags</h4>
             <div class="crow"><span class="cicon">🧊</span><div><b>Ice risk</b><small>air ≤ ${R.ride.iceTempC}° and wet roads or humidity ≥ ${R.ride.iceHumidityPct}%</small></div></div>
@@ -549,7 +549,7 @@ async function main() {
          <div class="cpane" data-pane="scores" hidden>
           <div class="cs"><h4>📊 Points per rule</h4>
             <table>${table(R.scores.ride.title + ` — base ${R.scores.ride.base}`, ride)}
-              ${table(R.cleaning.title + " — points", clean)}</table></div>
+              ${table(R.cleaning.title + " — points (more = dirtier)", clean, true)}</table></div>
          </div>
 
          <div class="cpane" data-pane="velo" hidden>
