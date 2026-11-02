@@ -414,9 +414,9 @@
     ],
     "levels": [
       { "min": 0, "label": "No cleaning needed", "icon": "✨", "text": "Dry roads. Wipe the chain if it is dusty." },
-      { "min": 2, "label": "Quick rinse and wipe", "icon": "🧽", "text": "Wipe down the frame and drivetrain, dry the chain well to prevent rust and add a drop of chain lube." },
-      { "min": 4, "label": "Rinse, brush and re-lube", "icon": "🚿", "text": "Rinse off the grime, brush the drivetrain, dry the chain and cassette thoroughly to prevent rust and re-lube the chain." },
-      { "min": 7, "label": "Full clean", "icon": "🧼", "text": "Degrease the drivetrain, wash the bike, dry it well (especially the drivetrain) and lube the chain. Check brakes and pads." }
+      { "min": 2, "label": "Quick rinse and wipe", "icon": "🧽", "text": "Wipe down the frame and drivetrain and add a drop of chain lube." },
+      { "min": 4, "label": "Rinse, brush and re-lube", "icon": "🚿", "text": "Rinse off the grime, brush the drivetrain and re-lube the chain." },
+      { "min": 7, "label": "Full clean", "icon": "🧼", "text": "Degrease the drivetrain, wash and dry the bike, lube the chain and check brakes and pads." }
     ]
   }
 }
