@@ -187,7 +187,8 @@
         { "min": 60, "label": "Good to ride", "icon": "🙂", "color": "#a3e635", "bg": ["#0e1420", "#16382a"] },
         { "min": 40, "label": "Okay if you must", "icon": "😐", "color": "#facc15", "bg": ["#0e1420", "#3d3216"] },
         { "min": 20, "label": "Poor weather", "icon": "🙁", "color": "#fb923c", "bg": ["#0e1420", "#3d2216"] },
-        { "min": 0, "label": "Stay inside", "icon": "🌧️", "color": "#ef4444", "bg": ["#0e1420", "#3d1626"] }
+        { "min": 8, "label": "Bad weather", "icon": "🌧️", "color": "#f87171", "bg": ["#0e1420", "#3d1d1d"] },
+        { "min": 0, "label": "Stay inside", "icon": "⛈️", "color": "#ef4444", "bg": ["#0e1420", "#3d1626"] }
       ]
     },
 
