@@ -295,7 +295,7 @@
     { "rule": 9, "text": "If you are out riding in bad weather, it means you are a badass. Period.",
       "when": { "input": "comfort", "op": "lt", "value": 40 } },
     { "rule": 67, "text": "Do your time in the wind.",
-      "when": [{ "input": "ff", "op": "gte", "value": 5 }, { "input": "comfort", "op": "gte", "value": 40 }] },
+      "when": { "input": "ff", "op": "gte", "value": 10.8 } },
     { "rule": 21, "text": "Cold weather gear is for cold weather.",
       "when": [{ "input": "rideTemp", "op": "gte", "value": 14 }, { "input": "comfort", "op": "gte", "value": 60 }] }
   ],
@@ -351,7 +351,8 @@
       { "when": [{ "input": "foggyCold", "op": "gte", "value": 1 }], "warning": "Cold fog: damp, cold and slippery. Dress warmer and use lights." },
       { "when": [{ "input": "rainIntensity", "op": "gt", "value": 2 }, { "input": "darkness", "op": "gt", "value": 0 }], "warning": "Heavy rain in the dark: very poor visibility. Consider skipping the ride." },
       { "when": { "input": "night", "op": "gte", "value": 1 }, "items": ["Front and rear lights", "Reflective vest"], "warning": "It is dark: use front and rear lights and wear a reflective vest." },
-      { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }], "items": ["Front and rear lights"], "warning": "Twilight: it is getting dark, use your lights." },
+      { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }, { "input": "dawn", "op": "lt", "value": 1 }], "items": ["Front and rear lights"], "warning": "Twilight: it is getting dark, use your lights." },
+      { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }, { "input": "dawn", "op": "gte", "value": 1 }], "items": ["Front and rear lights"], "warning": "Twilight: it is getting light, but keep your lights on until it is fully light." },
       { "when": { "input": "thunder", "op": "gte", "value": 1 }, "warning": "Thunderstorm: lightning is dangerous on a bike. Stay inside." },
       { "when": { "input": "moonlight", "op": "gte", "value": 1 }, "warning": "Clear sky and a bright moon: nice moonlit ride, but still use your lights." },
       { "when": [{ "input": "darkSoon", "op": "gte", "value": 1 }, { "input": "darkness", "op": "lte", "value": 0 }], "items": ["Front and rear lights"], "warning": "It gets dark within 2 hours: take lights in case you are still out." },

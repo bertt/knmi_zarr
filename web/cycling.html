@@ -30,7 +30,8 @@
     background:radial-gradient(circle at 100% 0%, rgba(76,201,240,.18), transparent 55%), rgba(16,23,38,.98); box-shadow:0 20px 60px rgba(0,0,0,.6); }
   dialog#info[open], dialog#calc[open] { animation:pop .18s ease-out; }
   dialog#info::backdrop, dialog#calc::backdrop { background:rgba(5,8,16,.65); backdrop-filter:blur(3px); }
-  dialog#calc { width:min(94vw,640px); max-height:88vh; }
+  dialog#info { max-height:88vh; max-height:88dvh; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+  dialog#calc { width:min(94vw,640px); max-height:88vh; max-height:88dvh; }
   dialog#calc[open] { display:flex; flex-direction:column; }
   .ctabs { display:flex; gap:6px; padding:10px 16px 0; }
   .ctabs .ctab { margin:0; padding:6px 14px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid transparent; font-size:13px; }
@@ -192,7 +193,7 @@
       <p>Zarr source: <a id="zsrc" href="#"></a></p></div>
     <div class="isec"><h4>🧮 Advice</h4>
       <p>Indicative advice based on the rules in <a id="rulesurl" href="#"></a>. Add <code>?rules=URL</code> to try your own.</p>
-      <p>Quotes: <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</p></div>
+      <p>Quotes: <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati (via <a href="https://github.com/simonneutert/velominati-js">velominati-js</a>).</p></div>
     <div class="isec"><h4>🔒 Privacy</h4>
       <p>Your location stays in your browser.</p></div>
     <div class="ifoot"><a href="https://github.com/bertt/knmi_zarr">⭐ Source code on GitHub</a><div class="iauthor">Author © Bert Temme</div></div>
@@ -325,6 +326,7 @@ function derive(o, s, t, R) {
     thunder: { 17: 1, 29: 1, 91: 1, 92: 1, 93: 1, 94: 1, 95: 2, 96: 2, 97: 2, 98: 2, 99: 2 }[o.ww] ?? 0,
     night: sunElevation(t, s.lat, s.lon) < -1 ? 1 : 0,
     darkness,
+    dawn: sunElevation(new Date(t.getTime() + 10 * 6e4), s.lat, s.lon) > elev ? 1 : 0,
     moonlight, moonIllumination: moon.illumination,
     dull: o.n != null && o.ff != null && o.n >= (r.dullMinCloudOctas ?? 7) && o.ff <= (r.dullMaxWindMs ?? 2.5) ? 1 : 0,
     coldEastWind: o.dd != null && o.ff != null && o.ta != null && o.dd >= 30 && o.dd <= 150 && o.ff >= 4 && o.ta < 10 ? 1 : 0,
@@ -367,9 +369,10 @@ async function main() {
   const posP = STATION ? null : makePos();
   posP?.catch(() => {});
   if (STATION) step("s-loc", "skip", "Using the station from the link");
-  const [meta, R] = await Promise.all([
+  const [meta, R, allRules] = await Promise.all([
     fetch(`${BASE}/stations.json`).then(r => r.json()),
     fetch(RULES_URL, { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(`${RULES_URL}: HTTP ${r.status}`); return r.json(); }),
+    fetch("velominati-rules.json").then(r => r.ok ? r.json() : []).catch(() => []),
   ]);
   const keys = VARS.filter(k => k in meta.variables);
   const data = {};
@@ -420,7 +423,12 @@ async function main() {
 
     inp.comfort = cScore;
     const quotes = (R.velominati ?? []).filter(q => test(q.when, inp));
-    const quote = quotes.length ? quotes[Math.floor(Math.random() * quotes.length)] : null;
+    let quote = quotes.length ? quotes[Math.floor(Math.random() * quotes.length)] : null;
+    const pool = allRules.filter(q => q.rule !== 67);
+    if (!quote && pool.length && Math.random() < 0.5) {
+      const q = pool[Math.floor(Math.random() * pool.length)];
+      quote = { rule: q.rule, text: q.title };
+    }
 
     const band = inp.rideTemp == null ? null : pick(R.clothing.bands, inp.rideTemp);
     const extras = new Set(), warnings = [];
@@ -462,7 +470,6 @@ async function main() {
 
     card.innerHTML = `
       <div class="head">
-        ${quote ? `<div class="rule"><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Velominati Rule #${quote.rule}</a> · “${esc(quote.text)}”</div>` : ""}
         <div class="place"><span class="title">🚴 Cycling weather</span> · ${esc(s.name)}</div>
         <div class="sub">${distance == null ? "KNMI station" : `KNMI station · ${fmt(distance, distance < 10 ? 1 : 0)} km from you`}
         <select id="pick" aria-label="Choose a station">${sorted.map(({ s: st, i }) =>
@@ -481,6 +488,7 @@ async function main() {
       </div>
 
       <div class="chips">${pills}</div>
+      ${quote ? `<div class="rule" style="margin:10px 0 0"><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Velominati Rule #${quote.rule}</a> · “${esc(quote.text)}”</div>` : ""}
 
       <div class="sec wear"><h2>👕 What to wear</h2>
         ${band ? `<div class="outfit">${esc(band.label)}</div>
@@ -548,7 +556,7 @@ async function main() {
 
          <div class="cpane" data-pane="velo" hidden>
           <div class="cs"><h4>🏆 Velominati rules</h4>
-            <div class="cdesc">One matching rule is shown at random at the top of the page. <a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Read all the rules</a></div>
+            <div class="cdesc">One matching rule is shown at random below the weather data. <a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Read all the rules</a></div>
             ${(R.velominati ?? []).map(q => `<div class="crow velo"><span class="cicon">#${q.rule}</span><div><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener"><b>Rule #${q.rule}</b></a> <i>“${esc(q.text)}”</i>
               <small>Shown when ${(Array.isArray(q.when) ? q.when : [q.when]).map(condText).map(esc).join(" <i>and</i> ")}</small></div></div>`).join("")}</div>
          </div>
