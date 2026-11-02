@@ -258,7 +258,7 @@
           { "input": "rideTemp", "op": "lt", "value": 12 },
           { "input": "rainIntensity", "op": "gt", "value": 0.05 }
         ], "items": ["Waterproof gloves", "Waterproof overshoes"] },
-      { "when": { "input": "qg", "op": "gte", "value": 300 }, "items": ["Sunglasses"] },
+      { "when": { "input": "qg", "op": "gte", "value": 700 }, "items": ["Sunglasses"] },
       { "when": { "input": "qg", "op": "gte", "value": 600 }, "items": ["Sunscreen"] },
       { "when": { "input": "rideTemp", "op": "gte", "value": 25 }, "items": ["Extra bottle"] },
       { "when": { "input": "ta", "op": "gte", "value": 25 }, "warning": "Heat: drink regularly, even if you are not thirsty." },
