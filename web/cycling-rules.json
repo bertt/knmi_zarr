@@ -287,7 +287,7 @@
         { "min": 55, "label": "Good training weather", "icon": "👍", "color": "#a3e635" },
         { "min": 35, "label": "Fine for an easy ride", "icon": "🙂", "color": "#facc15" },
         { "min": 15, "label": "Meh", "icon": "😕", "color": "#fb923c" },
-        { "min": 0, "label": "Use the trainer", "icon": "🏠", "color": "#ef4444" }
+        { "min": 0, "label": "Take the city bike", "icon": "🚲", "color": "#ef4444" }
       ]
     }
   },
@@ -358,7 +358,7 @@
       { "when": { "input": "moonlight", "op": "gte", "value": 1 }, "warning": "Clear sky and a bright moon: nice moonlit ride, but still use your lights." },
       { "when": [{ "input": "darkSoon", "op": "gte", "value": 1 }, { "input": "darkness", "op": "lte", "value": 0 }], "items": ["Front and rear lights"], "warning": "It gets dark within 2 hours: take lights in case you are still out." },
       { "when": { "input": "vv", "op": "lte", "value": 2000 }, "items": ["Front and rear lights"], "warning": "Fog or mist: less pleasant to ride and you are harder to see. Use lights and ride carefully." },
-      { "when": { "input": "iceRisk", "op": "gte", "value": 1 }, "warning": "Ice risk: roads can be slippery. Take care or use the trainer." },
+      { "when": { "input": "iceRisk", "op": "gte", "value": 1 }, "warning": "Ice risk: roads can be slippery. Take care or take the city bike." },
       { "when": { "input": "saltRisk", "op": "gte", "value": 1 }, "warning": "Road salt likely: bad for your bike (corrosion on chain, brakes and frame). Rinse it off thoroughly after the ride." }
     ]
   },
