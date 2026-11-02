@@ -194,7 +194,7 @@
 
     "training": {
       "title": "Training weather (wind and cold are welcome)",
-      "base": 55,
+      "base": 100,
       "rules": [
         { "id": "rain-now", "label": "Rain right now", "input": "rainIntensity", "unit": "mm/h", "dec": 1,
           "bands": [
