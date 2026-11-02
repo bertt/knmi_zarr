@@ -4,7 +4,7 @@
     "A 'band' list is evaluated top to bottom: the first band where value <= upTo applies (upTo null = everything above).",
     "Units: temperature in degC, wind and gusts in m/s, rain in mm (1h/6h/24h) or mm/h (now), radiation in W/m2, visibility in m.",
     "hail is 0 (none) to 4 (severe), derived from the KNMI weather code since hail size is not measured.",
-    "Inputs you can use: ta, td, rh, pp (sea-level pressure, hPa), rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, hail, night, darkness (0-100, dusk to full dark), darkSoon.",
+    "Inputs you can use: ta, td, rh, pp (sea-level pressure, hPa), rideTemp, ff, gust, qg, vv, n, ss, rainIntensity, rain1h, rain6h, rain24h, iceRisk, saltRisk, hail, snow, night, darkness (0-100, dusk to full dark), darkSoon.",
     "Scores: result = clamp(base + sum of band points, 0, 100). Cleaning: base + sum of points, then the highest level with min <= total."
   ],
 
@@ -358,6 +358,7 @@
       { "when": { "input": "moonlight", "op": "gte", "value": 1 }, "warning": "Clear sky and a bright moon: nice moonlit ride, but still use your lights." },
       { "when": [{ "input": "darkSoon", "op": "gte", "value": 1 }, { "input": "darkness", "op": "lte", "value": 0 }], "items": ["Front and rear lights"], "warning": "It gets dark within 2 hours: take lights in case you are still out." },
       { "when": { "input": "vv", "op": "lte", "value": 2000 }, "items": ["Front and rear lights"], "warning": "Fog or mist: less pleasant to ride and you are harder to see. Use lights and ride carefully." },
+      { "when": { "input": "snow", "op": "gte", "value": 1 }, "warning": "Snow: take the mountainbike, its wider tyres grip better than a road bike." },
       { "when": { "input": "iceRisk", "op": "gte", "value": 1 }, "warning": "Ice risk: roads can be slippery. Take care or take the city bike." },
       { "when": { "input": "saltRisk", "op": "gte", "value": 1 }, "warning": "Road salt likely: bad for your bike (corrosion on chain, brakes and frame). Rinse it off thoroughly after the ride." }
     ]
