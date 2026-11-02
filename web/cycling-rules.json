@@ -46,15 +46,21 @@
         { "id": "wet-roads", "label": "Rain last hour (wet roads)", "input": "rain1h", "unit": "mm", "dec": 1,
           "bands": [
             { "upTo": 0.1, "points": 0 },
-            { "upTo": 1, "points": -6, "note": "Damp roads" },
-            { "upTo": 3, "points": -12, "note": "Wet roads" },
-            { "upTo": null, "points": -18, "note": "Soaked roads" }
+            { "upTo": 1, "points": -10, "note": "Damp roads" },
+            { "upTo": 3, "points": -18, "note": "Wet roads" },
+            { "upTo": null, "points": -26, "note": "Soaked roads" }
           ] },
         { "id": "rain-6h", "label": "Rain last 6 hours", "input": "rain6h", "unit": "mm", "dec": 1,
           "bands": [
             { "upTo": 0.5, "points": 0 },
-            { "upTo": 3, "points": -2 },
-            { "upTo": null, "points": -4 }
+            { "upTo": 3, "points": -8, "note": "Wet roads" },
+            { "upTo": null, "points": -16, "note": "Very wet roads" }
+          ] },
+        { "id": "rain-24h", "label": "Rain last 24 hours (wet and dirty roads)", "input": "rain24h", "unit": "mm", "dec": 1,
+          "bands": [
+            { "upTo": 1, "points": 0 },
+            { "upTo": 5, "points": -4 },
+            { "upTo": null, "points": -8, "note": "A lot of rain: wet, dirty roads" }
           ] },
         { "id": "temp", "label": "Temperature on the bike", "input": "rideTemp", "unit": "°C", "dec": 1,
           "bands": [
