@@ -265,7 +265,7 @@
       { "when": [{ "input": "ff", "op": "gte", "value": 7 }, { "input": "rideTemp", "op": "lt", "value": 8 }], "items": ["Windproof gloves", "Neck warmer"] },
       { "when": { "input": "dryCold", "op": "gte", "value": 1 }, "items": ["Lip balm"], "warning": "Dry, cold air: lip balm and a buff over your nose and mouth help." },
       { "when": { "input": "ta", "op": "lt", "value": -10 }, "items": ["Ski goggles"], "warning": "Extreme cold: ski goggles protect your eyes and face from the icy wind." },
-      { "when": { "input": "sunGlare", "op": "gte", "value": 1 }, "items": ["Sunglasses"], "warning": "Low sun: glare can hide obstacles. Wear sunglasses." },
+      { "when": { "input": "sunGlare", "op": "gte", "value": 1 }, "warning": "Low sun: glare can hide obstacles." },
       { "when": [{ "input": "qg", "op": "gte", "value": 600 }, { "input": "rideTemp", "op": "gte", "value": 18 }], "items": ["Sun sleeves or light jersey"] },
       { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }, { "input": "rideTemp", "op": "lt", "value": 12 }], "items": ["Extra layer in your pocket"], "warning": "It gets dark soon and cooler: take an extra layer in case you ride longer." },
       { "when": { "input": "leafRisk", "op": "gte", "value": 1 }, "warning": "Wet leaves and mud: slippery, especially in corners and on cycle paths. Brake early." },
