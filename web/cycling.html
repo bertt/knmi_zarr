@@ -304,6 +304,7 @@ function derive(o, s, t, R) {
   const spread = o.ta != null && o.td != null ? o.ta - o.td : null;
   const damp = spread != null && spread < r.dampSpreadBelowC && o.ta <= r.dampMaxTempC;
   const chill = o.ff != null ? Math.max(0, o.ff - r.windChillAboveMs) * r.windChillPerMs : 0;
+  const darkness = Math.round(100 * Math.min(1, Math.max(0, ((r.twilightStartDeg ?? 4) - sunElevation(t, s.lat, s.lon)) / ((r.twilightStartDeg ?? 4) - (r.fullDarkDeg ?? -12)))));
   const parts = [];
   let rideTemp = null;
   if (o.ta != null) {
@@ -311,9 +312,17 @@ function derive(o, s, t, R) {
     if (raining) { rideTemp += r.rainOffsetC; parts.push(["rain", r.rainOffsetC]); }
     if (damp)    { rideTemp += r.dampOffsetC; parts.push(["damp air (dew point close to temperature)", r.dampOffsetC]); }
     if (chill > 0) { rideTemp -= chill; parts.push(["wind", -chill]); }
+    const dusk = (r.duskOffsetC ?? 0) * darkness / 100;
+    if (dusk) { rideTemp += dusk; parts.push(["dusk, getting colder", dusk]); }
+    if (o.dd != null && o.ff != null && r.coldWindPerMs) {
+      const rad = d => d * Math.PI / 180;
+      const dev = Math.min(Math.abs(o.dd - 45), 360 - Math.abs(o.dd - 45));
+      const w = dev <= 45 ? 1 : Math.max(0, Math.cos(rad(dev - 45)));
+      const coldWind = -r.coldWindPerMs * o.ff * w;
+      if (coldWind) { rideTemp += coldWind; parts.push(["cold northerly/easterly wind", coldWind]); }
+    }
   }
   const wetNow = (o.R1H ?? 0) > 0.1 || raining;
-  const darkness = Math.round(100 * Math.min(1, Math.max(0, ((r.twilightStartDeg ?? 4) - sunElevation(t, s.lat, s.lon)) / ((r.twilightStartDeg ?? 4) - (r.fullDarkDeg ?? -12)))));
   const moon = moonInfo(t, s.lat, s.lon);
   const elev = sunElevation(t, s.lat, s.lon);
   const moonlight = darkness >= 50 && o.n != null && o.n <= (r.moonMaxCloudOctas ?? 2) &&

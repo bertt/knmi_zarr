@@ -13,6 +13,8 @@
     "rainOffsetC": -1.5,
     "rainThresholdMmH": 0.05,
     "dampOffsetC": -1,
+    "duskOffsetC": -2,
+    "coldWindPerMs": 0.15,
     "dampSpreadBelowC": 2,
     "dampMaxTempC": 12,
     "windChillPerMs": 0.2,
