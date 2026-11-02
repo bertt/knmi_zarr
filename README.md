@@ -83,8 +83,7 @@ A station picker lets you switch to any of the 56 stations (distance is shown wh
 
 A third page that turns the same Zarr data (<https://bertt.github.io/knmi_zarr/obs.zarr>, read in the browser with zarrita.js) into cycling advice for the nearest (or a chosen) station:
 
-- **Ride comfort** score (0-100): sun and dry is good, rain, cold, strong wind and poor visibility are bad.
-- **Training** score (0-100): like comfort, but wind and cold count as a plus.
+- **Ride score** (0-100): one score that combines comfort and training (the average of both). Sun and dry is good; rain, extreme cold or heat, storm-force wind and poor visibility are bad; moderate wind and cold count as a small plus for training. The rules are listed in the calculation details.
 - **What to wear**: based on the temperature *on the bike* (air temperature about 2 °C lower, extra for rain, damp air via the dew point and wind chill), e.g. short/short above 15 °C, gloves and skullcap below 10 °C, windjacket below 12 °C, windjacket + base layer below 0 °C. Extras for rain, darkness, sun and ice.
 - **Bike cleaning**: estimate from rain now, the last 1/6/24 hours and salt risk.
 

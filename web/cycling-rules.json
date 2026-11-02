@@ -32,130 +32,139 @@
   },
 
   "scores": {
-    "comfort": {
-      "title": "Nice weather to ride",
+    "ride": {
+      "title": "Ride score (average of comfort and training)",
       "base": 100,
       "rules": [
         { "id": "rain-now", "label": "Rain right now", "input": "rainIntensity", "unit": "mm/h", "dec": 1,
           "bands": [
             { "upTo": 0.05, "points": 0, "note": "Dry" },
-            { "upTo": 0.5, "points": -25, "note": "Drizzle" },
-            { "upTo": 2, "points": -45, "note": "Rain" },
-            { "upTo": null, "points": -65, "note": "Heavy rain" }
+            { "upTo": 0.5, "points": -20, "note": "Drizzle" },
+            { "upTo": 2, "points": -37, "note": "Rain" },
+            { "upTo": null, "points": -57, "note": "Heavy rain" }
           ] },
         { "id": "wet-roads", "label": "Rain last hour (wet roads)", "input": "rain1h", "unit": "mm", "dec": 1,
           "bands": [
             { "upTo": 0.1, "points": 0 },
-            { "upTo": 1, "points": -8, "note": "Damp roads" },
-            { "upTo": 3, "points": -15, "note": "Wet roads" },
-            { "upTo": null, "points": -22, "note": "Soaked roads" }
+            { "upTo": 1, "points": -6, "note": "Damp roads" },
+            { "upTo": 3, "points": -12, "note": "Wet roads" },
+            { "upTo": null, "points": -18, "note": "Soaked roads" }
           ] },
         { "id": "rain-6h", "label": "Rain last 6 hours", "input": "rain6h", "unit": "mm", "dec": 1,
           "bands": [
             { "upTo": 0.5, "points": 0 },
-            { "upTo": 3, "points": -4 },
-            { "upTo": null, "points": -8 }
+            { "upTo": 3, "points": -2 },
+            { "upTo": null, "points": -4 }
           ] },
         { "id": "temp", "label": "Temperature on the bike", "input": "rideTemp", "unit": "°C", "dec": 1,
           "bands": [
-            { "upTo": -2, "points": -35, "note": "Freezing" },
-            { "upTo": 2, "points": -25, "note": "Very cold" },
-            { "upTo": 6, "points": -15, "note": "Cold" },
-            { "upTo": 10, "points": -8, "note": "Chilly" },
-            { "upTo": 12, "points": -3, "note": "Cool" },
-            { "upTo": 24, "points": 0, "note": "Comfortable" },
+            { "upTo": -2, "points": -25, "note": "Freezing" },
+            { "upTo": 2, "points": -10, "note": "Very cold" },
+            { "upTo": 6, "points": 0, "note": "Cold" },
+            { "upTo": 10, "points": 1, "note": "Chilly" },
+            { "upTo": 12, "points": 1, "note": "Cool" },
+            { "upTo": 14, "points": 3, "note": "Comfortable" },
+            { "upTo": 22, "points": 0, "note": "Comfortable" },
+            { "upTo": 24, "points": -2, "note": "Comfortable" },
             { "upTo": 28, "points": -5, "note": "Warm" },
             { "upTo": 32, "points": -15, "note": "Hot" },
-            { "upTo": null, "points": -30, "note": "Very hot" }
+            { "upTo": null, "points": -22, "note": "Very hot" }
           ] },
         { "id": "deep-cold", "label": "Deep cold (air below -10°C)", "input": "ta", "unit": "°C", "dec": 1,
           "bands": [
-            { "upTo": -15, "points": -35, "note": "Dangerous cold" },
-            { "upTo": -10, "points": -20, "note": "Too cold" },
+            { "upTo": -15, "points": -32, "note": "Dangerous cold" },
+            { "upTo": -10, "points": -17, "note": "Too cold" },
             { "upTo": null, "points": 0 }
           ] },
         { "id": "hail", "label": "Hail (1 = small/soft, 4 = heavy with thunderstorm)", "input": "hail",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": 1, "points": -20, "note": "Small hail" },
-            { "upTo": 2, "points": -35, "note": "Hail" },
-            { "upTo": 3, "points": -50, "note": "Heavy hail" },
-            { "upTo": null, "points": -65, "note": "Severe hail, seek shelter" }
+            { "upTo": 1, "points": -17, "note": "Small hail" },
+            { "upTo": 2, "points": -30, "note": "Hail" },
+            { "upTo": 3, "points": -45, "note": "Heavy hail" },
+            { "upTo": null, "points": -60, "note": "Severe hail, seek shelter" }
           ] },
         { "id": "heat", "label": "Heat (air above 30°C)", "input": "ta", "unit": "°C", "dec": 1,
           "bands": [
             { "upTo": 30, "points": 0 },
-            { "upTo": 35, "points": -20, "note": "Too hot" },
-            { "upTo": null, "points": -35, "note": "Dangerous heat" }
+            { "upTo": 35, "points": -17, "note": "Too hot" },
+            { "upTo": null, "points": -32, "note": "Dangerous heat" }
           ] },
         { "id": "wind", "label": "Wind", "input": "ff", "unit": "m/s", "dec": 1,
           "bands": [
-            { "upTo": 4, "points": 0, "note": "Calm to light" },
-            { "upTo": 7, "points": -5, "note": "Breezy" },
-            { "upTo": 10, "points": -15, "note": "Windy" },
-            { "upTo": 13, "points": -30, "note": "Very windy" },
-            { "upTo": null, "points": -45, "note": "Storm-like" }
+            { "upTo": 2, "points": -2, "note": "Calm to light" },
+            { "upTo": 4, "points": 3, "note": "Calm to light" },
+            { "upTo": 5, "points": 0, "note": "Breezy" },
+            { "upTo": 7, "points": 5, "note": "Breezy" },
+            { "upTo": 8, "points": 0, "note": "Windy" },
+            { "upTo": 10, "points": 5, "note": "Windy" },
+            { "upTo": 11, "points": -2, "note": "Very windy" },
+            { "upTo": 13, "points": -7, "note": "Very windy" },
+            { "upTo": 14, "points": -15, "note": "Storm-like" },
+            { "upTo": null, "points": -22, "note": "Storm-like" }
           ] },
         { "id": "gust", "label": "Gusts", "input": "gust", "unit": "m/s", "dec": 1,
           "bands": [
             { "upTo": 10, "points": 0 },
-            { "upTo": 15, "points": -5 },
-            { "upTo": 20, "points": -12 },
-            { "upTo": null, "points": -20, "note": "Dangerous gusts" }
+            { "upTo": 15, "points": -2 },
+            { "upTo": 20, "points": -8 },
+            { "upTo": null, "points": -17, "note": "Dangerous gusts" }
           ] },
         { "id": "pressure", "label": "Air pressure (sea level)", "input": "pp", "unit": "hPa", "dec": 0,
           "bands": [
-            { "upTo": 995, "points": -6, "note": "Deep low: unsettled, wet and windy weather" },
-            { "upTo": 1005, "points": -3, "note": "Low pressure: changeable weather" },
+            { "upTo": 995, "points": -3, "note": "Deep low: unsettled, wet and windy weather" },
+            { "upTo": 1005, "points": -1, "note": "Low pressure: changeable weather" },
             { "upTo": 1020, "points": 0 },
-            { "upTo": 1030, "points": 3, "note": "High pressure: stable weather" },
-            { "upTo": null, "points": 5, "note": "Strong high: settled, calm weather" }
+            { "upTo": 1030, "points": 2, "note": "High pressure: stable weather" },
+            { "upTo": null, "points": 3, "note": "Strong high: settled, calm weather" }
           ] },
         { "id": "sun", "label": "Sun (global radiation)", "input": "qg", "unit": "W/m²", "dec": 0,
           "bands": [
             { "upTo": 50, "points": 0 },
-            { "upTo": 200, "points": 3 },
-            { "upTo": 400, "points": 7, "note": "Some sun" },
-            { "upTo": null, "points": 10, "note": "Sunny" }
+            { "upTo": 200, "points": 2 },
+            { "upTo": 400, "points": 4, "note": "Some sun" },
+            { "upTo": null, "points": 5, "note": "Sunny" }
           ] },
         { "id": "east-wind", "label": "Cold easterly wind", "input": "coldEastWind", "display": "flag",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -4, "note": "Easterly wind feels extra cold" }
+            { "upTo": null, "points": -2, "note": "Easterly wind feels extra cold" }
           ] },
         { "id": "glare", "label": "Low sun glare", "input": "sunGlare", "display": "flag",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -3, "note": "Low sun: glare in your eyes" }
+            { "upTo": null, "points": -1, "note": "Low sun: glare in your eyes" }
           ] },
         { "id": "leaves", "label": "Wet autumn leaves", "input": "leafRisk", "display": "flag",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -6, "note": "Slippery leaves and mud on the road" }
+            { "upTo": null, "points": -3, "note": "Slippery leaves and mud on the road" }
           ] },
         { "id": "fog-cold", "label": "Fog and cold", "input": "foggyCold", "display": "flag",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -8, "note": "Cold fog: damp, dark and slippery" }
+            { "upTo": null, "points": -4, "note": "Cold fog: damp, dark and slippery" }
           ] },
         { "id": "dull", "label": "Dull weather (overcast and no wind)", "input": "dull", "display": "flag",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -10, "note": "Grey and windless: boring ride" }
+            { "upTo": null, "points": -5, "note": "Grey and windless: boring ride" }
           ] },
         { "id": "visibility", "label": "Visibility", "input": "vv", "unit": "m", "dec": 0,
           "bands": [
-            { "upTo": 500, "points": -30, "note": "Dense fog" },
-            { "upTo": 1000, "points": -20, "note": "Fog" },
-            { "upTo": 2000, "points": -12, "note": "Mist" },
-            { "upTo": 5000, "points": -5, "note": "Hazy" },
+            { "upTo": 500, "points": -27, "note": "Dense fog" },
+            { "upTo": 1000, "points": -16, "note": "Fog" },
+            { "upTo": 1500, "points": -12, "note": "Mist" },
+            { "upTo": 2000, "points": -8, "note": "Mist" },
+            { "upTo": 4000, "points": -4, "note": "Hazy" },
+            { "upTo": 5000, "points": -2, "note": "Hazy" },
             { "upTo": null, "points": 0 }
           ] },
         { "id": "dewpoint", "label": "Dew point (muggy)", "input": "td", "unit": "°C", "dec": 1,
           "bands": [
             { "upTo": 16, "points": 0 },
-            { "upTo": 19, "points": -4, "note": "Humid" },
-            { "upTo": null, "points": -8, "note": "Muggy" }
+            { "upTo": 19, "points": -2, "note": "Humid" },
+            { "upTo": null, "points": -4, "note": "Muggy" }
           ] },
         { "id": "ice", "label": "Ice risk (cold and damp)", "input": "iceRisk", "display": "flag",
           "bands": [
@@ -165,21 +174,26 @@
         { "id": "dark", "label": "Dusk / darkness", "input": "darkness", "unit": "%", "dec": 0,
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": 25, "points": -5, "note": "Dusk: light is fading" },
-            { "upTo": 50, "points": -12, "note": "Twilight: harder to see" },
-            { "upTo": 75, "points": -20, "note": "Getting dark: lights needed" },
-            { "upTo": null, "points": -30, "note": "Dark: less pleasant and harder to see, lights needed" }
+            { "upTo": 25, "points": -4, "note": "Dusk: light is fading" },
+            { "upTo": 50, "points": -9, "note": "Twilight: harder to see" },
+            { "upTo": 75, "points": -15, "note": "Getting dark: lights needed" },
+            { "upTo": null, "points": -22, "note": "Dark: less pleasant and harder to see, lights needed" }
           ] },
         { "id": "moon", "label": "Bright moon, clear sky", "input": "moonlight", "display": "flag",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": 10, "note": "Moonlit and clear: better to see and nicer to ride" }
+            { "upTo": null, "points": 5, "note": "Moonlit and clear: better to see and nicer to ride" }
           ] },
         { "id": "thunder", "label": "Thunderstorm (1 = thunder, 2 = severe)", "input": "thunder",
           "bands": [
             { "upTo": 0, "points": 0 },
-            { "upTo": 1, "points": -60, "note": "Thunderstorm: lightning risk, stay inside" },
-            { "upTo": null, "points": -80, "note": "Severe thunderstorm: stay inside" }
+            { "upTo": 1, "points": -30, "note": "Thunderstorm: lightning risk, stay inside" },
+            { "upTo": null, "points": -40, "note": "Severe thunderstorm: stay inside" }
+          ] },
+        { "id": "intervals", "label": "Calm and dry (ideal for intervals)", "input": "intervalWeather", "display": "flag",
+          "bands": [
+            { "upTo": 0, "points": 0 },
+            { "upTo": null, "points": 4, "note": "Little wind, dry, 8-18°C: good for intervals" }
           ] }
       ],
       "verdicts": [
@@ -189,105 +203,6 @@
         { "min": 20, "label": "Poor weather", "icon": "🙁", "color": "#fb923c", "bg": ["#0e1420", "#3d2216"] },
         { "min": 8, "label": "Bad weather", "icon": "🌧️", "color": "#f87171", "bg": ["#0e1420", "#3d1d1d"] },
         { "min": 0, "label": "Stay inside", "icon": "⛈️", "color": "#ef4444", "bg": ["#0e1420", "#3d1626"] }
-      ]
-    },
-
-    "training": {
-      "title": "Training weather (wind and cold are welcome)",
-      "base": 100,
-      "rules": [
-        { "id": "rain-now", "label": "Rain right now", "input": "rainIntensity", "unit": "mm/h", "dec": 1,
-          "bands": [
-            { "upTo": 0.05, "points": 0, "note": "Dry" },
-            { "upTo": 0.5, "points": -15, "note": "Drizzle" },
-            { "upTo": 2, "points": -30, "note": "Rain" },
-            { "upTo": null, "points": -50, "note": "Heavy rain" }
-          ] },
-        { "id": "wet-roads", "label": "Rain last hour (wet roads)", "input": "rain1h", "unit": "mm", "dec": 1,
-          "bands": [
-            { "upTo": 0.1, "points": 0 },
-            { "upTo": 1, "points": -5 },
-            { "upTo": 3, "points": -10 },
-            { "upTo": null, "points": -15 }
-          ] },
-        { "id": "deep-cold", "label": "Deep cold (air below -10°C)", "input": "ta", "unit": "°C", "dec": 1,
-          "bands": [
-            { "upTo": -15, "points": -30, "note": "Dangerous cold" },
-            { "upTo": -10, "points": -15, "note": "Too cold" },
-            { "upTo": null, "points": 0 }
-          ] },
-        { "id": "hail", "label": "Hail (1 = small/soft, 4 = heavy with thunderstorm)", "input": "hail",
-          "bands": [
-            { "upTo": 0, "points": 0 },
-            { "upTo": 1, "points": -15, "note": "Small hail" },
-            { "upTo": 2, "points": -25, "note": "Hail" },
-            { "upTo": 3, "points": -40, "note": "Heavy hail" },
-            { "upTo": null, "points": -55, "note": "Severe hail, seek shelter" }
-          ] },
-        { "id": "heat", "label": "Heat (air above 30°C)", "input": "ta", "unit": "°C", "dec": 1,
-          "bands": [
-            { "upTo": 30, "points": 0 },
-            { "upTo": 35, "points": -15, "note": "Too hot" },
-            { "upTo": null, "points": -30, "note": "Dangerous heat" }
-          ] },
-        { "id": "wind", "label": "Wind (resistance is training)", "input": "ff", "unit": "m/s", "dec": 1,
-          "bands": [
-            { "upTo": 2, "points": -5, "note": "No resistance" },
-            { "upTo": 5, "points": 5, "note": "Light resistance" },
-            { "upTo": 8, "points": 15, "note": "Good headwind work" },
-            { "upTo": 11, "points": 25, "note": "Hard, great for training" },
-            { "upTo": 14, "points": 15, "note": "Very hard" },
-            { "upTo": null, "points": 0, "note": "Too much" }
-          ] },
-        { "id": "gust", "label": "Gusts", "input": "gust", "unit": "m/s", "dec": 1,
-          "bands": [
-            { "upTo": 15, "points": 0 },
-            { "upTo": 20, "points": -5 },
-            { "upTo": null, "points": -15, "note": "Dangerous gusts" }
-          ] },
-        { "id": "temp", "label": "Temperature on the bike (cold is good)", "input": "rideTemp", "unit": "°C", "dec": 1,
-          "bands": [
-            { "upTo": -2, "points": -15, "note": "Too cold" },
-            { "upTo": 2, "points": 5 },
-            { "upTo": 6, "points": 15, "note": "Cold, good for training" },
-            { "upTo": 10, "points": 10 },
-            { "upTo": 14, "points": 5 },
-            { "upTo": 22, "points": 0 },
-            { "upTo": 28, "points": -5, "note": "Warm" },
-            { "upTo": null, "points": -15, "note": "Too hot" }
-          ] },
-        { "id": "intervals", "label": "Calm and dry (ideal for intervals)", "input": "intervalWeather", "display": "flag",
-          "bands": [
-            { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": 8, "note": "Little wind, dry, 8-18°C: good for intervals" }
-          ] },
-        { "id": "visibility", "label": "Visibility", "input": "vv", "unit": "m", "dec": 0,
-          "bands": [
-            { "upTo": 500, "points": -25, "note": "Dense fog" },
-            { "upTo": 1500, "points": -12, "note": "Fog" },
-            { "upTo": 4000, "points": -4 },
-            { "upTo": null, "points": 0 }
-          ] },
-        { "id": "ice", "label": "Ice risk (cold and damp)", "input": "iceRisk", "display": "flag",
-          "bands": [
-            { "upTo": 0, "points": 0 },
-            { "upTo": null, "points": -30, "note": "Slippery roads possible" }
-          ] },
-        { "id": "dark", "label": "Dusk / darkness", "input": "darkness", "unit": "%", "dec": 0,
-          "bands": [
-            { "upTo": 0, "points": 0 },
-            { "upTo": 25, "points": -3 },
-            { "upTo": 50, "points": -7, "note": "Twilight: harder to see" },
-            { "upTo": 75, "points": -11, "note": "Getting dark: lights needed" },
-            { "upTo": null, "points": -15, "note": "Dark: less pleasant and harder to see, lights needed" }
-          ] }
-      ],
-      "verdicts": [
-        { "min": 75, "label": "Perfect training weather", "icon": "💪", "color": "#2ecc71" },
-        { "min": 55, "label": "Good training weather", "icon": "👍", "color": "#a3e635" },
-        { "min": 35, "label": "Fine for an easy ride", "icon": "🙂", "color": "#facc15" },
-        { "min": 15, "label": "Meh", "icon": "😕", "color": "#fb923c" },
-        { "min": 0, "label": "Take the city bike", "icon": "🚲", "color": "#ef4444" }
       ]
     }
   },
