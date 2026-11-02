@@ -88,7 +88,7 @@ zsrc.href = `${ZARR_URL}/zarr.json`; zsrc.textContent = ZARR_URL;
 const store = new zarr.FetchStore(ZARR_URL);
 const root = zarr.root(store);
 const readVar = async name => {
-  const arr = await zarr.open(root.resolve(name), { kind: "array" });
+  const arr = await zarr.open.v3(root.resolve(name), { kind: "array" });
   const { data } = await zarr.get(arr);
   return Array.from(data, v => (Number.isFinite(v) && Math.abs(v) < 1e30) ? v : null);
 };
