@@ -244,8 +244,8 @@
         "items": ["Short jersey", "Windproof jacket", "Leg warmers or long tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
       { "upTo": 13.9, "label": "Cool",
         "items": ["Short jersey", "Windproof jacket", "Knee or leg warmers"] },
-      { "upTo": 15, "label": "Mild",
-        "items": ["Short jersey", "Arm warmers", "Bib shorts"] },
+      { "upTo": 18, "label": "Mild",
+        "items": ["Short jersey", "Base layer", "Arm warmers", "Bib shorts"] },
       { "upTo": null, "label": "Warm (short/short)",
         "items": ["Short jersey", "Bib shorts"],
         "note": "No leg warmers, no arm warmers." }
