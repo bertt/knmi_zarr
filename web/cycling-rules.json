@@ -237,17 +237,17 @@
   "clothing": {
     "bands": [
       { "upTo": 0, "label": "Freezing",
-        "items": ["Windproof jacket", "Thermal base layer", "Long thermal bib tights", "Winter gloves", "Skullcap", "Overshoes", "Neck warmer"] },
+        "items": ["Helmet", "Windproof jacket", "Thermal base layer", "Long thermal bib tights", "Winter gloves", "Skullcap", "Overshoes", "Neck warmer"] },
       { "upTo": 5, "label": "Very cold",
-        "items": ["Thermal jersey", "Windproof jacket", "Base layer", "Long bib tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
+        "items": ["Helmet", "Thermal jersey", "Windproof jacket", "Base layer", "Long bib tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
       { "upTo": 10, "label": "Cold",
-        "items": ["Short jersey", "Windproof jacket", "Leg warmers or long tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
+        "items": ["Helmet", "Short jersey", "Windproof jacket", "Leg warmers or long tights", "Gloves", "Skullcap", "Overshoes", "Neck warmer"] },
       { "upTo": 13.9, "label": "Cool",
-        "items": ["Short jersey", "Windproof jacket", "Knee or leg warmers"] },
+        "items": ["Helmet", "Short jersey", "Windproof jacket", "Knee or leg warmers"] },
       { "upTo": 18, "label": "Mild",
-        "items": ["Short jersey", "Base layer", "Arm warmers", "Bib shorts"] },
+        "items": ["Helmet", "Short jersey", "Base layer", "Arm warmers", "Bib shorts"] },
       { "upTo": null, "label": "Warm (short/short)",
-        "items": ["Short jersey", "Bib shorts"],
+        "items": ["Helmet", "Short jersey", "Bib shorts"],
         "note": "No leg warmers, no arm warmers." }
     ],
     "extras": [
