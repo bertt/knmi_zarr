@@ -37,7 +37,7 @@ uv run --with xarray --with netcdf4 --with zarr --with numpy python convert.py K
 `convert.py` writes:
 
 - `web/obs.zarr`: Zarr v3 store with all numeric variables (`station × time`), uncompressed (the data is tiny). Zarr v3 is used because it has no dot-files, which GitHub Pages artifacts would otherwise drop.
-- `web/stations.geojson`: station ids, names, coordinates and height (string variables can't be read by the browser from Zarr).
+- `web/stations.geojson`: GeoJSON FeatureCollection with one Point per station (`[lon, lat]`) and the properties `id`, `name` and `height` (string variables can't be read by the browser from Zarr). The feature order equals the `station` index in the Zarr store. The collection also carries the observation `time` and the `variables` (long name and units) as extra top-level members. It can be opened directly in QGIS, geojson.io, etc.
 
 ### 3. Visualize with MapLibre
 
