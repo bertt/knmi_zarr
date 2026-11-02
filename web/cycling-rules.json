@@ -231,6 +231,7 @@
       { "when": { "input": "rainIntensity", "op": "gt", "value": 0.05 }, "label": "Yes", "icon": "🌦️", "text": "Light rain is falling." },
       { "when": [ { "input": "rain1h", "op": "gt", "value": 0.2 }, { "input": "rideTemp", "op": "lt", "value": 12 } ], "label": "Take one along", "icon": "🎒", "text": "It rained in the last hour and it is cool." },
       { "when": [ { "input": "rh", "op": "gte", "value": 95 }, { "input": "rideTemp", "op": "lt", "value": 10 } ], "label": "Take one along", "icon": "🎒", "text": "Very damp and cold air: a showerproof layer helps." },
+      { "when": { "input": "night", "op": "gte", "value": 1 }, "label": "No", "icon": "🌙", "text": "No rain at the moment." },
       { "when": { "input": "n", "op": "gte", "value": 5 }, "label": "No", "icon": "☁️", "text": "No rain at the moment." },
       { "label": "No", "icon": "🌤️", "text": "No rain at the moment." }
     ]
