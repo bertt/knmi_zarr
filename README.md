@@ -37,7 +37,7 @@ uv run --with xarray --with netcdf4 --with zarr --with numpy python convert.py K
 `convert.py` writes:
 
 - `web/obs.zarr`: Zarr v3 store with all numeric variables (`station × time`), uncompressed (the data is tiny). Zarr v3 is used because it has no dot-files, which GitHub Pages artifacts would otherwise drop.
-- `web/stations.json`: station ids, names, coordinates and height (string variables can't be read by the browser from Zarr).
+- `web/stations.geojson`: station ids, names, coordinates and height (string variables can't be read by the browser from Zarr).
 
 ### 3. Visualize with MapLibre
 
@@ -58,12 +58,12 @@ python -m http.server 8765   # open http://localhost:8765
 
 🌦️ **Live: <https://bertt.github.io/knmi_zarr/nearby.html>**
 
-A second static page that shows the weather at your location as a card with a weather icon. It uses the same Zarr store (`obs.zarr`) and `stations.json` as the map, read in the browser with zarrita.js. There is no server and no API key.
+A second static page that shows the weather at your location as a card with a weather icon. It uses the same Zarr store (`obs.zarr`) and `stations.geojson` as the map, read in the browser with zarrita.js. There is no server and no API key.
 
 How it works:
 
 1. The browser location (`navigator.geolocation`) is requested. It never leaves the browser.
-2. The data is always read from the Zarr published on GitHub Pages (`https://bertt.github.io/knmi_zarr/obs.zarr` and `stations.json`), also when the page is opened locally.
+2. The data is always read from the Zarr published on GitHub Pages (`https://bertt.github.io/knmi_zarr/obs.zarr` and `stations.geojson`), also when the page is opened locally.
 3. The distance to every station that reports a temperature is calculated (haversine); the nearest one is used.
 4. The icon and theme are derived from the observations:
    - thunderstorm, rain, snow or sleet from precipitation intensity (`rg`, `pg`), temperature and the present-weather code (`ww`),
@@ -101,7 +101,7 @@ Source data: [KNMI 10-minute in-situ meteorological observations](https://datapl
 
 ### 6. Read the latest observations from the online Zarr (Python)
 
-`latest.py` shows that the published Zarr store can be used directly in a process, without a KNMI API key or a server. It reads `stations.json` to find a station by name (default `De Bilt`, the KNMI station in Utrecht), opens `https://bertt.github.io/knmi_zarr/obs.zarr` with xarray and prints the latest measurements of that station with their units.
+`latest.py` shows that the published Zarr store can be used directly in a process, without a KNMI API key or a server. It reads `stations.geojson` to find a station by name (default `De Bilt`, the KNMI station in Utrecht), opens `https://bertt.github.io/knmi_zarr/obs.zarr` with xarray and prints the latest measurements of that station with their units.
 
 ```powershell
 uv run --with xarray --with zarr --with requests --with fsspec --with aiohttp python latest.py
@@ -110,10 +110,10 @@ uv run --with xarray --with zarr --with requests --with fsspec --with aiohttp py
 
 How the code works:
 
-1. `stations.json` is fetched with `requests` and the station name is matched (case-insensitive, partial match) to get its index. In the Zarr store, stations are stored by numeric index.
+1. `stations.geojson` is fetched with `requests` and the station name is matched (case-insensitive, partial match) to get its index. In the Zarr store, stations are stored by numeric index.
 2. `xr.open_zarr(".../obs.zarr", consolidated=True, zarr_format=3)` opens the store lazily over HTTP, so only the needed chunks are downloaded.
 3. `ds.isel(station=idx, time=-1)` selects the station and the latest time step.
-4. The numeric variables listed in `stations.json` are printed with their long name and unit; missing values (NaN) are skipped.
+4. The numeric variables listed in `stations.geojson` are printed with their long name and unit; missing values (NaN) are skipped.
 
 ```python
 ds = xr.open_zarr(f"{BASE}/obs.zarr", consolidated=True, zarr_format=3)
@@ -122,7 +122,7 @@ print(row["ta"].values)  # air temperature
 ```
 ## Deployment
 
-GitHub Pages serves the `web/` folder through the workflow in `.github/workflows/pages.yml` on every push to `main`, manually, and hourly (`cron`). Each run downloads the latest KNMI file, converts it to `web/obs.zarr` and `web/stations.json`, and deploys. Add your API key as repository secret `KNMI_API_KEY` (Settings → Secrets and variables → Actions).
+GitHub Pages serves the `web/` folder through the workflow in `.github/workflows/pages.yml` on every push to `main`, manually, and hourly (`cron`). Each run downloads the latest KNMI file, converts it to `web/obs.zarr` and `web/stations.geojson`, and deploys. Add your API key as repository secret `KNMI_API_KEY` (Settings → Secrets and variables → Actions).
 
 ### GitHub Actions
 
@@ -136,7 +136,7 @@ Steps of the single `deploy` job (Ubuntu runner):
 
 1. **Checkout** the repository and set up [uv](https://github.com/astral-sh/uv).
 2. **Download** the latest KNMI NetCDF file with `download.py`, using the `KNMI_API_KEY` repository secret. The filename is passed to the next step via `NC_FILE`.
-3. **Convert** the NetCDF file to `web/obs.zarr` and `web/stations.json` with `convert.py`.
+3. **Convert** the NetCDF file to `web/obs.zarr` and `web/stations.geojson` with `convert.py`.
 4. **Publish**: `web/` is uploaded as a Pages artifact (`upload-pages-artifact`) and deployed with `deploy-pages`.
 
 The `concurrency` group `pages` cancels a still-running deployment when a new one starts, so the site is never more than about an hour old. The workflow needs the permissions `contents: read`, `pages: write` and `id-token: write`, and GitHub Pages must be set to the source *GitHub Actions* (Settings → Pages).
@@ -147,7 +147,7 @@ The `concurrency` group `pages` cancels a still-running deployment when a new on
 
 **License:** the KNMI dataset is published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (verified on the dataset page). This allows use, adaptation and redistribution, also commercially, as long as KNMI is credited as the source. Please credit: *"Source: KNMI"* with a link to the dataset above.
 
-**Modified data:** `web/obs.zarr` and `web/stations.json` are derived from the KNMI NetCDF files (converted to Zarr, string variables moved to JSON). They are not official KNMI products and may lag behind the original data by up to an hour.
+**Modified data:** `web/obs.zarr` and `web/stations.geojson` are derived from the KNMI NetCDF files (converted to Zarr, string variables moved to JSON). They are not official KNMI products and may lag behind the original data by up to an hour.
 
 The KNMI [fair use policy](https://developer.dataplatform.knmi.nl/fair-use) applies: the API key is kept in a repository secret (never published), and the workflow downloads one file per hour.
 

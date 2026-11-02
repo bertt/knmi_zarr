@@ -143,7 +143,8 @@ const fmt = (v, d=0) => v == null ? "–" : v.toFixed(d);
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 
 async function main() {
-  const meta = await (await fetch(`${BASE}/stations.json`)).json();
+  const meta = await (await fetch(`${BASE}/stations.geojson`)).json();
+  meta.stations = meta.features.map(f => ({ ...f.properties, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }));
   const data = {};
   const keys = Object.keys(meta.variables);
   await Promise.all(keys.map(async k => data[k] = await readVar(k)));

@@ -14,8 +14,17 @@ stations = [
     for c, n, la, lo, h in zip(codes, names, ds["lat"].values, ds["lon"].values, ds["height"].values)
 ]
 meta = {
+    "type": "FeatureCollection",
     "time": str(ds["time"].values[0])[:16] + "Z",
-    "stations": stations,
+    # feature order == station index in the zarr store
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [s["lon"], s["lat"]]},
+            "properties": {"id": s["id"], "name": s["name"], "height": s["height"]},
+        }
+        for s in stations
+    ],
     "variables": {
         v: {
             "long_name": ds[v].attrs.get("long_name", v),
@@ -25,10 +34,10 @@ meta = {
         if ds[v].dtype.kind == "f" and ds[v].dims == ("station", "time")
     },
 }
-json.dump(meta, open("web/stations.json", "w"), ensure_ascii=False)
+json.dump(meta, open("web/stations.geojson", "w"), ensure_ascii=False)
 
 num = ds.drop_vars("stationname")
-num = num.assign_coords(station=np.arange(len(codes)))  # numeric index; ids are in stations.json
+num = num.assign_coords(station=np.arange(len(codes)))  # numeric index; ids are in stations.geojson
 shutil.rmtree("web/obs.zarr", ignore_errors=True)
 enc = {v: {"compressors": None} for v in num.data_vars}
 enc.update({c: {"compressors": None} for c in num.coords})

@@ -10,12 +10,13 @@ import xarray as xr
 BASE = "https://bertt.github.io/knmi_zarr"
 name = sys.argv[1] if len(sys.argv) > 1 else "De Bilt"
 
-meta = requests.get(f"{BASE}/stations.json", timeout=30).json()
-matches = [i for i, s in enumerate(meta["stations"]) if name.lower() in s["name"].lower()]
+meta = requests.get(f"{BASE}/stations.geojson", timeout=30).json()
+stations = [{**f["properties"], "lon": f["geometry"]["coordinates"][0], "lat": f["geometry"]["coordinates"][1]} for f in meta["features"]]
+matches = [i for i, s in enumerate(stations) if name.lower() in s["name"].lower()]
 if not matches:
-    sys.exit(f"Station '{name}' not found. Available: " + ", ".join(s["name"] for s in meta["stations"]))
+    sys.exit(f"Station '{name}' not found. Available: " + ", ".join(s["name"] for s in stations))
 idx = matches[0]
-station = meta["stations"][idx]
+station = stations[idx]
 
 ds = xr.open_zarr(f"{BASE}/obs.zarr", consolidated=True, zarr_format=3)
 row = ds.isel(station=idx, time=-1)

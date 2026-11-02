@@ -157,9 +157,10 @@ async function readVar(name) {
 const statusEl = document.getElementById("status");
 let meta; const data = {};
 try {
-  const r = await fetch("stations.json");
-  if (!r.ok) throw new Error("stations.json: HTTP " + r.status);
+  const r = await fetch("stations.geojson");
+  if (!r.ok) throw new Error("stations.geojson: HTTP " + r.status);
   meta = await r.json();
+  meta.stations = meta.features.map(f => ({ ...f.properties, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }));
   await Promise.all(Object.keys(VARS).map(async k => data[k] = await readVar(k)));
 } catch (err) {
   statusEl.textContent = "Loading failed: " + err.message;
