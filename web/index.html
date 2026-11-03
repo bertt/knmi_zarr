@@ -268,13 +268,19 @@ for (const [g, keys] of Object.entries(GROUPS)) {
     b.onclick = () => { cur = k; render(); }; chips.append(b);
   }
 }
-document.getElementById("wind").onchange = e =>
-  map.setLayoutProperty("wind","visibility", e.target.checked ? "visible" : "none");
+const windBox = document.getElementById("wind");
+const updateWindVis = () => {
+  const isWind = GROUPS["Wind"].includes(cur);
+  windBox.closest("label").style.display = isWind ? "" : "none";
+  map.setLayoutProperty("wind","visibility", isWind && windBox.checked ? "visible" : "none");
+};
+windBox.onchange = updateWindVis;
 
 function render() {
   const V = VARS[cur];
   chips.querySelectorAll(".chip").forEach(b => b.classList.toggle("on", b.dataset.k === cur));
   map.getSource("st").setData(feats());
+  updateWindVis();
 
   const items = meta.stations.map((s,i) => ({ s, i, v: val(cur,i) })).filter(x => x.v != null);
   items.sort((a,b) => b.v - a.v);
