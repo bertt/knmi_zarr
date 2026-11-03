@@ -43,12 +43,12 @@ export async function loadStations({ bbox } = {}) {
   if (configError) throw configError;
   let file, metadata;
   try {
-    file = await asyncBufferFromUrl({ url: DATA_URL });
+    file = await asyncBufferFromUrl({ url: DATA_URL, requestInit: { cache: "no-store" } }); // no-store: partial responses must not end up in the HTTP cache
     metadata = await parquetMetadataAsync(file);
   } catch {
     // GitHub Pages gzips the file, which breaks HTTP range requests (the length is that of the compressed file): read it completely instead
     try {
-      const r = await fetch(DATA_URL, { cache: "no-cache" });
+      const r = await fetch(DATA_URL, { cache: "reload" });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       file = await r.arrayBuffer();
       metadata = await parquetMetadataAsync(file);
