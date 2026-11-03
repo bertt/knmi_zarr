@@ -31,22 +31,44 @@ Data comes from the KNMI Data Platform dataset
 ### 2. Convert NetCDF → Zarr
 
 ```powershell
-uv run --with xarray --with netcdf4 --with zarr --with numpy --with pyarrow --with shapely python convert.py KMDS__OPER_P___10M_OBS_L2_202610302250.nc
+uv run --with xarray --with netcdf4 --with zarr --with numpy python convert.py KMDS__OPER_P___10M_OBS_L2_202610302250.nc
 ```
 
-`convert.py` writes:
+`convert.py` writes `web/obs.zarr`: a Zarr v3 store with all numeric variables (`station × time`, see [VARIABLES.md](VARIABLES.md) for the variable names), uncompressed (the data is tiny). Zarr v3 is used because it has no dot-files, which GitHub Pages artifacts would otherwise drop. There is no separate stations file: everything is in this one store.
 
-- `web/obs.zarr`: Zarr v3 store with all numeric variables (`station × time`, see [VARIABLES.md](VARIABLES.md) for the variable names), uncompressed (the data is tiny). Zarr v3 is used because it has no dot-files, which GitHub Pages artifacts would otherwise drop.
-- `web/stations.parquet`: [GeoParquet](https://geoparquet.org/) 1.1 file with one row per station: the columns `id`, `name`, `height` and a `geometry` column (WKB Point, lon/lat, WGS84/CRS84; string variables can't be read by the browser from Zarr). The row order equals the `station` index in the Zarr store. The observation `time` and the `variables` (long name and units) are stored as JSON in the extra file-level metadata key `knmi`. The file is snappy-compressed (the codec [hyparquet](https://github.com/hyparam/hyparquet) supports in the browser). It can be opened directly in QGIS, GeoPandas, DuckDB, etc., e.g. `geopandas.read_parquet("web/stations.parquet")`.
+The stations are stored as coordinates on the `station` dimension, next to the observations:
+
+- `station_id` (string, the KNMI station code) and `station_name` (string) as variable-length UTF-8 strings (`vlen-utf8`; read with zarrita.js ≥ 0.7, xarray and zarr-python),
+- `lat`, `lon` and `height` (station height in m),
+- `station` is a numeric index (the position in the store). **Use `station_id` as the stable identity**: the position can change when stations are added.
+- `time` is stored as seconds since 1970-01-01; the long name and units of every variable are attributes of that variable (also in the consolidated metadata in the root `zarr.json`).
+
+#### Spatial indexing (latitude/longitude)
+
+Stations can be added worldwide, while a user usually wants only a small area. Zarr has no built-in spatial index, so `convert.py` builds one from the `lat`/`lon` values:
+
+1. **Z-order (Morton) sort:** lon/lat are quantized to a 16-bit grid (about 0.0055° in longitude, 0.0027° in latitude) and their bits are interleaved into one key. Sorting the stations by this key puts stations that are close together next to each other along the `station` dimension.
+2. **Chunking:** every array along `station` (`station_id`, `station_name`, `lat`, `lon`, `height` and all `station × time` variables) is chunked in blocks of 512 stations. Because of the sort, a chunk covers a compact area.
+3. **Chunk index:** the root attributes of `obs.zarr/zarr.json` hold `station_chunk_size` (512) and `station_chunk_bbox`, a list with `[west, south, east, north]` per chunk.
+
+A client reads a region like this:
+
+1. Read `zarr.json` (consolidated metadata and the chunk index) and the small `lat`/`lon` arrays.
+2. Select the chunks whose bbox intersects the area of interest.
+3. Read only those chunks of `station_id`, `station_name`, `height` and the wanted variables (`zarr.get(arr, [zarr.slice(start, end), 0])`).
+
+In `web/stations.js` this is `loadStations({ bbox: [west, south, east, north] })`. Stations outside the selected chunks keep their `lon`/`lat` but have `id`, `name` and `height` set to `null`. Without a bbox all stations are read; the pages do this now, since there are fewer than 512 stations (one chunk).
+
+Notes: a Z-order chunk can span a larger area than the stations in it suggest (the curve jumps), so the chunk bboxes may overlap and a query can read a few extra chunks. The `station` index is the position after sorting and can change when stations are added, so always identify a station by `station_id`.
 
 ### 2b. Download + convert in one go
 
-To fetch the most recent observations and convert them to `web/obs.zarr` and `web/stations.parquet` in one command (the API key is only set for this PowerShell session and never committed):
+To fetch the most recent observations and convert them to `web/obs.zarr` in one command (the API key is only set for this PowerShell session and never committed):
 
 ```powershell
 $env:KNMI_API_KEY = "<your key>"
 $nc = uv run --with requests python download.py | Select-Object -Last 1
-uv run --with xarray --with netcdf4 --with zarr --with numpy --with pyarrow --with shapely python convert.py $nc
+uv run --with xarray --with netcdf4 --with zarr --with numpy python convert.py $nc
 ```
 
 `download.py` prints the downloaded filename, which is passed to `convert.py`. If the API answers `429 Too Many Requests`, the key's rate limit is exhausted: wait a while and retry (see the fair use policy below). To view the result locally, see "Configuration" in step 3.
@@ -73,21 +95,20 @@ python -m http.server 8765   # open http://localhost:8765
 ```
 
 - The value is an absolute URL or a path relative to the config file. The default `obs.zarr` is the store next to the pages: on GitHub Pages that is <https://bertt.github.io/knmi_zarr/obs.zarr>, locally it is your own `web/obs.zarr` (step 2 / 2b). So local development needs no changes.
-- `stations.parquet` is expected in the same folder as the Zarr store.
 - To read another store, use its URL, e.g. `{ "zarr": "https://bertt.github.io/knmi_zarr/obs.zarr" }` (a store on another origin must allow CORS).
 - Another config file can be used per page with the URL parameter `?config=<file or url>` (relative to the page), e.g. `cycling.html?config=my-config.json&station=De%20Bilt`. The parameter is passed on automatically in the links between the pages, so you stay on the same data while navigating.
-- **Errors:** if the config file, the Zarr store (`<zarr>/zarr.json`) or `stations.parquet` cannot be found, the page shows a message such as `Zarr store not found at http://localhost:8765/obs.zarr (HTTP 404). Check the "zarr" URL in the config file ... or create the data with convert.py.` instead of an empty page.
+- **Errors:** if the config file or the Zarr store (`<zarr>/zarr.json`) cannot be found, the page shows a message such as `Zarr store not found at http://localhost:8765/obs.zarr (HTTP 404). Check the "zarr" URL in the config file ... or create the data with convert.py.` instead of an empty page.
 
 ### 4. Weather near you (`web/nearby.html`)
 
 🌦️ **Live: <https://bertt.github.io/knmi_zarr/nearby.html>**
 
-A second static page that shows the weather at your location as a card with a weather icon. It uses the same Zarr store (`obs.zarr`) and `stations.parquet` as the map, read in the browser with zarrita.js and hyparquet (via the shared module `web/stations.js`, which decodes the WKB geometry). There is no server and no API key.
+A second static page that shows the weather at your location as a card with a weather icon. It uses the same Zarr store (`obs.zarr`) as the map, including the stations, read in the browser with zarrita.js (via the shared module `web/stations.js`). There is no server and no API key.
 
 How it works:
 
 1. The browser location (`navigator.geolocation`) is requested. It never leaves the browser.
-2. The data is read from the Zarr URL in `web/config.json` (default `obs.zarr`, i.e. the store next to the page, with `stations.parquet` next to it).
+2. The data is read from the Zarr URL in `web/config.json` (default `obs.zarr`, i.e. the store next to the page).
 3. The distance to every station that reports a temperature is calculated (haversine); the nearest one is used.
 4. The icon and theme are derived from the observations:
    - thunderstorm, rain, snow or sleet from precipitation intensity (`rg`, `pg`), temperature and the present-weather code (`ww`),
@@ -124,19 +145,19 @@ Source data: [KNMI 10-minute in-situ meteorological observations](https://datapl
 
 ### 6. Read the latest observations from the online Zarr (Python)
 
-`latest.py` shows that the published Zarr store can be used directly in a process, without a KNMI API key or a server. It reads `stations.parquet` to find a station by name (default `De Bilt`, the KNMI station in Utrecht), opens `https://bertt.github.io/knmi_zarr/obs.zarr` with xarray and prints the latest measurements of that station with their units.
+`latest.py` shows that the published Zarr store can be used directly in a process, without a KNMI API key or a server. It reads the station names from the Zarr store (`station_name`) to find a station by name (default `De Bilt`, the KNMI station in Utrecht), opens `https://bertt.github.io/knmi_zarr/obs.zarr` with xarray and prints the latest measurements of that station with their units.
 
 ```powershell
-uv run --with xarray --with zarr --with requests --with fsspec --with aiohttp --with pyarrow --with shapely python latest.py
-uv run --with xarray --with zarr --with requests --with fsspec --with aiohttp --with pyarrow --with shapely python latest.py "Schiphol"
+uv run --with xarray --with zarr --with fsspec --with aiohttp python latest.py
+uv run --with xarray --with zarr --with fsspec --with aiohttp python latest.py "Schiphol"
 ```
 
 How the code works:
 
-1. `stations.parquet` is fetched with `requests` and read with pyarrow; the WKB geometry is decoded with shapely and the station name is matched (case-insensitive, partial match) to get its index. In the Zarr store, stations are stored by numeric index.
-2. `xr.open_zarr(".../obs.zarr", consolidated=True, zarr_format=3)` opens the store lazily over HTTP, so only the needed chunks are downloaded.
+1. `xr.open_zarr(".../obs.zarr", consolidated=True, zarr_format=3)` opens the store lazily over HTTP, so only the needed chunks are downloaded.
+2. The station name is matched (case-insensitive, partial match) against `ds["station_name"]` to get its index.
 3. `ds.isel(station=idx, time=-1)` selects the station and the latest time step.
-4. The numeric variables listed in the `knmi` metadata of `stations.parquet` are printed with their long name and unit; missing values (NaN) are skipped.
+4. The numeric `station × time` variables are printed with the long name and units from their attributes; missing values (NaN) are skipped.
 
 ```python
 ds = xr.open_zarr(f"{BASE}/obs.zarr", consolidated=True, zarr_format=3)
@@ -145,7 +166,7 @@ print(row["ta"].values)  # air temperature
 ```
 ## Deployment
 
-GitHub Pages serves the `web/` folder through the workflow in `.github/workflows/pages.yml` on every push to `main`, manually, and hourly (`cron`). Each run downloads the latest KNMI file, converts it to `web/obs.zarr` and `web/stations.parquet`, and deploys. Add your API key as repository secret `KNMI_API_KEY` (Settings → Secrets and variables → Actions).
+GitHub Pages serves the `web/` folder through the workflow in `.github/workflows/pages.yml` on every push to `main`, manually, and hourly (`cron`). Each run downloads the latest KNMI file, converts it to `web/obs.zarr`, and deploys. Add your API key as repository secret `KNMI_API_KEY` (Settings → Secrets and variables → Actions).
 
 ### GitHub Actions
 
@@ -159,7 +180,7 @@ Steps of the single `deploy` job (Ubuntu runner):
 
 1. **Checkout** the repository and set up [uv](https://github.com/astral-sh/uv).
 2. **Download** the latest KNMI NetCDF file with `download.py`, using the `KNMI_API_KEY` repository secret. The filename is passed to the next step via `NC_FILE`.
-3. **Convert** the NetCDF file to `web/obs.zarr` and `web/stations.parquet` with `convert.py`.
+3. **Convert** the NetCDF file to `web/obs.zarr` with `convert.py`.
 4. **Publish**: `web/` is uploaded as a Pages artifact (`upload-pages-artifact`) and deployed with `deploy-pages`.
 
 The `concurrency` group `pages` cancels a still-running deployment when a new one starts, so the site is never more than about an hour old. The workflow needs the permissions `contents: read`, `pages: write` and `id-token: write`, and GitHub Pages must be set to the source *GitHub Actions* (Settings → Pages).
@@ -170,7 +191,7 @@ The `concurrency` group `pages` cancels a still-running deployment when a new on
 
 **License:** the KNMI dataset is published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (verified on the dataset page). This allows use, adaptation and redistribution, also commercially, as long as KNMI is credited as the source. Please credit: *"Source: KNMI"* with a link to the dataset above.
 
-**Modified data:** `web/obs.zarr` and `web/stations.parquet` are derived from the KNMI NetCDF files (converted to Zarr, string variables moved to GeoParquet). They are not official KNMI products and may lag behind the original data by up to an hour.
+**Modified data:** `web/obs.zarr` is derived from the KNMI NetCDF files (converted to Zarr, stations sorted spatially and chunked). It is not an official KNMI product and may lag behind the original data by up to an hour.
 
 The KNMI [fair use policy](https://developer.dataplatform.knmi.nl/fair-use) applies: the API key is kept in a repository secret (never published), and the workflow downloads one file per hour.
 

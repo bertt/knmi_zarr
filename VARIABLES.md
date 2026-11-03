@@ -2,11 +2,11 @@
 
 ← Back to the [README](README.md)
 
-`web/obs.zarr` holds 90 numeric variables with dimensions `station × time` (one 10-minute time step, one value per station). The names, long names and units come from the KNMI NetCDF file ([dataset](https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0), © KNMI, CC BY 4.0). The same long names and units are stored in `web/stations.parquet` (file-level metadata key `knmi`), together with the observation time.
+`web/obs.zarr` holds 90 numeric variables with dimensions `station × time` (one 10-minute time step, one value per station). The names, long names and units come from the KNMI NetCDF file ([dataset](https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0), © KNMI, CC BY 4.0). The same long names and units are stored as attributes of every variable in the Zarr store.
 
 Naming: `T`/`t` temperature, `R`/`r` rain, `S`/`f`/`d` wind speed/gust/direction, `Q`/`q` solar radiation, `n` cloud cover, `h` cloud base, `p` pressure. A suffix such as `1H`, `6`, `12` or `24` is the period in hours. "with MD" is part of the original KNMI long names.
 
-Coordinates: `station` (numeric index; the row order of `stations.parquet`), `time`, `lat`, `lon`, `height` (station height in m).
+Coordinates: `station` (numeric index, the position in the store), `station_id` (string, stable id), `station_name` (string), `time`, `lat`, `lon`, `height` (station height in m).
 
 ## CF conventions
 
@@ -120,4 +120,4 @@ The *CF `standard_name`* column shows the attribute exactly as delivered in the 
 | `W10` | Past weather indicator | code | – |
 | `W10-10` | Past weather indicator for the previous 10 min interval | code | – |
 
-The web pages currently show 21 of these variables (see the [README](README.md)). The complete list with long names and units for the latest data is in the `knmi` metadata of `web/stations.parquet`.
+The web pages currently show 21 of these variables (see the [README](README.md)). The complete list with long names and units is in the variable attributes (and the consolidated metadata in `web/obs.zarr/zarr.json`).
