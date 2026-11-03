@@ -1,23 +1,23 @@
-# Variables in `obs.zarr`
+# Variables in `obs.parquet`
 
 ← Back to the [README](README.md)
 
-`web/obs.zarr` holds 90 numeric variables with dimensions `station × time` (one 10-minute time step, one value per station). The names, long names and units come from the KNMI NetCDF file ([dataset](https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0), © KNMI, CC BY 4.0). The same long names and units are stored as attributes of every variable in the Zarr store.
+`web/obs.parquet` (GeoParquet) holds one row per station and 90 nullable numeric observation columns (one 10-minute time step). The names, long names and units come from the KNMI NetCDF file ([dataset](https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0), © KNMI, CC BY 4.0). The same long names, units and standard names are stored as JSON in the file metadata (key `knmi:variables`).
 
 Naming: `T`/`t` temperature, `R`/`r` rain, `S`/`f`/`d` wind speed/gust/direction, `Q`/`q` solar radiation, `n` cloud cover, `h` cloud base, `p` pressure. A suffix such as `1H`, `6`, `12` or `24` is the period in hours. "with MD" is part of the original KNMI long names.
 
-Coordinates: `station` (numeric index, the position in the store), `station_id` (string, stable id), `station_name` (string), `time`, `lat`, `lon`, `height` (station height in m).
+Other columns: `station_id` (string, stable id), `station_name`, `source` (network, e.g. `KNMI`), `time` (UTC), `lat`, `lon`, `height` (station height in m), `wsi` (WMO station identifier), `geometry` (WKB point) and `bbox` (GeoParquet covering).
 
 ## CF conventions
 
-The abbreviations above are KNMI's own codes and not an international standard. The data itself follows the [CF Metadata Conventions](https://cfconventions.org/) (`Conventions: "CF-1.12"` in the store): a community standard for self-describing climate and forecast data, used by NetCDF, Zarr and many tools (xarray, Panoply, ncview, …). In CF every variable can carry:
+The abbreviations above are KNMI's own codes and not an international standard. The data itself follows the [CF Metadata Conventions](https://cfconventions.org/) (`Conventions: "CF-1.12"` in the file metadata `knmi:dataset`): a community standard for self-describing climate and forecast data, used by NetCDF, Zarr and many tools (xarray, Panoply, ncview, …). In CF every variable can carry:
 
 - `standard_name`: a name from the [CF Standard Name Table](https://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html) that says *what physical quantity* it is (e.g. `air_temperature`), independent of the local abbreviation. This is the key to compare or combine variables from different sources.
 - `long_name`: a free-text description (the *Description* column).
 - `units`: a [UDUNITS](https://docs.unidata.ucar.edu/udunits/current/) compatible unit.
 - `cell_methods` (optional in CF): how a value was aggregated (mean, minimum, maximum, sum, …). The KNMI file does not use it, so several variables share one `standard_name` and differ only in the statistic or period: for example `ta`, `tn` and `tx` are all `air_temperature`; the long name tells which one is the mean, minimum or maximum.
 
-The *CF `standard_name`* column shows the attribute exactly as delivered in the Zarr store. 80 of the 90 variables have one; `–` means that the KNMI file has none (durations, weather codes, indicators, luminance and optical range).
+The *CF `standard_name`* column shows the attribute exactly as delivered in the file metadata. 80 of the 90 variables have one; `–` means that the KNMI file has none (durations, weather codes, indicators, luminance and optical range).
 
 ¹ KNMI labels the wet bulb temperature `tb` with the standard name `soil_temperature`. This is probably an error in the source file (a CF name for wet bulb temperature would be `wet_bulb_temperature`). The value is kept as delivered.
 
@@ -120,4 +120,4 @@ The *CF `standard_name`* column shows the attribute exactly as delivered in the 
 | `W10` | Past weather indicator | code | – |
 | `W10-10` | Past weather indicator for the previous 10 min interval | code | – |
 
-The web pages currently show 21 of these variables (see the [README](README.md)). The complete list with long names and units is in the variable attributes (and the consolidated metadata in `web/obs.zarr/zarr.json`).
+The web pages currently show 21 of these variables (see the [README](README.md)). The complete list with long names and units is in the file metadata (`knmi:variables`).

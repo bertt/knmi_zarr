@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Weather near you · KNMI Zarr demo</title>
+<title>Weather near you · KNMI GeoParquet demo</title>
 <style>
   :root { --fg:#fff; --mut:rgba(255,255,255,.72); --bg1:#1f2a44; --bg2:#4b5d86; }
   * { box-sizing:border-box; }
@@ -48,15 +48,14 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="banner"><b>Zarr demo</b> · live KNMI observations read straight from a <a href="https://zarr.dev/">Zarr</a> store in your browser<br>
-    Zarr source: <a id="zsrc" href="#"></a><br>
+  <div class="banner">  <b>GeoParquet demo</b> · live KNMI observations read straight from a <a href="https://geoparquet.org/">GeoParquet</a> file in your browser<br>
+      GeoParquet source: <a id="zsrc" href="#"></a><br>
     <a href="./">🗺️ All stations on a map</a> · <a href="cycling.html">🚴 Cycling weather</a></div>
   <div class="card" id="card"><div class="desc" id="status">Finding your location…</div></div>
 </div>
 
 <script type="module">
-import * as zarr from "https://esm.sh/zarrita@0.7.5";
-import { loadStations, ZARR_URL } from "./stations.js";
+import { loadStations, DATA_URL } from "./stations.js";
 
 const FALLBACK = "De Bilt";   // KNMI's main station, in the middle of the Netherlands
 const MAX_KM = 150;           // farther than this from any station = outside the network
@@ -83,14 +82,7 @@ const GROUPS = [
 
 const card = document.getElementById("card");
 const zsrc = document.getElementById("zsrc");
-zsrc.href = `${ZARR_URL}/zarr.json`; zsrc.textContent = ZARR_URL;
-const store = new zarr.FetchStore(ZARR_URL);
-const root = zarr.root(store);
-const readVar = async name => {
-  const arr = await zarr.open.v3(root.resolve(name), { kind: "array" });
-  const { data } = await zarr.get(arr);
-  return Array.from(data, v => (Number.isFinite(v) && Math.abs(v) < 1e30) ? v : null);
-};
+zsrc.href = DATA_URL; zsrc.textContent = DATA_URL;
 
 function km(lat1, lon1, lat2, lon2) {
   const r = Math.PI/180, a = Math.sin((lat2-lat1)*r/2)**2 +
@@ -143,9 +135,8 @@ const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;
 
 async function main() {
   const meta = await loadStations();
-  const data = {};
+  const data = meta.columns;
   const keys = Object.keys(meta.variables);
-  await Promise.all(keys.map(async k => data[k] = await readVar(k)));
   const obs = i => Object.fromEntries(keys.map(k => [k, data[k]?.[i] ?? null]));
   const bilt = meta.stations.findIndex(s => s.name === FALLBACK);
 
@@ -216,11 +207,11 @@ async function main() {
     ${notice ? `<div class="notice">ℹ️ ${notice}</div>` : ""}
     ${sections}
     ${more}
-    <div class="count">All ${shown.size} of ${total} variables in the Zarr shown · ${withValue} have a value at this station</div>
+    <div class="count">All ${shown.size} of ${total} variables in the GeoParquet shown · ${withValue} have a value at this station</div>
     ${user == null ? `<button id="retry">Use my location</button>` : ""}
     <div class="foot">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time)<br>
       Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
-      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to Zarr (observations and stations); not an official KNMI product.<br>
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to GeoParquet (observations and stations); not an official KNMI product.<br>
       Your location stays in your browser. <a href="./">All stations on a map</a> ·
       <a href="https://github.com/bertt/knmi_zarr">Source code</a></div>`;
   document.getElementById("retry")?.addEventListener("click", () => location.reload());

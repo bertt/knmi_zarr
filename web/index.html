@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KNMI 10-minute observations · Zarr demo</title>
+<title>KNMI 10-minute observations · GeoParquet demo</title>
 <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
 <style>
   :root { --bg:#0e1420; --panel:rgba(16,23,38,.92); --fg:#e8edf5; --mut:#8fa0b8; --acc:#4cc9f0; }
@@ -75,19 +75,19 @@
 </style>
 </head>
 <body>
-<div id="status">Loading Zarr…</div>
+<div id="status">Loading GeoParquet…</div>
 <div id="map"></div>
 
 <div id="side" class="panel">
   <h1>⚡ KNMI weather stations</h1>
-  <div class="sub" id="time">10-minute observations · read from Zarr</div>
+  <div class="sub" id="time">10-minute observations · read from GeoParquet</div>
   <div class="sub"><a href="nearby.html" style="color:var(--acc)">Weather near you →</a> · <a href="cycling.html" style="color:var(--acc)">Cycling weather →</a></div>
   <div id="chips"></div>
   <div class="stats" id="stats"></div>
   <label class="row"><input type="checkbox" id="wind" checked> Show wind arrows (pointing where the wind blows to)</label>
   <div id="list"></div>
   <button class="chip" id="toggle">Show station list</button>
-  <div class="src">Source: <a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0" target="_blank" rel="noopener">KNMI</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/" target="_blank" rel="noopener">Zarr</a> (observations and stations); not an official KNMI product.
+  <div class="src">Source: <a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0" target="_blank" rel="noopener">KNMI</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Converted to <a href="https://geoparquet.org/" target="_blank" rel="noopener">GeoParquet</a> (observations and stations); not an official KNMI product.
     <a href="https://github.com/bertt/knmi_zarr" target="_blank" rel="noopener">Code</a></div>
 </div>
 
@@ -101,8 +101,7 @@
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script type="module">
-import * as zarr from "https://esm.sh/zarrita@0.7.5";
-import { loadStations, ZARR_URL } from "./stations.js";
+import { loadStations } from "./stations.js";
 
 const VARS = {
   ta:  { label:"Temperature",       unit:"°C",   ramp:"turbo",   dom:[-5,30],  dec:1 },
@@ -147,26 +146,19 @@ function color(ramp, t) {
 }
 const fmt = (v, d) => v==null ? "–" : v.toFixed(d);
 
-// ---------- Zarr ----------
-const store = new zarr.FetchStore(ZARR_URL);
-const root = zarr.root(store);
-async function readVar(name) {
-  const arr = await zarr.open.v3(root.resolve(name), { kind: "array" });
-  const { data } = await zarr.get(arr);
-  return Array.from(data, v => (Number.isFinite(v) && Math.abs(v) < 1e30) ? v : null);
-}
+// ---------- GeoParquet ----------
 const statusEl = document.getElementById("status");
-let meta; const data = {};
+let meta, data;
 try {
   meta = await loadStations();
-  await Promise.all(Object.keys(VARS).map(async k => data[k] = await readVar(k)));
+  data = meta.columns;
 } catch (err) {
   statusEl.textContent = "Loading failed: " + err.message;
   throw err;
 }
 
 document.getElementById("time").textContent =
-  new Date(meta.time).toLocaleString("en-GB", { dateStyle:"full", timeStyle:"short" }) + " · from Zarr · " +
+  new Date(meta.time).toLocaleString("en-GB", { dateStyle:"full", timeStyle:"short" }) + " · from GeoParquet · " +
   `${Object.keys(VARS).length} of ${Object.keys(meta.variables).length} variables shown`;
 
 const val = (k, i) => {

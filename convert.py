@@ -1,8 +1,19 @@
-import shutil, sys
+"""Convert one or more KNMI-style NetCDF files (station x time) to one GeoParquet file.
+
+Usage: python convert.py <file.nc> [<more.nc> ...] [-o web/obs.parquet]
+
+One row per station, worldwide capable: stations from several files are merged
+(union of columns, missing values are null) and sorted along a Z-order curve.
+"""
+import json, sys
+import geopandas as gpd
 import numpy as np
+import pandas as pd
+import pyarrow.parquet as pq
 import xarray as xr
 
-CHUNK = 512  # stations per chunk; stations are sorted along a Z-order curve, so a chunk is a compact area
+ROW_GROUP = 512  # stations per row group; spatially sorted, so a row group is a compact area
+META_KEYS = ("long_name", "units", "standard_name")
 
 
 def morton(lon, lat):
@@ -16,44 +27,61 @@ def morton(lon, lat):
     return key
 
 
-src = sys.argv[1]
-ds = xr.open_dataset(src)
-ds = ds.drop_vars([v for v in ds.data_vars if ds[v].dtype.kind in "US" and ds[v].ndim == 0])
+def read(path):
+    """Returns (DataFrame with one row per station, variable descriptions, dataset attributes)."""
+    ds = xr.open_dataset(path).isel(time=-1)  # latest time step
+    df = pd.DataFrame({
+        "station_id": [str(s) for s in ds["station"].values],
+        "station_name": [str(n).strip() for n in ds["stationname"].values],
+        "source": "KNMI",
+        "time": pd.Timestamp(ds["time"].values).tz_localize("UTC").floor("ms"),
+    })
+    variables = {}
+    for v in ds.data_vars:
+        d = ds[v]
+        if d.dims != ("station",) or v == "stationname":
+            continue
+        if d.dtype.kind in "US":
+            df[v] = [str(x).strip() for x in d.values]  # e.g. wsi
+        elif d.dtype.kind in "fiu":
+            df[v] = d.values.astype("float32")
+            variables[v] = {k: str(d.attrs[k]) for k in META_KEYS if k in d.attrs}
+    for v in ("lon", "lat"):
+        df[v] = ds[v].values.astype("float64")
+        variables[v] = {k: str(ds[v].attrs[k]) for k in META_KEYS if k in ds[v].attrs}
+    return df, variables, ds.attrs
 
-# Station id and name are stored as string coordinates next to lat, lon and height
-codes = np.array([str(s) for s in ds["station"].values], dtype=object)  # object = variable-length string (vlen-utf8)
-names = np.array([str(n).strip() for n in ds["stationname"].values], dtype=object)
-ds = ds.drop_vars("stationname")
 
-# Sort the stations spatially and use the position as numeric `station` index
-order = np.argsort(morton(ds["lon"].values, ds["lat"].values), kind="stable")
-ds = ds.isel(station=order)
-codes, names = codes[order], names[order]
-n = len(codes)
-ds = ds.assign_coords(station=np.arange(n), station_id=("station", codes), station_name=("station", names))
-for c in list(ds.variables):  # other string variables (e.g. wsi) also as vlen-utf8, which browsers can read
-    if ds[c].dtype.kind in "US":
-        ds[c] = ds[c].astype(object)
-ds["station_id"].attrs["long_name"] = "station id (stable identifier; the position in this store can change)"
-ds["station_name"].attrs["long_name"] = "station name"
+args = sys.argv[1:]
+out = "web/obs.parquet"
+if "-o" in args:
+    i = args.index("-o")
+    out = args[i + 1]
+    del args[i:i + 2]
+if not args:
+    sys.exit(__doc__)
 
-# Bounding box of every station chunk: lets a client read only the chunks in its area
-lon, lat = ds["lon"].values, ds["lat"].values
-ds.attrs["station_chunk_size"] = CHUNK
-ds.attrs["station_chunk_bbox"] = [
-    [float(lon[i:i + CHUNK].min()), float(lat[i:i + CHUNK].min()), float(lon[i:i + CHUNK].max()), float(lat[i:i + CHUNK].max())]
-    for i in range(0, n, CHUNK)
-]
+frames, variables, attrs = [], {}, {}
+for p in args:
+    df, v, a = read(p)
+    frames.append(df)
+    variables.update(v)
+    attrs = attrs or dict(a)
+df = pd.concat(frames, ignore_index=True)
+df = df.drop_duplicates(["source", "station_id"], keep="last")
+df = df[df["lon"].between(-180, 180) & df["lat"].between(-90, 90)]
+df = df.iloc[np.argsort(morton(df["lon"], df["lat"]), kind="stable")].reset_index(drop=True)
 
-def chunks(v):
-    return tuple(min(CHUNK, n) if d == "station" else 1 if d == "time" else s for d, s in zip(v.dims, v.shape))
+gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df["lon"], df["lat"]), crs="EPSG:4326")
+gdf.to_parquet(out, index=False, schema_version="1.1.0", write_covering_bbox=True, compression="snappy")
 
-shutil.rmtree("web/obs.zarr", ignore_errors=True)
-enc = {v: {"chunks": chunks(ds[v])} for v in ds.variables if "station" in ds[v].dims}
-for v in ds.data_vars:
-    enc.setdefault(v, {})["compressors"] = None
-for c in ds.coords:
-    enc.setdefault(c, {})["compressors"] = None
-enc["time"] = {"compressors": None, "units": "seconds since 1970-01-01T00:00:00", "dtype": "int64"}
-ds.to_zarr("web/obs.zarr", mode="w", zarr_format=3, consolidated=True, encoding=enc)
-print(len(ds.data_vars), "variables,", n, "stations")
+# Rewrite with small row groups and the variable descriptions (long name, units) in the file metadata
+table = pq.read_table(out)
+meta = dict(table.schema.metadata or {})
+meta[b"knmi:variables"] = json.dumps(variables, ensure_ascii=False).encode()
+meta[b"knmi:dataset"] = json.dumps(
+    {k: str(attrs[k]) for k in ("title", "institution", "source", "references", "Conventions") if k in attrs},
+    ensure_ascii=False,
+).encode()
+pq.write_table(table.replace_schema_metadata(meta), out, row_group_size=ROW_GROUP, compression="snappy", write_statistics=True)
+print(len(variables), "variables,", len(gdf), "stations ->", out)

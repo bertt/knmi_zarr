@@ -1,7 +1,7 @@
-import * as zarr from "https://esm.sh/zarrita@0.7.5";
+import { asyncBufferFromUrl, parquetMetadataAsync, parquetReadObjects } from "https://esm.sh/hyparquet@1.32.0";
 
-// config.json holds the Zarr URL used by all pages (absolute, or relative to the config file; default "obs.zarr" = the store next to the pages).
-// Station id, name, longitude, latitude and height are stored in the Zarr store itself.
+// config.json holds the GeoParquet URL used by all pages (absolute, or relative to the config file; default "obs.parquet" = the file next to the pages).
+// Station id, name, longitude, latitude and height are stored in the GeoParquet file itself.
 // The config file can be overridden with ?config=<file or url> (relative to the page), e.g. ?config=my-config.json
 const configUrl = new URL(new URLSearchParams(location.search).get("config") || "config.json", location.href);
 let configError = null, config = {};
@@ -9,11 +9,11 @@ try {
   const r = await fetch(configUrl, { cache: "no-cache" });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   config = await r.json();
-  if (typeof config.zarr !== "string") throw new Error('missing "zarr" property');
+  if (typeof config.parquet !== "string") throw new Error('missing "parquet" property');
 } catch (err) {
   configError = new Error(`Config file ${configUrl.href} could not be loaded: ${err.message}`);
 }
-export const ZARR_URL = new URL(config.zarr ?? "obs.zarr", configUrl).href;
+export const DATA_URL = new URL(config.parquet ?? "obs.parquet", configUrl).href;
 
 // Keep ?config=... when following relative links to other pages (also for links added later)
 const configParam = new URLSearchParams(location.search).get("config");
@@ -30,71 +30,55 @@ function keepConfig(root) {
 keepConfig(document);
 new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(keepConfig))).observe(document.body, { childList: true, subtree: true });
 
-async function exists(url) {
-  try { return (await fetch(url, { method: "GET", headers: { Range: "bytes=0-0" }, cache: "no-store" })).status; } catch { return 0; }
-}
+const NOT_VARIABLE = new Set(["lon", "lat", "height"]);
+const NOT_READ = new Set(["geometry", "bbox"]); // WKB geometry and covering bbox are for GIS tools; lon/lat are separate columns
 
-// Throws a readable error when the config or the Zarr store cannot be found
-async function checkSources() {
-  if (configError) throw configError;
-  const hint = `Check the "zarr" URL in the config file (${configUrl.href}) or create the data with convert.py.`;
-  const s = await exists(`${ZARR_URL}/zarr.json`);
-  if (s < 200 || s >= 300) throw new Error(`Zarr store not found at ${ZARR_URL} (${s ? "HTTP " + s : "not reachable"}). ${hint}`);
-}
-
-const UNIT_MS = { days: 864e5, hours: 36e5, minutes: 6e4, seconds: 1e3 };
-// Decodes a CF time value ("<unit> since <date>") to an ISO string
-function cfTime(value, units) {
-  const m = /^(\w+) since (.+)$/.exec(units || "");
-  if (!m || !UNIT_MS[m[1]]) throw new Error(`Unsupported time units "${units}" in the Zarr store`);
-  // Safari rejects "1970-01-01Z" and other non-strict ISO forms, so parse the base date explicitly
-  const p = /^(\d{4})-(\d\d)-(\d\d)(?:[T ](\d\d):(\d\d)(?::(\d\d(?:\.\d+)?))?)?\s*(Z|[+-]\d\d:?\d\d)?$/.exec(m[2].trim());
-  if (!p) throw new Error(`Unsupported time base "${m[2]}" in the Zarr store`);
-  let base = Date.UTC(+p[1], +p[2] - 1, +p[3], +(p[4] || 0), +(p[5] || 0), 0, Math.round(parseFloat(p[6] || 0) * 1000));
-  if (p[7] && p[7] !== "Z") {
-    const z = p[7].replace(":", "");
-    base -= (z[0] === "-" ? -1 : 1) * (+z.slice(1, 3) * 60 + +z.slice(3, 5)) * 6e4;
-  }
-  return new Date(base + Number(value) * UNIT_MS[m[1]]).toISOString();
-}
-
-const readAll = async (root, name, sel) => {
-  const arr = await zarr.open.v3(root.resolve(name), { kind: "array" });
-  return (await zarr.get(arr, sel)).data;
-};
-
-// Reads the station metadata (id, name, longitude, latitude, height), the observation time and the variable descriptions from the Zarr store.
-// The stations are sorted spatially and stored in chunks (consolidated attribute `station_chunk_bbox`).
-// Optional bbox [west, south, east, north]: only id, name and height of the chunks that intersect the bbox are read
-// (the others have id, name and height null). Without bbox all stations are read.
-// Returns { time, variables, stations: [{ id, name, height, lon, lat }] }; the array position is the `station` index of every variable.
+// Reads the station metadata (id, name, longitude, latitude, height), the observation time, the variable descriptions and the values.
+// The stations are sorted spatially and stored in row groups of a few hundred stations (worldwide: any number of stations).
+// Optional bbox [west, south, east, north]: only the row groups whose lon/lat statistics intersect the bbox are read completely
+// (the other stations have id, name, height and values null). Without bbox all stations are read.
+// Returns { time, variables, stations: [{ id, name, height, lon, lat }], columns: { variable: [value|null, ...] } };
+// the array position is the station index of every column.
 export async function loadStations({ bbox } = {}) {
-  await checkSources();
-  const res = await fetch(`${ZARR_URL}/zarr.json`, { cache: "no-cache" });
-  const group = await res.json();
-  const nodes = group.consolidated_metadata?.metadata;
-  if (!nodes) throw new Error(`The Zarr store at ${ZARR_URL} has no consolidated metadata. Create it with convert.py.`);
+  if (configError) throw configError;
+  let file, metadata;
+  try {
+    file = await asyncBufferFromUrl({ url: DATA_URL });
+    metadata = await parquetMetadataAsync(file);
+  } catch (err) {
+    throw new Error(`GeoParquet file not found at ${DATA_URL} (${err.message}). Check the "parquet" URL in the config file (${configUrl.href}) or create the data with convert.py.`);
+  }
+  const kv = Object.fromEntries((metadata.key_value_metadata ?? []).map(e => [e.key, e.value]));
+  const described = JSON.parse(kv["knmi:variables"] ?? "{}");
+  const names = metadata.schema.slice(1).map(s => s.name).filter(n => !NOT_READ.has(n));
   const variables = {};
-  for (const [name, a] of Object.entries(nodes)) {
-    const d = a.dimension_names;
-    if (typeof a.data_type === "string" && a.data_type.startsWith("float") && d?.length === 2 && d[0] === "station" && d[1] === "time")
-      variables[name] = { long_name: a.attributes?.long_name ?? name, units: a.attributes?.units ?? "" };
+  for (const [k, a] of Object.entries(described))
+    if (!NOT_VARIABLE.has(k) && names.includes(k)) variables[k] = { long_name: a.long_name ?? k, units: a.units ?? "" };
+
+  // Row ranges and lon/lat statistics of every row group
+  const groups = []; let start = 0;
+  for (const g of metadata.row_groups) {
+    const stat = n => g.columns.find(c => c.meta_data?.path_in_schema?.join(".") === n)?.meta_data?.statistics;
+    const x = stat("lon"), y = stat("lat");
+    groups.push({ start, end: start + Number(g.num_rows), box: x && y ? [x.min_value, y.min_value, x.max_value, y.max_value] : null });
+    start += Number(g.num_rows);
   }
-  const root = zarr.root(new zarr.FetchStore(ZARR_URL));
-  const [t, lon, lat] = await Promise.all(["time", "lon", "lat"].map(n => readAll(root, n)));
-  const time = cfTime(t[t.length - 1], nodes.time?.attributes?.units);
-  const n = lon.length, size = group.attributes?.station_chunk_size ?? n, boxes = group.attributes?.station_chunk_bbox;
-  const stations = Array.from({ length: n }, (_, i) => ({ id: null, name: null, height: null, lon: lon[i], lat: lat[i] }));
-  const wanted = [];
-  for (let c = 0; c * size < n; c++) {
-    const b = boxes?.[c];
-    if (bbox && b && (b[2] < bbox[0] || b[0] > bbox[2] || b[3] < bbox[1] || b[1] > bbox[3])) continue;
-    wanted.push(c);
-  }
-  await Promise.all(wanted.map(async c => {
-    const sel = [zarr.slice(c * size, Math.min(n, (c + 1) * size))];
-    const [id, name, height] = await Promise.all(["station_id", "station_name", "height"].map(k => readAll(root, k, sel)));
-    id.forEach((v, j) => Object.assign(stations[c * size + j], { id: String(v), name: String(name[j]), height: Number(height[j]) }));
+  const n = start;
+  const lonlat = await parquetReadObjects({ file, metadata, columns: ["lon", "lat"] });
+  const stations = lonlat.map(r => ({ id: null, name: null, height: null, lon: r.lon, lat: r.lat }));
+  const columns = Object.fromEntries(Object.keys(variables).map(k => [k, new Array(n).fill(null)]));
+  let time = null;
+  const wanted = groups.filter(g => !bbox || !g.box || !(g.box[2] < bbox[0] || g.box[0] > bbox[2] || g.box[3] < bbox[1] || g.box[1] > bbox[3]));
+  const read = names.filter(k => k in variables || ["station_id", "station_name", "height", "time"].includes(k));
+  await Promise.all(wanted.map(async g => {
+    const rows = await parquetReadObjects({ file, metadata, columns: read, rowStart: g.start, rowEnd: g.end });
+    rows.forEach((r, j) => {
+      const s = stations[g.start + j];
+      s.id = String(r.station_id); s.name = String(r.station_name); s.height = r.height == null ? null : Number(r.height);
+      for (const k in variables) { const v = r[k]; columns[k][g.start + j] = v != null && Number.isFinite(Number(v)) ? Number(v) : null; }
+      if (r.time && (!time || r.time > time)) time = r.time;
+    });
   }));
-  return { time, variables, stations };
+  if (!time) throw new Error(`The GeoParquet file at ${DATA_URL} has no observation time.`);
+  return { time: new Date(time).toISOString(), variables, stations, columns };
 }

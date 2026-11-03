@@ -12,7 +12,7 @@
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cycling weather · KNMI Zarr demo</title>
+<title>Cycling weather · KNMI GeoParquet demo</title>
 <style>
   :root { --fg:#e8edf5; --mut:#8fa0b8; --acc:#4cc9f0; --bg1:#0e1420; --bg2:#0f3d3a; }
   * { box-sizing:border-box; }
@@ -187,11 +187,11 @@
     <div class="isec"><h4>👋 About this site</h4>
       <p>This page finds the nearest KNMI weather station and turns its latest measurements into practical advice for cyclists: a ride score, what to wear, whether you need a rain jacket, and how to clean your bike afterwards. It also warns about ice, fog, darkness and thunder.</p>
       <p>It uses <b>18 weather parameters</b>: temperature, dew point, humidity, air pressure, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p></div>
-    <div class="isec"><h4>🧊 Data and Zarr</h4>
-      <p>The observations are 10-minute <a href="https://www.knmi.nl/">KNMI</a> measurements (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), published as NetCDF and converted to <a href="https://zarr.dev/">Zarr</a>. Not an official KNMI product.</p>
-      <p>Zarr is an open format for chunked, compressed multi-dimensional arrays. Because the data is split into small files, your browser can fetch just the pieces it needs straight from static storage, with no server or API in between.</p>
-      <p>Zarr source: <a id="zsrc" href="#"></a><br>
-        The station id, name, height and location are stored in the same Zarr store.</p></div>
+    <div class="isec"><h4>🧊 Data and GeoParquet</h4>
+      <p>The observations are 10-minute <a href="https://www.knmi.nl/">KNMI</a> measurements (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), published as NetCDF and       converted to <a href="https://geoparquet.org/">GeoParquet</a>. Not an official KNMI product.</p>
+            <p>GeoParquet is an open, columnar format for geospatial data. The stations are sorted by location and stored in small row groups, so your browser can fetch just the pieces it needs (HTTP range requests) straight from static storage, with no server or API in between.</p>
+            <p>GeoParquet source: <a id="zsrc" href="#"></a><br>
+              The station id, name, height and location are stored in the same file.</p></div>
     <div class="isec"><h4>🧮 Advice</h4>
       <p>Indicative advice based on the rules in <a id="rulesurl" href="#"></a>. Add <code>?rules=URL</code> to try your own.</p>
       <p>Quotes: <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati (via <a href="https://github.com/simonneutert/velominati-js">velominati-js</a>).</p></div>
@@ -206,8 +206,7 @@
 </div>
 
 <script type="module">
-import * as zarr from "https://esm.sh/zarrita@0.7.5";
-import { loadStations, ZARR_URL } from "./stations.js";
+import { loadStations, DATA_URL } from "./stations.js";
 
 const PARAMS = new URLSearchParams(location.search);
 const RULES_URL = PARAMS.get("rules") || "cycling-rules.json";
@@ -221,15 +220,8 @@ const VARS = ["ta","td","rh","ff","dd","gff","fx","qg","vv","n","ss","rg","pg","
 
 const card = document.getElementById("card");
 const zsrc = document.getElementById("zsrc");
-zsrc.href = `${ZARR_URL}/zarr.json`; zsrc.textContent = ZARR_URL;
+zsrc.href = DATA_URL; zsrc.textContent = DATA_URL;
 document.getElementById("info").addEventListener("click", e => { if (e.target.id === "info") e.target.close(); });
-const store = new zarr.FetchStore(ZARR_URL);
-const root = zarr.root(store);
-const readVar = async name => {
-  const arr = await zarr.open.v3(root.resolve(name), { kind: "array" });
-  const { data } = await zarr.get(arr);
-  return Array.from(data, v => (Number.isFinite(v) && Math.abs(v) < 1e30) ? v : null);
-};
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 const rgbOf = hex => { const h = String(hex).replace("#", ""); const n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16); return `${n >> 16 & 255},${n >> 8 & 255},${n & 255}`; };
@@ -384,9 +376,7 @@ async function main() {
     fetch(RULES_URL, { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(`${RULES_URL}: HTTP ${r.status}`); return r.json(); }),
     fetch("velominati-rules.json").then(r => r.ok ? r.json() : []).catch(() => []),
   ]);
-  const keys = VARS.filter(k => k in meta.variables);
-  const data = {};
-  await Promise.all(keys.map(async k => data[k] = await readVar(k)));
+  const data = meta.columns;
   step("s-data", "ok", "KNMI data loaded");
   const obs = i => Object.fromEntries(VARS.map(k => [k, data[k]?.[i] ?? null]));
 

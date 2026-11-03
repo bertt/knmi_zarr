@@ -1,3 +1,3 @@
 {
-  "zarr": "obs.zarr"
+  "parquet": "obs.parquet"
 }
