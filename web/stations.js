@@ -47,8 +47,15 @@ const UNIT_MS = { days: 864e5, hours: 36e5, minutes: 6e4, seconds: 1e3 };
 function cfTime(value, units) {
   const m = /^(\w+) since (.+)$/.exec(units || "");
   if (!m || !UNIT_MS[m[1]]) throw new Error(`Unsupported time units "${units}" in the Zarr store`);
-  const base = /(Z|[+-]\d\d:?\d\d)$/.test(m[2]) ? m[2] : m[2].replace(" ", "T") + "Z";
-  return new Date(new Date(base).getTime() + Number(value) * UNIT_MS[m[1]]).toISOString();
+  // Safari rejects "1970-01-01Z" and other non-strict ISO forms, so parse the base date explicitly
+  const p = /^(\d{4})-(\d\d)-(\d\d)(?:[T ](\d\d):(\d\d)(?::(\d\d(?:\.\d+)?))?)?\s*(Z|[+-]\d\d:?\d\d)?$/.exec(m[2].trim());
+  if (!p) throw new Error(`Unsupported time base "${m[2]}" in the Zarr store`);
+  let base = Date.UTC(+p[1], +p[2] - 1, +p[3], +(p[4] || 0), +(p[5] || 0), 0, Math.round(parseFloat(p[6] || 0) * 1000));
+  if (p[7] && p[7] !== "Z") {
+    const z = p[7].replace(":", "");
+    base -= (z[0] === "-" ? -1 : 1) * (+z.slice(1, 3) * 60 + +z.slice(3, 5)) * 6e4;
+  }
+  return new Date(base + Number(value) * UNIT_MS[m[1]]).toISOString();
 }
 
 const readAll = async (root, name, sel) => {
