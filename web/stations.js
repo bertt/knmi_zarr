@@ -45,8 +45,16 @@ export async function loadStations({ bbox } = {}) {
   try {
     file = await asyncBufferFromUrl({ url: DATA_URL });
     metadata = await parquetMetadataAsync(file);
-  } catch (err) {
-    throw new Error(`GeoParquet file not found at ${DATA_URL} (${err.message}). Check the "parquet" URL in the config file (${configUrl.href}) or create the data with convert.py.`);
+  } catch {
+    // GitHub Pages gzips the file, which breaks HTTP range requests (the length is that of the compressed file): read it completely instead
+    try {
+      const r = await fetch(DATA_URL, { cache: "no-cache" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      file = await r.arrayBuffer();
+      metadata = await parquetMetadataAsync(file);
+    } catch (err) {
+      throw new Error(`GeoParquet file not found at ${DATA_URL} (${err.message}). Check the "parquet" URL in the config file (${configUrl.href}) or create the data with convert.py.`);
+    }
   }
   const kv = Object.fromEntries((metadata.key_value_metadata ?? []).map(e => [e.key, e.value]));
   const described = JSON.parse(kv["knmi:variables"] ?? "{}");
