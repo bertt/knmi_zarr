@@ -270,7 +270,7 @@
       { "when": { "input": "ta", "op": "lt", "value": -10 }, "items": ["Ski goggles"], "warning": "Extreme cold: ski goggles protect your eyes and face from the icy wind." },
       { "when": { "input": "sunGlare", "op": "gte", "value": 1 }, "warning": "Low sun: glare can hide obstacles." },
       { "when": [{ "input": "qg", "op": "gte", "value": 600 }, { "input": "rideTemp", "op": "gte", "value": 18 }], "items": ["Sun sleeves or light jersey"] },
-      { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }, { "input": "rideTemp", "op": "lt", "value": 12 }], "items": ["Extra layer in your pocket"], "warning": "It gets dark soon and cooler: take an extra layer in case you ride longer." },
+      { "when": [{ "input": "darkness", "op": "gt", "value": 0 }, { "input": "night", "op": "lt", "value": 1 }, { "input": "dawn", "op": "lt", "value": 1 }, { "input": "rideTemp", "op": "lt", "value": 12 }], "items": ["Extra layer in your pocket"], "warning": "It gets dark soon and cooler: take an extra layer in case you ride longer." },
       { "when": { "input": "coldEastWind", "op": "gte", "value": 1 }, "warning": "Cold easterly wind: it feels colder than the temperature suggests." },
       { "when": { "input": "bridgeIce", "op": "gte", "value": 1 }, "warning": "Near freezing and damp: bridges and viaducts can be icy first." },
       { "when": [{ "input": "foggyCold", "op": "gte", "value": 1 }], "warning": "Cold fog: damp, cold and slippery. Dress warmer and use lights." },
