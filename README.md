@@ -47,7 +47,14 @@ Stations without a temperature measurement (`ta` is null) are left out of the fi
 
 #### NetCDF vs GeoParquet size
 
-The KNMI NetCDF file holds a single time step (not a time series) for all stations. In the example run (`KMDS__OPER_P___10M_OBS_L2_202611032140.nc`) the NetCDF is 156,175 bytes with 57 stations. The resulting `obs.parquet` is 95,902 bytes (about 39% smaller) with 48 stations, because 9 stations without temperature are dropped.
+The KNMI NetCDF file holds a single time step (not a time series) for all stations. Example run (`KMDS__OPER_P___10M_OBS_L2_202611032140.nc`):
+
+| Format | Size (bytes) | Stations |
+|---|---|---|
+| NetCDF | 156,175 | 57 |
+| GeoParquet (`obs.parquet`) | 95,902 (about 39% smaller) | 48 |
+
+The 9 stations without temperature are dropped from the GeoParquet.
 
 #### Spatial indexing and worldwide stations
 
