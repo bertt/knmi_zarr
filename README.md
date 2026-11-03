@@ -4,7 +4,7 @@ KNMI 10-minute weather observations → **Zarr** → interactive **MapLibre** ma
 
 🌍 **Live demo: https://bertt.github.io/knmi_zarr/**
 
-The demo reads the Zarr store directly in the browser (via [zarrita.js](https://github.com/manzt/zarrita.js)) and shows all KNMI automatic weather stations (including the Caribbean Netherlands) on a map. The Zarr store contains 90 numeric `station × time` variables; the demo currently shows 21 of them, grouped by category: temperature, precipitation, wind, humidity & pressure, and sun, clouds & visibility.
+The demo reads the Zarr store directly in the browser (via [zarrita.js](https://github.com/manzt/zarrita.js)) and shows all KNMI automatic weather stations (including the Caribbean Netherlands) on a map. The Zarr store contains 90 numeric `station × time` variables (a description of every variable is in [VARIABLES.md](VARIABLES.md)); the demo currently shows 21 of them, grouped by category: temperature, precipitation, wind, humidity & pressure, and sun, clouds & visibility.
 
 ## Pipeline
 
@@ -36,7 +36,7 @@ uv run --with xarray --with netcdf4 --with zarr --with numpy --with pyarrow --wi
 
 `convert.py` writes:
 
-- `web/obs.zarr`: Zarr v3 store with all numeric variables (`station × time`), uncompressed (the data is tiny). Zarr v3 is used because it has no dot-files, which GitHub Pages artifacts would otherwise drop.
+- `web/obs.zarr`: Zarr v3 store with all numeric variables (`station × time`, see [VARIABLES.md](VARIABLES.md) for the variable names), uncompressed (the data is tiny). Zarr v3 is used because it has no dot-files, which GitHub Pages artifacts would otherwise drop.
 - `web/stations.parquet`: [GeoParquet](https://geoparquet.org/) 1.1 file with one row per station: the columns `id`, `name`, `height` and a `geometry` column (WKB Point, lon/lat, WGS84/CRS84; string variables can't be read by the browser from Zarr). The row order equals the `station` index in the Zarr store. The observation `time` and the `variables` (long name and units) are stored as JSON in the extra file-level metadata key `knmi`. The file is snappy-compressed (the codec [hyparquet](https://github.com/hyparam/hyparquet) supports in the browser). It can be opened directly in QGIS, GeoPandas, DuckDB, etc., e.g. `geopandas.read_parquet("web/stations.parquet")`.
 
 ### 2b. Download + convert in one go
