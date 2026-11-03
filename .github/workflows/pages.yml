@@ -30,7 +30,7 @@ jobs:
           f=$(uv run --with requests python download.py)
           echo "NC_FILE=$f" >> "$GITHUB_ENV"
       - name: Convert NetCDF to Zarr
-        run: uv run --with xarray --with netcdf4 --with zarr --with numpy python convert.py "$NC_FILE"
+        run: uv run --with xarray --with netcdf4 --with zarr --with numpy --with pyarrow --with shapely python convert.py "$NC_FILE"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

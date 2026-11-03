@@ -1,6 +1,6 @@
 {
   "shape": [
-    56
+    59
   ],
   "data_type": {
     "name": "fixed_length_utf32",
@@ -12,7 +12,7 @@
     "name": "regular",
     "configuration": {
       "chunk_shape": [
-        56
+        59
       ]
     }
   },

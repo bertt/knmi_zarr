@@ -29,7 +29,7 @@
   "attributes": {
     "long_name": "Time (in UTC) indicating the end of the 10-minute measurement interval",
     "standard_name": "time",
-    "units": "days since 2026-10-30 22:50:00",
+    "units": "days since 2026-11-03 06:30:00",
     "calendar": "proleptic_gregorian"
   },
   "dimension_names": [

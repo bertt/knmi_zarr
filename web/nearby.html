@@ -56,6 +56,7 @@
 
 <script type="module">
 import * as zarr from "https://esm.sh/zarrita@0.5.1";
+import { loadStations, ZARR_URL } from "./stations.js";
 
 const FALLBACK = "De Bilt";   // KNMI's main station, in the middle of the Netherlands
 const MAX_KM = 150;           // farther than this from any station = outside the network
@@ -80,8 +81,6 @@ const GROUPS = [
   ]],
 ];
 
-const BASE = "https://bertt.github.io/knmi_zarr";   // always read the Zarr published on GitHub Pages
-const ZARR_URL = `${BASE}/obs.zarr`;
 const card = document.getElementById("card");
 const zsrc = document.getElementById("zsrc");
 zsrc.href = `${ZARR_URL}/zarr.json`; zsrc.textContent = ZARR_URL;
@@ -143,8 +142,7 @@ const fmt = (v, d=0) => v == null ? "–" : v.toFixed(d);
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
 
 async function main() {
-  const meta = await (await fetch(`${BASE}/stations.geojson`)).json();
-  meta.stations = meta.features.map(f => ({ ...f.properties, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }));
+  const meta = await loadStations();
   const data = {};
   const keys = Object.keys(meta.variables);
   await Promise.all(keys.map(async k => data[k] = await readVar(k)));

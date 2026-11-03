@@ -102,6 +102,7 @@
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script type="module">
 import * as zarr from "https://esm.sh/zarrita@0.5.1";
+import { loadStations, ZARR_URL } from "./stations.js";
 
 const VARS = {
   ta:  { label:"Temperature",       unit:"°C",   ramp:"turbo",   dom:[-5,30],  dec:1 },
@@ -147,7 +148,7 @@ function color(ramp, t) {
 const fmt = (v, d) => v==null ? "–" : v.toFixed(d);
 
 // ---------- Zarr ----------
-const store = new zarr.FetchStore(new URL("obs.zarr", location.href).href);
+const store = new zarr.FetchStore(ZARR_URL);
 const root = zarr.root(store);
 async function readVar(name) {
   const arr = await zarr.open.v3(root.resolve(name), { kind: "array" });
@@ -157,10 +158,7 @@ async function readVar(name) {
 const statusEl = document.getElementById("status");
 let meta; const data = {};
 try {
-  const r = await fetch("stations.geojson");
-  if (!r.ok) throw new Error("stations.geojson: HTTP " + r.status);
-  meta = await r.json();
-  meta.stations = meta.features.map(f => ({ ...f.properties, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }));
+  meta = await loadStations();
   await Promise.all(Object.keys(VARS).map(async k => data[k] = await readVar(k)));
 } catch (err) {
   statusEl.textContent = "Loading failed: " + err.message;

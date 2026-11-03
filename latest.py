@@ -2,16 +2,27 @@
 
 Usage: python latest.py [station name]   (default: "De Bilt", the KNMI station in Utrecht)
 """
+import io
+import json
 import sys
 
+import pyarrow.parquet as pq
 import requests
+import shapely
 import xarray as xr
 
 BASE = "https://bertt.github.io/knmi_zarr"
 name = sys.argv[1] if len(sys.argv) > 1 else "De Bilt"
 
-meta = requests.get(f"{BASE}/stations.geojson", timeout=30).json()
-stations = [{**f["properties"], "lon": f["geometry"]["coordinates"][0], "lat": f["geometry"]["coordinates"][1]} for f in meta["features"]]
+resp = requests.get(f"{BASE}/stations.parquet", timeout=30)
+resp.raise_for_status()
+table = pq.read_table(io.BytesIO(resp.content))
+meta = json.loads(table.schema.metadata[b"knmi"])
+points = shapely.from_wkb(table["geometry"].to_pylist())
+stations = [
+    {"name": n, "lon": p.x, "lat": p.y}
+    for n, p in zip(table["name"].to_pylist(), points)
+]
 matches = [i for i, s in enumerate(stations) if name.lower() in s["name"].lower()]
 if not matches:
     sys.exit(f"Station '{name}' not found. Available: " + ", ".join(s["name"] for s in stations))
