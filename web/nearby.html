@@ -50,6 +50,7 @@
 <div class="wrap">
   <div class="banner"><b>Zarr demo</b> · live KNMI observations read straight from a <a href="https://zarr.dev/">Zarr</a> store in your browser<br>
     Zarr source: <a id="zsrc" href="#"></a><br>
+    Stations (<a href="https://geoparquet.org/">GeoParquet</a>): <a href="https://bertt.github.io/knmi_zarr/stations.parquet">stations.parquet</a><br>
     <a href="./">🗺️ All stations on a map</a> · <a href="cycling.html">🚴 Cycling weather</a></div>
   <div class="card" id="card"><div class="desc" id="status">Finding your location…</div></div>
 </div>
@@ -220,7 +221,7 @@ async function main() {
     ${user == null ? `<button id="retry">Use my location</button>` : ""}
     <div class="foot">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time)<br>
       Source: <a href="https://www.knmi.nl/">KNMI</a> (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>),
-      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to Zarr; not an official KNMI product.<br>
+      <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Converted to Zarr (observations) and GeoParquet (stations); not an official KNMI product.<br>
       Your location stays in your browser. <a href="./">All stations on a map</a> ·
       <a href="https://github.com/bertt/knmi_zarr">Source code</a></div>`;
   document.getElementById("retry")?.addEventListener("click", () => location.reload());

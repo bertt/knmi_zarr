@@ -80,14 +80,14 @@
 
 <div id="side" class="panel">
   <h1>⚡ KNMI weather stations</h1>
-  <div class="sub" id="time">10-minute observations · read from Zarr</div>
+  <div class="sub" id="time">10-minute observations · read from Zarr + GeoParquet</div>
   <div class="sub"><a href="nearby.html" style="color:var(--acc)">Weather near you →</a> · <a href="cycling.html" style="color:var(--acc)">Cycling weather →</a></div>
   <div id="chips"></div>
   <div class="stats" id="stats"></div>
   <label class="row"><input type="checkbox" id="wind" checked> Show wind arrows (pointing where the wind blows to)</label>
   <div id="list"></div>
   <button class="chip" id="toggle">Show station list</button>
-  <div class="src">Source: <a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0" target="_blank" rel="noopener">KNMI</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/" target="_blank" rel="noopener">Zarr</a>; not an official KNMI product.
+  <div class="src">Source: <a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0" target="_blank" rel="noopener">KNMI</a>, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Converted to <a href="https://zarr.dev/" target="_blank" rel="noopener">Zarr</a> (observations) and <a href="https://geoparquet.org/" target="_blank" rel="noopener">GeoParquet</a> (<a href="stations.parquet">stations.parquet</a>); not an official KNMI product.
     <a href="https://github.com/bertt/knmi_zarr" target="_blank" rel="noopener">Code</a></div>
 </div>
 
