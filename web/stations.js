@@ -32,7 +32,7 @@ new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(keepConfig))).ob
 export const STATIONS_URL = ZARR_URL.replace(/[^/]+\/?$/, "stations.parquet");
 
 async function exists(url) {
-  try { return (await fetch(url, { method: "GET", headers: { Range: "bytes=0-0" } })).status; } catch { return 0; }
+  try { return (await fetch(url, { method: "GET", headers: { Range: "bytes=0-0" }, cache: "no-store" })).status; } catch { return 0; }
 }
 
 // Throws a readable error when the config, the Zarr store or stations.parquet cannot be found
@@ -59,7 +59,10 @@ function point(g) {
 export async function loadStations() {
   await checkSources();
   // The file is small: read it whole (also works on servers without Range support, like python -m http.server)
-  const file = await (await fetch(STATIONS_URL)).arrayBuffer();
+  // cache: "no-cache" revalidates, so a cached partial (Range) response is never used as the whole file
+  const res = await fetch(STATIONS_URL, { cache: "no-cache" });
+  if (!res.ok || res.status === 206) throw new Error(`Stations file could not be loaded (HTTP ${res.status})`);
+  const file = await res.arrayBuffer();
   const md = parquetMetadata(file);
   const kv = Object.fromEntries((md.key_value_metadata || []).map(e => [e.key, e.value]));
   const { time, variables } = JSON.parse(kv.knmi);
