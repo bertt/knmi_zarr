@@ -26,10 +26,12 @@
   .banner b { color:var(--acc); font-size:14px; letter-spacing:.02em; }
   .banner a { word-break:break-all; }
   .wrap { position:relative; }
-  dialog#info, dialog#calc { width:min(92vw,440px); margin:auto; border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:0; overflow:hidden; color:var(--fg);
+  .rulemore { font:inherit; font-size:11px; font-style:normal; padding:1px 8px; margin-left:4px; border-radius:999px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:inherit; cursor:pointer; }
+  dialog#rulefull .rtext { padding:4px 20px 20px; font-size:14px; line-height:1.55; }
+  dialog#info, dialog#calc, dialog#rulefull { width:min(92vw,440px); margin:auto; border:1px solid rgba(255,255,255,.14); border-radius:22px; padding:0; overflow:hidden; color:var(--fg);
     background:radial-gradient(circle at 100% 0%, rgba(76,201,240,.18), transparent 55%), rgba(16,23,38,.98); box-shadow:0 20px 60px rgba(0,0,0,.6); }
-  dialog#info[open], dialog#calc[open] { animation:pop .18s ease-out; }
-  dialog#info::backdrop, dialog#calc::backdrop { background:rgba(5,8,16,.65); backdrop-filter:blur(3px); }
+  dialog#info[open], dialog#calc[open], dialog#rulefull[open] { animation:pop .18s ease-out; }
+  dialog#info::backdrop, dialog#calc::backdrop, dialog#rulefull::backdrop { background:rgba(5,8,16,.65); backdrop-filter:blur(3px); }
   dialog#info { max-height:88vh; max-height:88dvh; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
   dialog#calc { width:min(94vw,640px); max-height:88vh; max-height:88dvh; }
   dialog#calc[open] { display:flex; flex-direction:column; }
@@ -428,6 +430,7 @@ async function main() {
       quote = { rule: q.rule, text: q.title };
     }
 
+    const fullRule = quote ? allRules.find(q => q.rule === quote.rule) : null;
     const band = inp.rideTemp == null ? null : pick(R.clothing.bands, inp.rideTemp);
     const extras = new Set(), warnings = [];
     for (const e of R.clothing.extras) if (test(e.when, inp)) { (e.items ?? []).forEach(i => extras.add(i)); if (e.warning) warnings.push(e.warning); }
@@ -483,9 +486,14 @@ async function main() {
       </div>
 
       <div class="chips">${pills}</div>
-      ${quote ? `<div class="rule" style="margin:10px 0 0"><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Velominati Rule #${quote.rule}</a> · “${esc(quote.text)}”</div>` : ""}
+      ${quote ? `<div class="rule" style="margin:10px 0 0"><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Velominati Rule #${quote.rule}</a> ·       “${esc(quote.text)}”${fullRule ? ` <button type="button" class="rulemore noshare" id="rulemore">More</button>` : ""}</div>
+            ${fullRule ? `<dialog id="rulefull" class="noshare">
+              <form method="dialog" class="ihead"><div><div class="ititle">Velominati Rule #${fullRule.rule}</div><div class="isub">${esc(fullRule.title)}</div></div>
+                <button class="iclose" aria-label="Close">✕</button></form>
+              <div class="rtext">${esc(fullRule.text)} <a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">All rules</a></div>
+            </dialog>` : ""}
 
-      <div class="sec wear"><h2>👕 What to wear</h2>
+            <div class="sec wear"><h2>👕 What to wear</h2>
         ${band ? `<div class="outfit">${esc(band.label)}</div>
           <div class="items">${(band.items).map(i => `<span class="item">${iconFor(i)} ${esc(i)}</span>`).join("")}
             ${extraOnly.map(i => `<span class="item extra">${iconFor(i)} ${esc(i)}</span>`).join("")}</div>
@@ -568,6 +576,11 @@ async function main() {
       calcDlg.querySelectorAll(".cpane").forEach(p => p.hidden = p.dataset.pane !== b.dataset.tab);
     }));
     calcDlg.addEventListener("click", e => { if (e.target === calcDlg) calcDlg.close(); });
+    const ruleDlg = document.getElementById("rulefull");
+    if (ruleDlg) {
+      document.getElementById("rulemore").addEventListener("click", () => ruleDlg.showModal());
+      ruleDlg.addEventListener("click", e => { if (e.target === ruleDlg) ruleDlg.close(); });
+    }
     document.getElementById("share").addEventListener("click", async e => {
       const btn = e.currentTarget, label = btn.textContent;
       btn.disabled = true; btn.textContent = "Making screenshot…";
