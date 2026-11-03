@@ -1,4 +1,4 @@
-import { asyncBufferFromUrl, parquetMetadataAsync, parquetReadObjects } from "https://esm.sh/hyparquet@1.17.1";
+import { parquetMetadata, parquetReadObjects } from "https://esm.sh/hyparquet@1.17.1";
 
 // config.json holds the Zarr URL used by all pages (absolute, or relative to the config file; default "obs.zarr" = the store next to the pages).
 // stations.parquet is expected next to the Zarr store.
@@ -58,9 +58,9 @@ function point(g) {
 // Returns { time, variables, stations: [{ id, name, height, lon, lat }] }
 export async function loadStations() {
   await checkSources();
-  const url = STATIONS_URL;
-  const file = await asyncBufferFromUrl({ url });
-  const md = await parquetMetadataAsync(file);
+  // The file is small: read it whole (also works on servers without Range support, like python -m http.server)
+  const file = await (await fetch(STATIONS_URL)).arrayBuffer();
+  const md = parquetMetadata(file);
   const kv = Object.fromEntries((md.key_value_metadata || []).map(e => [e.key, e.value]));
   const { time, variables } = JSON.parse(kv.knmi);
   const rows = await parquetReadObjects({ file, metadata: md, utf8: false });
