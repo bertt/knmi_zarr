@@ -486,14 +486,14 @@ async function main() {
       </div>
 
       <div class="chips">${pills}</div>
-      ${quote ? `<div class="rule" style="margin:10px 0 0"><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Velominati Rule #${quote.rule}</a> ·       “${esc(quote.text)}”${fullRule ? ` <button type="button" class="rulemore noshare" id="rulemore">More</button>` : ""}</div>
-            ${fullRule ? `<dialog id="rulefull" class="noshare">
-              <form method="dialog" class="ihead"><div><div class="ititle">Velominati Rule #${fullRule.rule}</div><div class="isub">${esc(fullRule.title)}</div></div>
-                <button class="iclose" aria-label="Close">✕</button></form>
-              <div class="rtext">${esc(fullRule.text)} <a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">All rules</a></div>
-            </dialog>` : ""}
+      ${quote ? `<div class="rule" style="margin:10px 0 0"><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Velominati Rule #${quote.rule}</a>       · “${esc(quote.text)}”${fullRule ? ` <button type="button" class="rulemore noshare" id="rulemore">More</button>` : ""}</div>` : ""}
+           ${quote && fullRule ? `<dialog id="rulefull" class="noshare">
+             <form method="dialog" class="ihead"><div><div class="ititle">Velominati Rule #${fullRule.rule}</div><div class="isub">${esc(fullRule.title)}</div></div>
+               <button class="iclose" aria-label="Close">✕</button></form>
+             <div class="rtext">${esc(fullRule.text)} <a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">All rules</a></div>
+           </dialog>` : ""}
 
-            <div class="sec wear"><h2>👕 What to wear</h2>
+           <div class="sec wear"><h2>👕 What to wear</h2>
         ${band ? `<div class="outfit">${esc(band.label)}</div>
           <div class="items">${(band.items).map(i => `<span class="item">${iconFor(i)} ${esc(i)}</span>`).join("")}
             ${extraOnly.map(i => `<span class="item extra">${iconFor(i)} ${esc(i)}</span>`).join("")}</div>
