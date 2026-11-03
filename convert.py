@@ -70,6 +70,7 @@ for p in args:
 df = pd.concat(frames, ignore_index=True)
 df = df.drop_duplicates(["source", "station_id"], keep="last")
 df = df[df["lon"].between(-180, 180) & df["lat"].between(-90, 90)]
+df = df[df["ta"].notna()]  # skip stations without temperature
 df = df.iloc[np.argsort(morton(df["lon"], df["lat"]), kind="stable")].reset_index(drop=True)
 
 gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df["lon"], df["lat"]), crs="EPSG:4326")

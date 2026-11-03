@@ -399,7 +399,7 @@ async function main() {
   const sorted = meta.stations.map((s, i) => ({ s, i })).sort((x, y) => x.s.name.localeCompare(y.s.name));
   const t = new Date(meta.time);
 
-  const missingAt = i => SENSORS.filter(x => x.vars.every(k => data[k]?.[i] == null)).map(x => x.label);
+  const missingAt = i => SENSORS.filter(x => x.label !== "visibility" && x.vars.every(k => data[k]?.[i] == null)).map(x => x.label);
   const betterStation = (i, missing) => meta.stations
     .map((st, j) => ({ j, d: km(meta.stations[i].lat, meta.stations[i].lon, st.lat, st.lon) }))
     .filter(x => x.j !== i && x.d <= 60 && missing.every(l => !missingAt(x.j).includes(l)))
