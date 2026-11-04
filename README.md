@@ -143,6 +143,7 @@ A third page that turns the same GeoParquet data (<https://bertt.github.io/knmi_
 
 - **Ride score** (0-100): one score that combines comfort and training (the average of both). Sun and dry is good; rain, extreme cold or heat, storm-force wind and poor visibility are bad; moderate wind and cold count as a small plus for training. The rules are listed in the calculation details.
 - **What to wear**: based on the temperature *on the bike* (air temperature about 2 °C lower, extra for rain, damp air via the dew point and wind chill), e.g. short/short above 15 °C, gloves and skullcap below 10 °C, windjacket below 12 °C, windjacket + base layer below 0 °C. Extras for rain, darkness, sun and ice.
+- **Feels-like temperature**: a 🧊 pill shows a standard formula next to the temperature on the bike: wind chill `13.12 + 0.6215·T − 11.37·v^0.16 + 0.3965·T·v^0.16` (T ≤ 10 °C, wind > 4.8 km/h, v = 10 m wind in km/h) or the heat index (T ≥ 27 °C, uses relative humidity). It ignores riding speed, darkness and wind direction, so it is usually milder than the temperature on the bike.
 - **Bike cleaning**: estimate from rain now, the last 1/6/24 hours and salt risk.
 
 All rules and thresholds live in [`web/cycling-rules.json`](web/cycling-rules.json), so they can be tuned without touching the code. Rules are `bands` (`upTo` value, `points`, `note`; `upTo: null` = everything above), clothing bands/extras, and cleaning rules/levels. The page has these URL parameters:

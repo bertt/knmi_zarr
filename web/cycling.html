@@ -200,6 +200,7 @@
     <div class="isec"><h4>👋 About this site</h4>
       <p>This page finds the nearest KNMI weather station and turns its latest measurements into practical advice for cyclists: a ride score, what to wear, whether you need a rain jacket, and how to clean your bike afterwards. It also warns about ice, fog, darkness and thunder.</p>
       <p>It uses <b>18 weather parameters</b>: temperature, dew point, humidity, air pressure, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p>
+      <p>Next to the temperature on the bike, the 🧊 pill shows a standard "feels like" temperature from air temperature and wind: the wind chill formula (T ≤ 10 °C, wind &gt; 4.8 km/h) <code>13.12 + 0.6215·T − 11.37·v<sup>0.16</sup> + 0.3965·T·v<sup>0.16</sup></code> (v = wind at 10 m in km/h), or the heat index (T ≥ 27 °C, with humidity). It does not include riding speed, darkness or wind direction, so it differs from the temperature on the bike.</p>
       <p>Cycling quotes come from <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</p>
       <p><button type="button" id="calcbtn">🧮 How are the scores calculated?</button></p></div>
     <div class="isec"><h4>🧊 Data and GeoParquet</h4>
@@ -304,6 +305,22 @@ const test = (c, inp) => (Array.isArray(c) ? c : [c]).every(x => {
   return { gt: v > x.value, gte: v >= x.value, lt: v < x.value, lte: v <= x.value, eq: v === x.value }[x.op];
 });
 
+function feelsLike(ta, ff, rh) {
+  if (ta == null) return null;
+  const v = ff == null ? null : ff * 3.6;
+  if (ta <= 10 && v != null && v > 4.8) {
+    const p = Math.pow(v, 0.16);
+    return 13.12 + 0.6215 * ta - 11.37 * p + 0.3965 * ta * p;
+  }
+  if (ta >= 27 && rh != null) {
+    const f = ta * 9 / 5 + 32;
+    const hi = -42.379 + 2.04901523 * f + 10.14333127 * rh - 0.22475541 * f * rh - 0.00683783 * f * f
+      - 0.05481717 * rh * rh + 0.00122874 * f * f * rh + 0.00085282 * f * rh * rh - 0.00000199 * f * f * rh * rh;
+    return (hi - 32) * 5 / 9;
+  }
+  return ta;
+}
+
 function derive(o, s, t, R) {
   const r = R.ride;
   const rainIntensity = maxOf(o.rg, o.pg);
@@ -336,7 +353,7 @@ function derive(o, s, t, R) {
     moon.illumination >= (r.moonMinIlluminationPct ?? 50) && moon.altitude >= (r.moonMinAltitudeDeg ?? 5) ? 1 : 0;
   return {
     ta: o.ta, td: o.td, rh: o.rh, ff: o.ff, gust: maxOf(o.gff, o.fx), qg: o.qg, vv: o.vv, n: o.n, ss: o.ss, pp: o.pp,
-    rainIntensity, rain1h: o.R1H, rain6h: o.R6H, rain24h: o.R24H, rideTemp,
+    rainIntensity, rain1h: o.R1H, rain6h: o.R6H, rain24h: o.R24H,     rideTemp, feelsFormula: feelsLike(o.ta, o.ff, o.rh),
     iceRisk: o.ta != null && o.ta <= r.iceTempC && (wetNow || (o.rh != null && o.rh >= r.iceHumidityPct)) ? 1 : 0,
     saltRisk: o.ta != null && o.ta <= r.saltTempC && (wetNow || (o.R6H ?? 0) > 0.5) ? 1 : 0,
     hail: { 87: 1, 27: 2, 89: 2, 88: 3, 90: 3, 96: 3, 99: 4 }[o.ww] ?? 0,
@@ -461,7 +478,8 @@ async function main() {
     const feels = inp.rideTemp == null ? null : inp.rideTemp;
     const pills = [
       o.ta != null && `🌡️ <b>${fmt(o.ta, 1)}°</b> <span>feels ${fmt(feels, 1)}° on the bike</span>`,
-      o.td != null && `💧 dew point <b>${fmt(o.td, 1)}°</b>`,
+           inp.feelsFormula != null && `🧊 <b>${fmt(inp.feelsFormula, 1)}°</b> <span>wind chill / heat index formula</span>`,
+           o.td != null && `💧 dew point <b>${fmt(o.td, 1)}°</b>`,
       inp.rainIntensity != null && `🌧️ <b>${fmt(inp.rainIntensity, 1)}</b> mm/h`,
       o.R1H != null && `☔ <b>${fmt(o.R1H, 1)}</b> mm last hour`,
       o.ff != null && `💨 <b>${bft(o.ff)}</b> Bft${o.dd != null ? ` from <b>${compass(o.dd)}</b>` : ""}`,
