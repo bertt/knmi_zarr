@@ -412,7 +412,8 @@ async function main() {
   } catch (err) {
     notice = `Your location is not available (${esc(err.message)}), so ${FALLBACK} is shown instead.`;
   }
-  const sorted = meta.stations.map((s, i) => ({ s, i })).sort((x, y) => x.s.name.localeCompare(y.s.name));
+  const dist = st => user ? km(user.latitude, user.longitude, st.lat, st.lon) : 0;
+  const sorted = meta.stations.map((s, i) => ({ s, i })).sort((x, y) => user ? dist(x.s) - dist(y.s) : x.s.name.localeCompare(y.s.name));
   const t = new Date(meta.time);
 
   const missingAt = i => SENSORS.filter(x => x.label !== "visibility" && x.vars.every(k => data[k]?.[i] == null)).map(x => x.label);
