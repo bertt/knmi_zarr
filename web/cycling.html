@@ -46,6 +46,10 @@
   .cchips { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
   .cchip { padding:5px 10px; border-radius:12px; background:rgba(0,0,0,.25); font-size:12.5px; }
   .cchip b { color:var(--acc); margin-left:4px; }
+  .cchips.sel .cchip { opacity:.45; }
+  .cchips.sel .cchip.cur { opacity:1; background:rgba(76,201,240,.28); outline:1px solid #4cc9f0; font-weight:600; }
+  .cchips.sel .cchip.cur::before { content:"✓ "; color:#4cc9f0; }
+  .cnow { margin-top:8px; padding:6px 10px; border-radius:12px; background:rgba(76,201,240,.16); border:1px solid rgba(76,201,240,.5); font-size:13px; }
   .cchip small, .crow small, .cband small { display:block; font-size:11.5px; color:var(--mut); }
   .crow { display:flex; gap:10px; align-items:center; padding:6px 0; border-top:1px solid rgba(255,255,255,.07); font-size:13px; }
   .cs h4 + .crow { border-top:0; }
@@ -58,6 +62,8 @@
   .sbands { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
   .sband { padding:2px 8px; border-radius:999px; background:rgba(0,0,0,.25); font-size:11.5px; color:var(--mut); white-space:nowrap; }
   .sband b { margin-left:3px; }
+  .sband.cur { background:rgba(76,201,240,.3); color:#fff; outline:1px solid rgba(76,201,240,.7); font-weight:650; }
+  .sval { float:right; font-weight:650; font-variant-numeric:tabular-nums; color:#4cc9f0; }
   .cwhat { display:flex; flex-wrap:wrap; gap:4px; flex:1 1 45%; }
   .cwhat .item { font-size:12px; padding:2px 8px; }
   .warnchip { background:rgba(239,68,68,.3); border-color:rgba(239,68,68,.5); }
@@ -69,6 +75,8 @@
   .velo a { color:var(--acc); text-decoration:none; }
   .cbands { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:6px; }
   .cband { padding:7px 9px; border-radius:12px; background:linear-gradient(135deg, rgba(76,201,240,.22), rgba(76,201,240,.06)); border:1px solid rgba(76,201,240,.3); font-size:13px; }
+  .cband.cur { background:linear-gradient(135deg, rgba(76,201,240,.55), rgba(76,201,240,.2)); border-color:#4cc9f0; box-shadow:0 0 0 1px #4cc9f0; }
+  .crow.cur { background:rgba(76,201,240,.16); border-radius:10px; padding-left:8px; padding-right:8px; outline:1px solid rgba(76,201,240,.6); }
   .calcbody .why { font-size:12.5px; line-height:1.5; }
   @keyframes pop { from { opacity:0; transform:translateY(10px) scale(.97); } to { opacity:1; transform:none; } }
   .ihead { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin:0; padding:16px 16px 12px; border-bottom:1px solid rgba(255,255,255,.08); }
@@ -456,17 +464,15 @@ async function main() {
       o.vv != null && `👁️ <b>${fmt(o.vv / 1000, 1)}</b> km`,
     ].filter(Boolean).map(p => `<span class="pill">${p}</span>`).join("");
 
-    const table = (title, res, dirt) => `<tr><th colspan="3">${esc(title)}</th></tr>` + res.rows.map(({ r, v, points, note }) =>
-      `<tr><td>${esc(r.label)}</td><td>${esc(valueText(r, v))}${note ? ` · ${esc(note)}` : ""}</td><td>${signed(points, dirt)}</td></tr>`).join("");
-
-    const scale = (rules, dirt) => rules.map(r => {
+    const scale = (res, dirt) => res.rows.map(({ r, v, points }) => {
       const u = r.unit ? ` ${r.unit}` : "";
+      const cur = v == null ? null : pick(r.bands, v);
       const chips = r.bands.map((b, i, a) => {
         const range = r.display === "flag" ? (b.upTo === 0 ? "no" : "yes")
           : b.upTo == null ? `> ${a[i-1].upTo}${u}` : i === 0 ? `≤ ${b.upTo}${u}` : `${a[i-1].upTo} – ${b.upTo}${u}`;
-        return `<span class="sband" title="${esc(b.note ?? "")}">${esc(range)} <b>${signed(b.points, dirt)}</b></span>`;
+        return `<span class="sband${b === cur ? " cur" : ""}" title="${esc(b.note ?? "")}">${esc(range)} <b>${signed(b.points, dirt)}</b></span>`;
       }).join("");
-      return `<div class="srule"><div class="sl">${esc(r.label)}</div><div class="sbands">${chips}</div></div>`;
+      return `<div class="srule"><div class="sl">${esc(r.label)}<span class="sval">now: ${esc(valueText(r, v))} → ${signed(points, dirt)}</span></div><div class="sbands">${chips}</div></div>`;
     }).join("");
 
     card.innerHTML = `
@@ -515,44 +521,38 @@ async function main() {
         <form method="dialog" class="ihead"><div><div class="ititle">How are the scores calculated?</div><div class="isub">Every rule adds or subtracts points from a base score.</div></div>
           <button class="iclose" aria-label="Close">✕</button></form>
         <div class="ctabs" role="tablist">
-          <button type="button" class="ctab on" data-tab="rules" role="tab">📖 Rules</button>
-          <button type="button" class="ctab" data-tab="scores" role="tab">📊 Scores</button>
+          <button type="button" class="ctab on" data-tab="rules" role="tab">📖 Rules &amp; scores</button>
           <button type="button" class="ctab" data-tab="velo" role="tab">🏆 Velominati</button></div>
         <div class="calcbody">
          <div class="cpane" data-pane="rules">
           <div class="cs"><h4>🌡️ Temperature on the bike</h4>
             <div class="cdesc">Used for clothing, the jacket advice and the scores. It starts from the air temperature:</div>
-            <div class="cchips">
-              <span class="cchip">🚴 riding speed <b>${sg(R.ride.bikeOffsetC)}</b></span>
-              <span class="cchip">🌧️ rain &gt; ${R.ride.rainThresholdMmH} mm/h <b>${sg(R.ride.rainOffsetC)}</b></span>
-              <span class="cchip">💧 damp air <b>${sg(R.ride.dampOffsetC)}</b><small>spread &lt; ${R.ride.dampSpreadBelowC}°, air ≤ ${R.ride.dampMaxTempC}°</small></span>
-              <span class="cchip">💨 wind above ${R.ride.windChillAboveMs} m/s <b>−${R.ride.windChillPerMs}° per m/s</b></span>
-            </div></div>
+            <div class="cchips sel">
+              <span class="cchip cur">🚴 riding speed <b>${sg(R.ride.bikeOffsetC)}</b></span>
+              <span class="cchip${inp.rainIntensity > R.ride.rainThresholdMmH ? " cur" : ""}">🌧️ rain &gt; ${R.ride.rainThresholdMmH} mm/h <b>${sg(R.ride.rainOffsetC)}</b></span>
+              <span class="cchip${inp.ta != null && inp.td != null && inp.ta - inp.td < R.ride.dampSpreadBelowC && inp.ta <= R.ride.dampMaxTempC ? " cur" : ""}">💧 damp air <b>${sg(R.ride.dampOffsetC)}</b><small>spread &lt; ${R.ride.dampSpreadBelowC}°, air ≤ ${R.ride.dampMaxTempC}°</small></span>
+              <span class="cchip${inp.ff > R.ride.windChillAboveMs ? " cur" : ""}">💨 wind above ${R.ride.windChillAboveMs} m/s <b>−${R.ride.windChillPerMs}° per m/s</b></span>
+            </div>
+            ${inp.rideTemp == null ? "" : `<div class="cnow">Now: air <b>${fmt(inp.ta, 1)}°</b> → on the bike <b>${fmt(inp.rideTemp, 1)}°</b></div>`}</div>
 
-          <div class="cs"><h4>📏 Point scale: ride score <small>(base ${R.scores.ride.base})</small></h4>${scale(R.scores.ride.rules)}</div>
-          <div class="cs"><h4>📏 Point scale: bike cleaning <small>(levels: ${R.cleaning.levels.map(l => `${l.min}+ ${esc(l.label)}`).join(", ")})</small></h4>${scale(R.cleaning.rules, true)}</div>
+          <div class="cs"><h4>📏 Point scale: ride score <small>(base ${R.scores.ride.base})</small></h4>          ${scale(ride)}</div>
+                    <div class="cs"><h4>📏 Point scale: bike cleaning <small>(levels: ${R.cleaning.levels.map(l => `${l.min}+ ${esc(l.label)}`).join(", ")})</small></h4>${scale(clean, true)}</div>
 
           <div class="cs"><h4>🚩 Flags</h4>
             <div class="crow"><span class="cicon">🧊</span><div><b>Ice risk</b><small>air ≤ ${R.ride.iceTempC}° and wet roads or humidity ≥ ${R.ride.iceHumidityPct}%</small></div></div>
             <div class="crow"><span class="cicon">🧂</span><div><b>Road salt likely</b><small>air ≤ ${R.ride.saltTempC}° and wet, or &gt; 0.5 mm rain in 6 hours</small></div></div></div>
 
-          <div class="cs"><h4>👕 Clothing by temperature on the bike</h4>
-            <div class="cbands">${R.clothing.bands.map((b, i, a) => `<div class="cband"><b>${esc(b.label)}</b><small>${b.upTo == null ? `above ${a[i-1].upTo}°` : i === 0 ? `up to ${b.upTo}°` : `${a[i-1].upTo}° – ${b.upTo}°`}</small></div>`).join("")}</div></div>
+          <div class="cs"><h4>👕 Clothing by temperature on the bike${inp.rideTemp == null ? "" : ` <small>(now ${fmt(inp.rideTemp, 1)}°)</small>`}</h4>
+            <div class="cbands">${R.clothing.bands.map((b, i, a) => `<div class="cband${b === band ? " cur" : ""}"><b>${esc(b.label)}</b><small>${b.upTo == null ? `above ${a[i-1].upTo}°` : i === 0 ? `up to ${b.upTo}°` : `${a[i-1].upTo}° – ${b.upTo}°`}</small></div>`).join("")}</div></div>
 
           <div class="cs"><h4>➕ Extras and warnings</h4>
-            ${R.clothing.extras.map(e => `<div class="crow"><div class="cwhat">${(e.items ?? []).length
+            ${R.clothing.extras.map(e => `<div class="crow${test(e.when, inp) ? " cur" : ""}"><div class="cwhat">${(e.items ?? []).length
               ? e.items.map(i => `<span class="item">${iconFor(i)} ${esc(i)}</span>`).join("")
               : `<span class="item warnchip">⚠️ Warning</span>`}</div>
               <div class="cif">${(Array.isArray(e.when) ? e.when : [e.when]).map(condText).map(esc).join(" <i>and</i> ")}</div></div>`).join("")}</div>
 
           <div class="cs"><h4>☔ Rain jacket</h4>
-            ${R.rainJacket.levels.map(l => `<div class="crow"><span class="cicon">${l.icon}</span><div><b>${esc(l.label)}</b><small>${esc(l.text)}</small></div></div>`).join("")}</div>
-         </div>
-
-         <div class="cpane" data-pane="scores" hidden>
-          <div class="cs"><h4>📊 Points per rule</h4>
-            <table>${table(R.scores.ride.title + ` — base ${R.scores.ride.base}`, ride)}
-              ${table(R.cleaning.title + " — points (more = dirtier)", clean, true)}</table></div>
+            ${R.rainJacket.levels.map(l => `<div class="crow${l === rj ? " cur" : ""}"><span class="cicon">${l.icon}</span><div><b>${esc(l.label)}</b><small>${esc(l.text)}</small></div></div>`).join("")}</div>
          </div>
 
          <div class="cpane" data-pane="velo" hidden>
