@@ -566,7 +566,7 @@ async function main() {
       <div class="foot noshare">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time) · © Bert Temme</div>`;
 
     const calcDlg = document.getElementById("calcslot");
-    calcDlg.replaceChildren(document.getElementById("calcwrap"));
+    calcDlg.replaceChildren(card.querySelector("#calcwrap"));
     const showCalc = on => { calcDlg.hidden = !on; document.getElementById("aboutmain").hidden = on; document.getElementById("info").scrollTop = 0; };
     document.getElementById("aboutbtn").addEventListener("click", () => { showCalc(false); document.getElementById("info").showModal(); });
     document.getElementById("calcbtn").onclick = () => showCalc(true);
