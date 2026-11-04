@@ -32,7 +32,7 @@
     background:radial-gradient(circle at 100% 0%, rgba(76,201,240,.18), transparent 55%), rgba(16,23,38,.98); box-shadow:0 20px 60px rgba(0,0,0,.6); }
   dialog#info[open], dialog#calc[open], dialog#rulefull[open] { animation:pop .18s ease-out; }
   dialog#info::backdrop, dialog#calc::backdrop, dialog#rulefull::backdrop { background:rgba(5,8,16,.65); backdrop-filter:blur(3px); }
-  dialog#info { max-height:88vh; max-height:88dvh; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+  dialog#info { width:min(94vw,640px); max-height:88vh; max-height:88dvh; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
   dialog#calc { width:min(94vw,640px); max-height:88vh; max-height:88dvh; }
   dialog#calc[open] { display:flex; flex-direction:column; }
   .ctabs { display:flex; gap:6px; padding:10px 16px 0; }
@@ -196,19 +196,23 @@
     <form method="dialog" class="ihead"><div><div class="ititle">🚴 Cycling weather</div><div class="isub">Should you ride today, and what should you wear? Advice based on live weather observations.</div></div>
       <button class="iclose" aria-label="Close">✕</button></form>
     <div class="inav"><a href="./">🗺️ All stations on a map</a><a href="nearby.html">🌦️ Weather near you</a></div>
+    <div id="aboutmain">
     <div class="isec"><h4>👋 About this site</h4>
       <p>This page finds the nearest KNMI weather station and turns its latest measurements into practical advice for cyclists: a ride score, what to wear, whether you need a rain jacket, and how to clean your bike afterwards. It also warns about ice, fog, darkness and thunder.</p>
-      <p>It uses <b>18 weather parameters</b>: temperature, dew point, humidity, air pressure, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p></div>
+      <p>It uses <b>18 weather parameters</b>: temperature, dew point, humidity, air pressure, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p>
+      <p>Cycling quotes come from <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</p>
+      <p><button type="button" id="calcbtn">🧮 How are the scores calculated?</button></p></div>
     <div class="isec"><h4>🧊 Data and GeoParquet</h4>
       <p>The observations are 10-minute <a href="https://www.knmi.nl/">KNMI</a> measurements (<a href="https://dataplatform.knmi.nl/dataset/10-minute-in-situ-meteorological-observations-1-0">dataset</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>), published as NetCDF and       converted to <a href="https://geoparquet.org/">GeoParquet</a>. Not an official KNMI product.</p>
             <p>GeoParquet is an open, columnar format for geospatial data. The stations are sorted by location and stored in small row groups, so your browser can fetch just the pieces it needs (HTTP range requests) straight from static storage, with no server or API in between.</p>
             <p>GeoParquet source: <a id="zsrc" href="#"></a><br>
               The station id, name, height and location are stored in the same file.</p></div>
     <div class="isec"><h4>🧮 Advice</h4>
-      <p>Indicative advice based on the rules in <a id="rulesurl" href="#"></a>. Add <code>?rules=URL</code> to try your own.</p>
-      <p>Quotes: <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati (via <a href="https://github.com/simonneutert/velominati-js">velominati-js</a>).</p></div>
+      <p>Indicative advice based on the rules in <a id="rulesurl" href="#"></a>. Add <code>?rules=URL</code> to try your own.</p></div>
     <div class="isec"><h4>🔒 Privacy</h4>
       <p>Your location stays in your browser.</p></div>
+    </div>
+    <div id="calcslot" hidden></div>
     <div class="ifoot"><a href="https://github.com/bertt/knmi_zarr">⭐ Source code on GitHub</a><div class="iauthor">Author © Bert Temme</div></div>
   </dialog>
   <div class="card" id="card"><div class="loading"><div class="bike">🚴</div><div class="road"></div><div class="lt">Checking the weather…</div>
@@ -519,12 +523,9 @@ async function main() {
         ${cleanTips.map(x => `<div class="why">🔧 ${esc(x)}</div>`).join("")}
       </div>
 
-      <dialog id="calc" class="noshare">
-        <form method="dialog" class="ihead"><div><div class="ititle">How are the scores calculated?</div><div class="isub">Every rule adds or subtracts points from a base score.</div></div>
-          <button class="iclose" aria-label="Close">✕</button></form>
-        <div class="ctabs" role="tablist">
-          <button type="button" class="ctab on" data-tab="rules" role="tab">📖 Rules &amp; scores</button>
-          <button type="button" class="ctab" data-tab="velo" role="tab">🏆 Velominati</button></div>
+      <div id="calcwrap">
+        <div class="ctabs"><button type="button" class="ctab" id="calcback">← Back</button></div>
+        <div class="cdesc" style="padding:8px 16px 0">Every rule adds or subtracts points from a base score. The current situation is highlighted.</div>
         <div class="calcbody">
          <div class="cpane" data-pane="rules">
           <div class="cs"><h4>🌡️ Temperature on the bike</h4>
@@ -556,29 +557,19 @@ async function main() {
           <div class="cs"><h4>☔ Rain jacket</h4>
             ${R.rainJacket.levels.map(l => `<div class="crow${l === rj ? " cur" : ""}"><span class="cicon">${l.icon}</span><div><b>${esc(l.label)}</b><small>${esc(l.text)}</small></div></div>`).join("")}</div>
          </div>
-
-         <div class="cpane" data-pane="velo" hidden>
-          <div class="cs"><h4>🏆 Velominati rules</h4>
-            <div class="cdesc">One matching rule is shown at random below the weather data. <a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener">Read all the rules</a></div>
-            ${(R.velominati ?? []).map(q => `<div class="crow velo"><span class="cicon">#${q.rule}</span><div><a href="https://www.velominati.com/the-rules/" target="_blank" rel="noopener"><b>Rule #${q.rule}</b></a> <i>“${esc(q.text)}”</i>
-              <small>Shown when ${(Array.isArray(q.when) ? q.when : [q.when]).map(condText).map(esc).join(" <i>and</i> ")}</small></div></div>`).join("")}</div>
-         </div>
         </div>
-      </dialog>
+      </div>
 
       <div class="sharelink">🚴 ${SHARE_URL}<span class="when">🕒 Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (local time)</span><small>Data: KNMI, CC BY 4.0 · © Bert Temme</small></div>
-      <div class="noshare" style="text-align:center"><button id="calcbtn" type="button">🧮 How are scores calculated?</button> <button id="aboutbtn" type="button">ℹ️ About</button> <button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
+      <div class="noshare" style="text-align:center"><button id="aboutbtn" type="button">ℹ️ About</button> <button id="share">📤 Share screenshot</button>${user == null ? ` <button id="retry">Use my location</button>` : ""}</div>
       <div class="foot noshare">Observed ${t.toLocaleString("en-GB", { dateStyle:"medium", timeStyle:"short" })} (your time) · © Bert Temme</div>`;
 
-    const calcDlg = document.getElementById("calc");
-    document.getElementById("aboutbtn").addEventListener("click", () => document.getElementById("info").showModal());
-    document.getElementById("calcbtn").addEventListener("click", () => calcDlg.showModal());
-    calcDlg.querySelectorAll(".ctab").forEach(b => b.addEventListener("click", () => {
-      calcDlg.querySelectorAll(".ctab").forEach(x => x.classList.toggle("on", x === b));
-      calcDlg.querySelectorAll(".cpane").forEach(p => p.hidden = p.dataset.pane !== b.dataset.tab);
-    }));
-    calcDlg.addEventListener("click", e => { if (e.target === calcDlg) calcDlg.close(); });
-    const ruleDlg = document.getElementById("rulefull");
+    const calcDlg = document.getElementById("calcslot");
+    calcDlg.replaceChildren(document.getElementById("calcwrap"));
+    const showCalc = on => { calcDlg.hidden = !on; document.getElementById("aboutmain").hidden = on; document.getElementById("info").scrollTop = 0; };
+    document.getElementById("aboutbtn").addEventListener("click", () => { showCalc(false); document.getElementById("info").showModal(); });
+    document.getElementById("calcbtn").onclick = () => showCalc(true);
+    document.getElementById("calcback").addEventListener("click", () => showCalc(false));    const ruleDlg = document.getElementById("rulefull");
     if (ruleDlg) {
       document.getElementById("rulemore").addEventListener("click", () => ruleDlg.showModal());
       ruleDlg.addEventListener("click", e => { if (e.target === ruleDlg) ruleDlg.close(); });
