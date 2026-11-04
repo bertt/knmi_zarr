@@ -25,6 +25,9 @@
   .banner { margin-bottom:10px; padding:7px 12px; border-radius:14px; background:rgba(16,23,38,.92); border:1px solid rgba(255,255,255,.08); text-align:center; font-size:12px; line-height:1.4; color:var(--mut); }
   .banner b { color:var(--acc); font-size:14px; letter-spacing:.02em; }
   .banner a { word-break:break-all; }
+  .testi { margin-bottom:10px; padding:9px 14px; border-radius:14px; background:rgba(16,23,38,.92); border:1px solid rgba(255,255,255,.08); text-align:center; font-size:13px; line-height:1.45; color:var(--mut); animation:pop .3s ease-out; }
+  .testi q { display:block; font-style:italic; color:var(--fg); }
+  .testi b { color:var(--acc); font-weight:600; }
   .wrap { position:relative; }
   .rulemore { font:inherit; font-size:11px; font-style:normal; padding:1px 8px; margin-left:4px; border-radius:999px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.08); color:inherit; cursor:pointer; }
   dialog#rulefull .rtext { padding:4px 20px 20px; font-size:14px; line-height:1.55; }
@@ -184,14 +187,41 @@
   .clean .em { font-size:28px; }
   details { margin-top:8px; }
   .foot { margin-top:8px; }
+  /* extra vertical compaction */
+  body { padding:8px; line-height:1.3; }
+  .banner { margin-bottom:6px; padding:4px 10px; font-size:11.5px; line-height:1.3; }
+  .testi { margin-bottom:6px; padding:5px 12px; font-size:12px; line-height:1.3; }
+  .card { padding:8px 14px; }
+  .place { font-size:17px; }
+  .sub { margin-top:0; }
+  .rule { margin-bottom:3px; }
+  .scores { margin-top:6px; gap:6px; }
+  .score { padding:6px 10px; }
+  .ring { width:64px; height:64px; } .ring > div { width:48px; height:48px; } .ring .em { font-size:17px; } .ring .n { font-size:14px; }
+  .score .verdict { font-size:14px; margin-top:0; }
+  .score .bar { margin-top:3px; }
+  .chips { margin-top:6px; gap:3px; }
+  .pill { padding:1px 7px; font-size:11.5px; }
+  .sec { margin-top:6px; padding:6px 10px; }
+  .sec h2 { margin-bottom:3px; font-size:11px; }
+  .outfit { font-size:15px; }
+  .items { margin-top:3px; gap:3px; }
+  .item { padding:2px 8px; font-size:12.5px; }
+  .why { margin-top:3px; }
+  .warn { margin-top:3px; padding:3px 9px; font-size:12px; }
+  .clean { gap:10px; } .clean .em { font-size:24px; } .clean .l { font-size:14.5px; } .clean .t { font-size:12px; }
+  details { margin-top:6px; }
+  .sharelink { margin-top:8px; padding-top:6px; }
+  .foot { margin-top:6px; }
   @media (min-width:800px) {
     .wrap { width:min(620px,100%); }
   }
-  @media (max-width:480px) { .ring { width:68px; height:68px; } .ring > div { width:52px; height:52px; } .ring .n { font-size:15px; } .ring .em { font-size:18px; } .score { column-gap:9px; padding:8px 9px; } .score .verdict { font-size:13px; } }
+  @media (max-width:480px) { .ring { width:56px; height:56px; } .ring > div { width:42px; height:42px; } .ring .n { font-size:13px; } .ring .em { font-size:15px; } .score { column-gap:9px; padding:6px 9px; } .score .verdict { font-size:13px; } }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="testi" id="testi" hidden></div>
   <dialog id="info">
     <form method="dialog" class="ihead"><div><div class="ititle">🚴 Cycling weather</div><div class="isub">Should you ride today, and what should you wear? Advice based on live weather observations.</div></div>
       <button class="iclose" aria-label="Close">✕</button></form>
@@ -241,6 +271,36 @@ zsrc.href = DATA_URL; zsrc.textContent = DATA_URL;
 document.getElementById("info").addEventListener("click", e => { if (e.target.id === "info") e.target.close(); });
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+
+// Fictional testimonials (invented texts and names), one random one on every page load.
+const TESTIMONIALS = [
+  { text: "The rain jacket tip saved my commute. I arrived completely dry while everyone else looked like drowned rats.", name: "Anna de Vries", place: "Utrecht" },
+  { text: "Finally an app that tells me what to wear. No more freezing fingers on the Veluwe!", name: "Joost Bakker", place: "Apeldoorn" },
+  { text: "The ice warning stopped me from riding over a frozen bridge this morning. Thank you!", name: "Marieke Jansen", place: "Groningen" },
+  { text: "I check the ride score before every training. My Sunday group now calls it 'the oracle'.", name: "Pieter van Dijk", place: "Maastricht" },
+  { text: "Wind gusts at the coast are no joke. This page predicted it better than my own legs.", name: "Sanne Visser", place: "Den Helder" },
+  { text: "Love the bike cleaning advice after a wet ride. My chain has never been happier.", name: "Thomas Mulder", place: "Zwolle" },
+  { text: "Simple, fast and no account needed. Exactly what a cyclist wants before leaving the house.", name: "Lotte Smit", place: "Leiden" },
+  { text: "Dark in 2 hours? Good to know. I packed my lights and got home safely.", name: "Ruben Meijer", place: "Eindhoven" },
+  { text: "The 'feels like' temperature is spot on. I finally dress for the wind instead of the thermometer.", name: "Femke Hendriks", place: "Haarlem" },
+  { text: "My kids check the ride score before school. Apparently a 9 means we cycle through the park.", name: "Daan Kok", place: "Amersfoort" },
+  { text: "Foggy and cold? The warning made me swap to my bright lights. Best decision of the week.", name: "Iris van den Berg", place: "Venlo" },
+  { text: "I used to guess the weather. Now I just open this page and go. Zero regrets, one dry saddle.", name: "Bas Dekker", place: "Rotterdam" },
+  { text: "Wet autumn leaves warning? I slowed down in the corner and kept my skin on my knees.", name: "Eva Brouwer", place: "Arnhem" },
+  { text: "Great for my gravel rides. Knowing the rain of the last 6 hours tells me exactly how muddy the trail will be.", name: "Niels de Boer", place: "Nijmegen" },
+  { text: "Not an official forecast, but better than my neighbour's knee. And much more polite.", name: "Judith Peters", place: "Delft" },
+  { text: "Sunglare warning on the way home? Never thought I'd need it, but there I was, squinting no more.", name: "Koen Willems", place: "Breda" },
+  { text: "Ten minutes of fresh data from a real KNMI station. This is how weather advice should work.", name: "Lieke Hoekstra", place: "Leeuwarden" },
+  { text: "Thunder alert kept me home. Ten minutes later the sky exploded. I'm still thankful.", name: "Mark Scholten", place: "Enschede" },
+  { text: "Bike cleaning tips after the salted roads saved my drivetrain this winter.", name: "Sophie Bos", place: "Almere" },
+  { text: "The whole site loads instantly and knows where I am. I don't even know how, but I love it.", name: "Tim Vermeulen", place: "Tilburg" },
+  { text: "Perfect for the Zeeland dyke. Headwind going out, tailwind home. Planned the route around it.", name: "Anouk Prins", place: "Middelburg" }
+];
+{
+  const t = TESTIMONIALS[Math.floor(Math.random() * TESTIMONIALS.length)], el = document.getElementById("testi");
+  el.innerHTML = `<q>${esc(t.text)}</q><b>${esc(t.name)}</b> · ${esc(t.place)}`;
+  el.hidden = false;
+}
 const rgbOf = hex => { const h = String(hex).replace("#", ""); const n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16); return `${n >> 16 & 255},${n >> 8 & 255},${n & 255}`; };
 const fmt = (v, d = 0) => v == null ? "–" : v.toFixed(d);
 const bft = v => [0.3,1.6,3.4,5.5,8,10.8,13.9,17.2,20.8,24.5,28.5,32.7].filter(t => v >= t).length;
