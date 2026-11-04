@@ -323,5 +323,40 @@
     "text": "Why do I need a 'ride score' when Buienradar just shows me the rain? Overcomplicated and wrong twice this week.",
     "name": "Greet Wijnands",
     "place": "Sittard"
+  },
+  {
+    "text": "Just look out of the window. That's free, instant and never wrong. Why do I need a website for that?",
+    "name": "Ton Franken",
+    "place": "Geleen"
+  },
+  {
+    "text": "I open the curtains and know exactly what to wear. No page needed, no score, no formulas.",
+    "name": "Mieke Dorrestein",
+    "place": "Barneveld"
+  },
+  {
+    "text": "My grandfather felt the weather coming in his knee. This site is slower and less accurate.",
+    "name": "Ruud Pothoven",
+    "place": "Winterswijk"
+  },
+  {
+    "text": "You can feel it on your wooden shoes if it's going to rain. Nobody needs 18 parameters for that.",
+    "name": "Klaas Bouwman",
+    "place": "Staphorst"
+  },
+  {
+    "text": "The formulas don't add up. It said 'feels like 4 degrees' and I was sweating like a pig on the first hill.",
+    "name": "Dennis Ooms",
+    "place": "Venray"
+  },
+  {
+    "text": "Wind chill formula? Nonsense. Headwind was far worse than the page claimed. Check your maths.",
+    "name": "Karin Tuinstra",
+    "place": "Sneek"
+  },
+  {
+    "text": "The score was 8 out of 100 and it was a lovely ride. The formulas are off, completely.",
+    "name": "Joep Lemmens",
+    "place": "Sint-Oedenrode"
   }
 ]
