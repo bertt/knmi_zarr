@@ -64,6 +64,8 @@
   .sband b { margin-left:3px; }
   .sband.cur { background:rgba(76,201,240,.3); color:#fff; outline:1px solid rgba(76,201,240,.7); font-weight:650; }
   .sval { float:right; font-weight:650; font-variant-numeric:tabular-nums; color:#4cc9f0; }
+  .srule.nodata .sval { color:#ffb454; }
+  .srule.nodata .sbands { opacity:.4; }
   .cwhat { display:flex; flex-wrap:wrap; gap:4px; flex:1 1 45%; }
   .cwhat .item { font-size:12px; padding:2px 8px; }
   .warnchip { background:rgba(239,68,68,.3); border-color:rgba(239,68,68,.5); }
@@ -472,7 +474,7 @@ async function main() {
           : b.upTo == null ? `> ${a[i-1].upTo}${u}` : i === 0 ? `≤ ${b.upTo}${u}` : `${a[i-1].upTo} – ${b.upTo}${u}`;
         return `<span class="sband${b === cur ? " cur" : ""}" title="${esc(b.note ?? "")}">${esc(range)} <b>${signed(b.points, dirt)}</b></span>`;
       }).join("");
-      return `<div class="srule"><div class="sl">${esc(r.label)}<span class="sval">now: ${esc(valueText(r, v))} → ${signed(points, dirt)}</span></div><div class="sbands">${chips}</div></div>`;
+      return `<div class="srule${v == null ? " nodata" : ""}"><div class="sl">${esc(r.label)}<span class="sval">${v == null ? "⚠️ not measured — no points" : `now: ${esc(valueText(r, v))} → ${signed(points, dirt)}`}</span></div><div class="sbands">${chips}</div></div>`;
     }).join("");
 
     card.innerHTML = `
