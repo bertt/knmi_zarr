@@ -40,13 +40,13 @@
   #legend .t { font-size:12px; font-weight:600; }
   #nav { right:14px; top:14px; padding:6px; display:flex; gap:6px; }
   #nav button { padding:6px 10px; }
-  .maplibregl-popup-content { background:#141c2d; color:var(--fg); border-radius:12px; padding:12px 14px; min-width:200px; }
+  .maplibregl-popup-content { background:#141c2d; color:var(--fg); border-radius:12px; padding:12px 14px; min-width:340px; }
   .maplibregl-popup-tip { border-top-color:#141c2d !important; border-bottom-color:#141c2d !important; }
   .maplibregl-popup-close-button { color:var(--fg); }
   .pop h3 { margin:0 22px 2px 0; font-size:15px; }
   .pop small { color:var(--mut); }
   .pop table { width:100%; margin-top:8px; border-collapse:collapse; }
-  .pop { max-height:50vh; overflow-y:auto; }
+  .pop { width:340px; max-width:100%; max-height:50vh; overflow-y:auto; }
   .pop td { padding:2px 0; } .pop td:last-child { text-align:right; font-weight:600; font-variant-numeric:tabular-nums; }
   #status { position:absolute; inset:0; display:grid; place-items:center; background:var(--bg); z-index:10; color:var(--mut); }
   #toggle { display:none; }
@@ -162,7 +162,7 @@ document.getElementById("time").textContent =
   `${Object.keys(VARS).length} of ${Object.keys(meta.variables).length} variables shown`;
 
 const val = (k, i) => {
-  const v = data[k][i]; return v==null ? null : v * (VARS[k].scale ?? 1);
+  const v = data[k]?.[i]; return v==null ? null : v * (VARS[k].scale ?? 1);
 };
 
 // ---------- Map ----------
@@ -201,7 +201,7 @@ const feats = () => ({
   type:"FeatureCollection",
   features: meta.stations.map((s,i) => {
     const v = val(cur,i), V = VARS[cur];
-    const dd = data.dd[i], ff = data.ff[i];
+    const dd = data.dd?.[i], ff = data.ff?.[i];
     return { type:"Feature", id:i,
       geometry:{ type:"Point", coordinates:[s.lon,s.lat] },
       properties:{ i, name:s.name, v, label: v==null ? "" : fmt(v, V.dec),
@@ -240,8 +240,8 @@ function show(i, at) {
     const v = val(k,i); return `<tr><td>${V.label}</td><td>${fmt(v,V.dec)} ${v==null?"":V.unit}</td></tr>`;
   }).join("");
   popup?.remove();
-  popup = new maplibregl.Popup({ offset:14, maxWidth:"280px" }).setLngLat(at ?? [s.lon,s.lat])
-    .setHTML(`<div class="pop"><h3>${s.name}</h3><small>Station ${s.id} · ${s.height.toFixed(0)} m elevation</small><table>${rows}</table></div>`).addTo(map);
+  popup = new maplibregl.Popup({ offset:14, maxWidth:"380px" }).setLngLat(at ?? [s.lon,s.lat])
+    .setHTML(`<div class="pop"><h3>${s.name}</h3><small>Station ${s.id}${s.height==null ? "" : ` · ${s.height.toFixed(0)} m elevation`}</small><table>${rows}</table></div>`).addTo(map);
 }
 
 // ---------- UI ----------
