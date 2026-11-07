@@ -1,0 +1,33 @@
+{
+  "name": "cycling-weather",
+  "productName": "Cycling Weather",
+  "version": "1.0.0",
+  "description": "Cycling weather based on KNMI 10-minute observations (GeoParquet via HTTP range requests)",
+  "author": "Bert Temme",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "prepare-web": "node prepare-web.js",
+    "start": "npm run prepare-web && electron .",
+    "dist": "npm run prepare-web && electron-builder --win appx"
+  },
+  "devDependencies": {
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "nl.bertt.cyclingweather",
+    "productName": "Cycling Weather",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "www/**/*"],
+    "win": { "target": ["appx"] },
+    "appx": {
+      "applicationId": "CyclingWeather",
+      "displayName": "Cycling Weather",
+      "publisherDisplayName": "Bert Temme",
+      "identityName": "Replace.With.PackageIdentityName",
+      "publisher": "CN=Replace-With-Publisher-ID",
+      "languages": ["en-US", "nl-NL"]
+    }
+  }
+}

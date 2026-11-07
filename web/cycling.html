@@ -451,8 +451,12 @@ async function main() {
   step("s-data", "ok", "KNMI data loaded");
   const obs = i => Object.fromEntries(VARS.map(k => [k, data[k]?.[i] ?? null]));
 
+  const hasData = i => meta.stations[i].name != null && data.ta?.[i] != null;
   let idx = meta.stations.findIndex(s => s.name === FALLBACK), notice = "", distance = null, user = null;
-  const wanted = STATION ? meta.stations.findIndex(s => s.name.toLowerCase() === STATION.trim().toLowerCase()) : -1;
+  if (idx < 0) idx = meta.stations.findIndex((s, i) => hasData(i));
+  if (idx < 0) throw new Error("no stations with data");
+  const FB = meta.stations[idx].name;
+  const wanted = STATION ? meta.stations.findIndex(s => s.name?.toLowerCase() === STATION.trim().toLowerCase()) : -1;
   if (wanted >= 0) idx = wanted;
   else try {
     if (STATION) notice = `Unknown station "${esc(STATION)}", showing the nearest station instead.`;
@@ -460,21 +464,21 @@ async function main() {
     user = coords;
     const ranked = meta.stations
       .map((s, i) => ({ i, d: km(coords.latitude, coords.longitude, s.lat, s.lon) }))
-      .filter(x => data.ta?.[x.i] != null)
+      .filter(x => hasData(x.i))
       .sort((a, b) => a.d - b.d);
     if (ranked[0] && ranked[0].d <= MAX_KM) { idx = ranked[0].i; distance = ranked[0].d; }
-    else notice = `You appear to be outside the KNMI network (nearest station: ${fmt(ranked[0]?.d)} km away), so ${FALLBACK} is shown instead.`;
+    else notice = `You appear to be outside the station network (nearest station: ${fmt(ranked[0]?.d)} km away), so ${FB} is shown instead.`;
   } catch (err) {
-    notice = `Your location is not available (${esc(err.message)}), so ${FALLBACK} is shown instead.`;
+    notice = `Your location is not available (${esc(err.message)}), so ${FB} is shown instead.`;
   }
   const dist = st => user ? km(user.latitude, user.longitude, st.lat, st.lon) : 0;
-  const sorted = meta.stations.map((s, i) => ({ s, i })).sort((x, y) => user ? dist(x.s) - dist(y.s) : x.s.name.localeCompare(y.s.name));
+  const sorted = meta.stations.map((s, i) => ({ s, i })).filter(x => hasData(x.i)).sort((x, y) => user ? dist(x.s) - dist(y.s) : x.s.name.localeCompare(y.s.name));
   const t = new Date(meta.time);
 
   const missingAt = i => SENSORS.filter(x => x.label !== "visibility" && x.vars.every(k => data[k]?.[i] == null)).map(x => x.label);
   const betterStation = (i, missing) => meta.stations
     .map((st, j) => ({ j, d: km(meta.stations[i].lat, meta.stations[i].lon, st.lat, st.lon) }))
-    .filter(x => x.j !== i && x.d <= 60 && missing.every(l => !missingAt(x.j).includes(l)))
+    .filter(x => x.j !== i && hasData(x.j) && x.d <= 60 && missing.every(l => !missingAt(x.j).includes(l)))
     .sort((a, b) => a.d - b.d)[0];
 
   const render = (idx, notice, distance) => {

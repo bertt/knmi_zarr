@@ -138,7 +138,11 @@ async function main() {
   const data = meta.columns;
   const keys = Object.keys(meta.variables);
   const obs = i => Object.fromEntries(keys.map(k => [k, data[k]?.[i] ?? null]));
-  const bilt = meta.stations.findIndex(s => s.name === FALLBACK);
+  const hasData = i => meta.stations[i].name != null && data.ta?.[i] != null;
+  let bilt = meta.stations.findIndex(s => s.name === FALLBACK);
+  if (bilt < 0) bilt = meta.stations.findIndex((s, i) => hasData(i));
+  if (bilt < 0) throw new Error("no stations with data");
+  const FB = meta.stations[bilt].name;
 
   let idx = bilt, notice = "", distance = null, user = null;
   try {
@@ -146,18 +150,18 @@ async function main() {
     user = coords;
     const ranked = meta.stations
       .map((s,i) => ({ i, d: km(coords.latitude, coords.longitude, s.lat, s.lon) }))
-      .filter(x => data.ta?.[x.i] != null)
+      .filter(x => hasData(x.i))
       .sort((a,b) => a.d - b.d);
     if (ranked[0] && ranked[0].d <= MAX_KM) {
       idx = ranked[0].i; distance = ranked[0].d;
     } else {
-      notice = `You appear to be outside the KNMI network (nearest station: ${fmt(ranked[0]?.d)} km away), so ${FALLBACK} is shown instead.`;
+      notice = `You appear to be outside the station network (nearest station: ${fmt(ranked[0]?.d)} km away), so ${FB} is shown instead.`;
     }
   } catch (err) {
-    notice = `Your location is not available (${esc(err.message)}), so ${FALLBACK} is shown instead.`;
+    notice = `Your location is not available (${esc(err.message)}), so ${FB} is shown instead.`;
   }
 
-  const sorted = meta.stations.map((s, i) => ({ s, i })).sort((x, y) => x.s.name.localeCompare(y.s.name));
+  const sorted = meta.stations.map((s, i) => ({ s, i })).filter(x => hasData(x.i)).sort((x, y) => x.s.name.localeCompare(y.s.name));
 
   const render = (idx, notice, distance) => {
   const s = meta.stations[idx], o = obs(idx), t = new Date(meta.time);
