@@ -22,17 +22,17 @@ function createWindow() {
   };
   win.webContents.on("did-finish-load", fit);
   win.on("resize", fit);
-  // Once the data is rendered, shrink the window height to the content (once)
+  // While the page is still rendering (data, quote, fonts), keep the window height equal to the content height
   win.webContents.once("did-finish-load", async () => {
-    for (let i = 0; i < 40 && !win.isDestroyed(); i++) {
+    for (let i = 0; i < 60 && !win.isDestroyed(); i++) {
       await new Promise(r => setTimeout(r, 500));
+      if (win.isDestroyed()) return;
       const h = await win.webContents.executeJavaScript(
         "document.querySelector('.card') ? Math.ceil(document.querySelector('.wrap').getBoundingClientRect().bottom) + 14 : 0").catch(() => 0);
-      if (h && !win.isDestroyed()) {
-        const [w] = win.getContentSize();
-        win.setContentSize(w, Math.round(h * win.webContents.getZoomFactor()));
-        return;
-      }
+      if (!h) continue;
+      const [w, curH] = win.getContentSize();
+      const want = Math.ceil(h * win.webContents.getZoomFactor()) + 2;
+      if (Math.abs(want - curH) > 1) win.setContentSize(w, want);
     }
   });
   win.loadURL("app://local/cycling.html");
