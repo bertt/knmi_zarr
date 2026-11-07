@@ -11,10 +11,17 @@ const root = path.join(__dirname, "www");
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1100, height: 900, backgroundColor: "#ffffff",
+    width: 700, height: 900, minWidth: 360, backgroundColor: "#ffffff",
     webPreferences: { contextIsolation: true, sandbox: true },
   });
   win.removeMenu();
+  // The page is a 620px column: scale it up with the window width so it fills the window
+  const fit = () => {
+    const [w] = win.getContentSize();
+    win.webContents.setZoomFactor(Math.min(Math.max(w / 660, 1), 2.5));
+  };
+  win.webContents.on("did-finish-load", fit);
+  win.on("resize", fit);
   win.loadURL("app://local/cycling.html");
   // External links open in the default browser
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: "deny" }; });
