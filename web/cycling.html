@@ -230,7 +230,7 @@
     <div class="isec"><h4>👋 About this site</h4>
       <p>This page finds the nearest KNMI weather station and turns its latest measurements into practical advice for cyclists: a ride score, what to wear, whether you need a rain jacket, and how to clean your bike afterwards. It also warns about ice, fog, darkness and thunder.</p>
       <p>It uses <b>18 weather parameters</b>: temperature, dew point, humidity, air pressure, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p>
-      <p>Next to the temperature on the bike, the 🧊 pill shows a standard "feels like" temperature from air temperature and wind: the wind chill formula (T ≤ 10 °C, wind &gt; 4.8 km/h) <code>13.12 + 0.6215·T − 11.37·v<sup>0.16</sup> + 0.3965·T·v<sup>0.16</sup></code> (v = wind at 10 m in km/h), or the heat index (T ≥ 27 °C, with humidity). It does not include riding speed, darkness or wind direction, so it differs from the temperature on the bike.</p>
+      <p>Next to the temperature on the bike, the 🧊 pill shows a standard "feels like" temperature from air temperature and wind: the wind chill formula (T ≤ 10 °C, wind &gt; 4.8 km/h) <code>13.12 + 0.6215·T − 11.37·v<sup>0.16</sup> + 0.3965·T·v<sup>0.16</sup></code> (v = wind at 10 m in km/h), or the heat index (T ≥ 27 °C, with humidity). It is hidden when neither formula applies (e.g. calm wind, or 10–27 °C). It does not include riding speed, darkness or wind direction, so it differs from the temperature on the bike.</p>
       <p>Cycling quotes come from <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</p>
       <p><button type="button" id="calcbtn">🧮 How are the scores calculated?</button></p></div>
     <div class="isec"><h4>🧊 Data and GeoParquet</h4>
@@ -356,7 +356,7 @@ function feelsLike(ta, ff, rh) {
       - 0.05481717 * rh * rh + 0.00122874 * f * f * rh + 0.00085282 * f * rh * rh - 0.00000199 * f * f * rh * rh;
     return (hi - 32) * 5 / 9;
   }
-  return ta;
+  return null;
 }
 
 function derive(o, s, t, R) {
