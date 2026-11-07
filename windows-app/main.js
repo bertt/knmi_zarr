@@ -22,6 +22,19 @@ function createWindow() {
   };
   win.webContents.on("did-finish-load", fit);
   win.on("resize", fit);
+  // Once the data is rendered, shrink the window height to the content (once)
+  win.webContents.once("did-finish-load", async () => {
+    for (let i = 0; i < 40 && !win.isDestroyed(); i++) {
+      await new Promise(r => setTimeout(r, 500));
+      const h = await win.webContents.executeJavaScript(
+        "document.querySelector('.card') ? Math.ceil(document.querySelector('.wrap').getBoundingClientRect().bottom) + 14 : 0").catch(() => 0);
+      if (h && !win.isDestroyed()) {
+        const [w] = win.getContentSize();
+        win.setContentSize(w, Math.round(h * win.webContents.getZoomFactor()));
+        return;
+      }
+    }
+  });
   win.loadURL("app://local/cycling.html");
   // External links open in the default browser
   win.webContents.setWindowOpenHandler(({ url }) => { shell.openExternal(url); return { action: "deny" }; });
