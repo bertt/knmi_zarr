@@ -343,6 +343,13 @@ const test = (c, inp) => (Array.isArray(c) ? c : [c]).every(x => {
   return { gt: v > x.value, gte: v >= x.value, lt: v < x.value, lte: v <= x.value, eq: v === x.value }[x.op];
 });
 
+function pressureLabel(pp) {
+  if (pp < 980) return "very low";
+  if (pp < 1000) return "low";
+  if (pp < 1020) return "normal";
+  if (pp < 1030) return "high";
+  return "very high";
+}
 function feelsLike(ta, ff, rh) {
   if (ta == null) return null;
   const v = ff == null ? null : ff * 3.6;
@@ -523,7 +530,7 @@ async function main() {
       o.ff != null && `💨 <b>${bft(o.ff)}</b> Bft${o.dd != null ? ` from <b>${compass(o.dd)}</b>` : ""}`,
       inp.gust != null && `🌬️ gusts <b>${bft(inp.gust)}</b> Bft`,
       o.qg != null && `☀️ <b>${sunWord(o.qg)}</b> <span>${fmt(o.qg)} W/m²</span>`,
-      o.pp != null && `🧭 <b>${fmt(o.pp)}</b> hPa`,
+      o.pp != null && `🧭 <b>${fmt(o.pp)}</b> hPa <span>${pressureLabel(o.pp)}</span>`,
       o.vv != null && `👁️ <b>${fmt(o.vv / 1000, 1)}</b> km`,
     ].filter(Boolean).map(p => `<span class="pill">${p}</span>`).join("");
 
