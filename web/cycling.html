@@ -232,7 +232,7 @@
     <div class="isec"><h4>👋 About this site</h4>
       <p>This page finds the nearest KNMI weather station and turns its latest measurements into practical advice for cyclists: a ride score, what to wear, whether you need a rain jacket, and how to clean your bike afterwards. It also warns about ice, fog, darkness and thunder.</p>
       <p>It uses <b>18 weather parameters</b>: temperature, dew point, humidity, air pressure, wind speed, direction and gusts, sun radiation, visibility, cloud cover, sunshine duration, rain intensity, rain over the last 1, 6 and 24 hours, and the present-weather code.</p>
-      <p>Next to the temperature on the bike, the 🧊 pill shows a standard "feels like" temperature from air temperature and wind: the wind chill formula (T ≤ 10 °C, wind &gt; 4.8 km/h) <code>13.12 + 0.6215·T − 11.37·v<sup>0.16</sup> + 0.3965·T·v<sup>0.16</sup></code> (v = wind at 10 m in km/h), or the heat index (T ≥ 27 °C, with humidity). It is hidden when neither formula applies (e.g. calm wind, or 10–27 °C). It does not include riding speed, darkness or wind direction, so it differs from the temperature on the bike.</p>
+      <p>Next to the temperature on the bike, the 🧊 pill shows a standard "feels like" temperature from air temperature and wind: the wind chill formula (T ≤ 10 °C, wind &gt; 4.8 km/h) <code>13.12 + 0.6215·T − 11.37·v<sup>0.16</sup> + 0.3965·T·v<sup>0.16</sup></code> (v = wind at 10 m in km/h), or the heat index (T ≥ 27 °C, with humidity). The 🪨 pill flags <a href="https://www.allesoverwielrennen.nl/dikke-wind/" target="_blank" rel="noopener">"dikke wind"</a>: cold, high-pressure air is denser and gives more air resistance. It is calculated from temperature, pressure and humidity relative to standard air (1.225 kg/m³) and shown at +3.5% (thick), +7% (very thick) or −3.5% (thin). The 🧊 pill is hidden when neither formula applies (e.g. calm wind, or 10–27 °C). It does not include riding speed, darkness or wind direction, so it differs from the temperature on the bike.</p>
       <p>Cycling quotes come from <a href="https://www.velominati.com/the-rules/">The Rules</a> by Velominati.</p>
       <p><button type="button" id="calcbtn">🧮 How are the scores calculated?</button></p></div>
     <div class="isec"><h4>🧊 Data and GeoParquet</h4>
@@ -351,6 +351,21 @@ function pressureLabel(pp) {
   if (pp < 1020) return "normal";
   if (pp < 1030) return "high";
   return "very high";
+}
+// Air density (kg/m³) from the ideal gas law, with vapour pressure correction; 1.225 is the standard (15 °C, 1013 hPa).
+function airDensity(ta, pp, rh) {
+  if (ta == null || pp == null) return null;
+  const es = 6.1078 * Math.pow(10, 7.5 * ta / (ta + 237.3));
+  const e = rh == null ? 0 : es * rh / 100;
+  return ((pp - e) * 100) / (287.05 * (ta + 273.15)) + (e * 100) / (461.5 * (ta + 273.15));
+}
+function windThickness(rho) {
+  if (rho == null) return null;
+  const pct = (rho / 1.225 - 1) * 100;
+  if (pct >= 7) return { label: "very thick wind", pct };
+  if (pct >= 3.5) return { label: "thick wind", pct };
+  if (pct <= -3.5) return { label: "thin wind", pct };
+  return null;
 }
 function feelsLike(ta, ff, rh) {
   if (ta == null) return null;
@@ -532,6 +547,7 @@ async function main() {
       o.ff != null && `💨 <b>${bft(o.ff)}</b> Bft${o.dd != null ? ` from <b>${compass(o.dd)}</b>` : ""}`,
       inp.gust != null && `🌬️ gusts <b>${bft(inp.gust)}</b> Bft`,
       o.qg != null && `☀️ <b>${sunWord(o.qg)}</b> <span>${fmt(o.qg)} W/m²</span>`,
+      (th => th && `🪨 <b>${th.label}</b> <span>${th.pct > 0 ? "+" : ""}${fmt(th.pct, 0)}% air resistance</span>`)(windThickness(airDensity(o.ta, o.pp, o.rh))),
       o.pp != null && `🧭 <b>${fmt(o.pp)}</b> hPa <span>${pressureLabel(o.pp)}</span>`,
       o.vv != null && `👁️ <b>${fmt(o.vv / 1000, 1)}</b> km`,
     ].filter(Boolean).map(p => `<span class="pill">${p}</span>`).join("");
