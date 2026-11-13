@@ -328,6 +328,8 @@
           { "upTo": null, "points": 2 }
         ]
       },
+      { "id": "wet-roads", "label": "Roads still wet (cool weather, shade does not dry)", "input": "wetRoads", "display": "flag",
+        "bands": [ { "upTo": 0, "points": 0 }, { "upTo": null, "points": 3, "note": "Wet road spray" } ] },
       { "id": "salt", "label": "Road salt likely (cold and wet)", "input": "saltRisk", "display": "flag",
         "bands": [
           { "upTo": 0, "points": 0 },
