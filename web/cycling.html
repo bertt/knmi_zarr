@@ -474,7 +474,14 @@ async function main() {
   ]);
   const data = meta.columns;
   step("s-data", "ok", "KNMI data loaded");
-  const obs = i => Object.fromEntries(VARS.map(k => [k, data[k]?.[i] ?? null]));
+  // A single rain gauge can miss small showers: use the median of the stations within 50 km for the 6 h / 24 h totals
+  const areaRain = (i, k) => {
+    const s = meta.stations[i];
+    const v = meta.stations.map((st, j) => ({ j, d: km(s.lat, s.lon, st.lat, st.lon) })).filter(x => x.d <= 50 && data[k]?.[x.j] != null)
+      .map(x => data[k][x.j]).sort((a, b) => a - b);
+    return v.length ? Math.max(data[k][i] ?? 0, v[Math.floor(v.length / 2)]) : data[k]?.[i] ?? null;
+  };
+  const obs = i => ({ ...Object.fromEntries(VARS.map(k => [k, data[k]?.[i] ?? null])), R6H: areaRain(i, "R6H"), R24H: areaRain(i, "R24H") });
 
   let idx = meta.stations.findIndex(s => s.name === FALLBACK), notice = "", distance = null, user = null;
   if (idx < 0) idx = Math.max(0, meta.stations.findIndex((_, i) => data.ta?.[i] != null));
