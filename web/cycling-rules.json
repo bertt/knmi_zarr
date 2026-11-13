@@ -310,11 +310,12 @@
           { "upTo": 3, "points": 1 },
           { "upTo": null, "points": 2 }
         ] },
-      { "id": "rain-24h", "label": "Rain last 24 hours (dirty roads)", "input": "rain24h", "unit": "mm", "dec": 1,
+      { "id": "rain-24h", "label": "Rain last 24 hours (roads stay wet and dirty, also in the shade)", "input": "rain24h", "unit": "mm", "dec": 1,
         "bands": [
-          { "upTo": 1, "points": 0 },
-          { "upTo": 5, "points": 1 },
-          { "upTo": null, "points": 2 }
+          { "upTo": 0.5, "points": 0 },
+          { "upTo": 2, "points": 2 },
+          { "upTo": 5, "points": 3 },
+          { "upTo": null, "points": 4 }
         ] },
       {
         "id": "damp",
@@ -322,7 +323,8 @@
         "input": "rh",
         "unit": "%",
         "bands": [
-          { "upTo": 94.9, "points": 0 },
+          { "upTo": 89.9, "points": 0 },
+          { "upTo": 94.9, "points": 1 },
           { "upTo": null, "points": 2 }
         ]
       },

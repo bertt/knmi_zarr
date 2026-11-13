@@ -476,6 +476,7 @@ async function main() {
   const obs = i => Object.fromEntries(VARS.map(k => [k, data[k]?.[i] ?? null]));
 
   let idx = meta.stations.findIndex(s => s.name === FALLBACK), notice = "", distance = null, user = null;
+  if (idx < 0) idx = Math.max(0, meta.stations.findIndex((_, i) => data.ta?.[i] != null));
   const wanted = STATION ? meta.stations.findIndex(s => s.name.toLowerCase() === STATION.trim().toLowerCase()) : -1;
   if (wanted >= 0) idx = wanted;
   else try {
